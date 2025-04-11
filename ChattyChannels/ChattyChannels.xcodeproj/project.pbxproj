@@ -1,0 +1,556 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		CEED324B2D9C359F00AE3FE5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CEED32342D9C359E00AE3FE5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CEED323B2D9C359E00AE3FE5;
+			remoteInfo = ChattyChannels;
+		};
+		CEED32552D9C359F00AE3FE5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CEED32342D9C359E00AE3FE5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CEED323B2D9C359E00AE3FE5;
+			remoteInfo = ChattyChannels;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		CEED323C2D9C359E00AE3FE5 /* ChattyChannels.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChattyChannels.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEED324A2D9C359F00AE3FE5 /* ChattyChannelsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChattyChannelsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEED32542D9C359F00AE3FE5 /* ChattyChannelsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChattyChannelsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		CEED323E2D9C359E00AE3FE5 /* ChattyChannels */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ChattyChannels;
+			sourceTree = "<group>";
+		};
+		CEED324D2D9C359F00AE3FE5 /* ChattyChannelsTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ChattyChannelsTests;
+			sourceTree = "<group>";
+		};
+		CEED32572D9C359F00AE3FE5 /* ChattyChannelsUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ChattyChannelsUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CEED32392D9C359E00AE3FE5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CEED32472D9C359F00AE3FE5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CEED32512D9C359F00AE3FE5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		CEED32332D9C359E00AE3FE5 = {
+			isa = PBXGroup;
+			children = (
+				CEED323E2D9C359E00AE3FE5 /* ChattyChannels */,
+				CEED324D2D9C359F00AE3FE5 /* ChattyChannelsTests */,
+				CEED32572D9C359F00AE3FE5 /* ChattyChannelsUITests */,
+				CEED323D2D9C359E00AE3FE5 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CEED323D2D9C359E00AE3FE5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CEED323C2D9C359E00AE3FE5 /* ChattyChannels.app */,
+				CEED324A2D9C359F00AE3FE5 /* ChattyChannelsTests.xctest */,
+				CEED32542D9C359F00AE3FE5 /* ChattyChannelsUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CEED323B2D9C359E00AE3FE5 /* ChattyChannels */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CEED325E2D9C359F00AE3FE5 /* Build configuration list for PBXNativeTarget "ChattyChannels" */;
+			buildPhases = (
+				CEED32382D9C359E00AE3FE5 /* Sources */,
+				CEED32392D9C359E00AE3FE5 /* Frameworks */,
+				CEED323A2D9C359E00AE3FE5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				CEED323E2D9C359E00AE3FE5 /* ChattyChannels */,
+			);
+			name = ChattyChannels;
+			packageProductDependencies = (
+			);
+			productName = ChattyChannels;
+			productReference = CEED323C2D9C359E00AE3FE5 /* ChattyChannels.app */;
+			productType = "com.apple.product-type.application";
+		};
+		CEED32492D9C359F00AE3FE5 /* ChattyChannelsTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CEED32612D9C359F00AE3FE5 /* Build configuration list for PBXNativeTarget "ChattyChannelsTests" */;
+			buildPhases = (
+				CEED32462D9C359F00AE3FE5 /* Sources */,
+				CEED32472D9C359F00AE3FE5 /* Frameworks */,
+				CEED32482D9C359F00AE3FE5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CEED324C2D9C359F00AE3FE5 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				CEED324D2D9C359F00AE3FE5 /* ChattyChannelsTests */,
+			);
+			name = ChattyChannelsTests;
+			packageProductDependencies = (
+			);
+			productName = ChattyChannelsTests;
+			productReference = CEED324A2D9C359F00AE3FE5 /* ChattyChannelsTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		CEED32532D9C359F00AE3FE5 /* ChattyChannelsUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CEED32642D9C359F00AE3FE5 /* Build configuration list for PBXNativeTarget "ChattyChannelsUITests" */;
+			buildPhases = (
+				CEED32502D9C359F00AE3FE5 /* Sources */,
+				CEED32512D9C359F00AE3FE5 /* Frameworks */,
+				CEED32522D9C359F00AE3FE5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CEED32562D9C359F00AE3FE5 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				CEED32572D9C359F00AE3FE5 /* ChattyChannelsUITests */,
+			);
+			name = ChattyChannelsUITests;
+			packageProductDependencies = (
+			);
+			productName = ChattyChannelsUITests;
+			productReference = CEED32542D9C359F00AE3FE5 /* ChattyChannelsUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		CEED32342D9C359E00AE3FE5 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1630;
+				LastUpgradeCheck = 1630;
+				TargetAttributes = {
+					CEED323B2D9C359E00AE3FE5 = {
+						CreatedOnToolsVersion = 16.3;
+					};
+					CEED32492D9C359F00AE3FE5 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = CEED323B2D9C359E00AE3FE5;
+					};
+					CEED32532D9C359F00AE3FE5 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = CEED323B2D9C359E00AE3FE5;
+					};
+				};
+			};
+			buildConfigurationList = CEED32372D9C359E00AE3FE5 /* Build configuration list for PBXProject "ChattyChannels" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = CEED32332D9C359E00AE3FE5;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = CEED323D2D9C359E00AE3FE5 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CEED323B2D9C359E00AE3FE5 /* ChattyChannels */,
+				CEED32492D9C359F00AE3FE5 /* ChattyChannelsTests */,
+				CEED32532D9C359F00AE3FE5 /* ChattyChannelsUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CEED323A2D9C359E00AE3FE5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CEED32482D9C359F00AE3FE5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CEED32522D9C359F00AE3FE5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CEED32382D9C359E00AE3FE5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CEED32462D9C359F00AE3FE5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CEED32502D9C359F00AE3FE5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		CEED324C2D9C359F00AE3FE5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CEED323B2D9C359E00AE3FE5 /* ChattyChannels */;
+			targetProxy = CEED324B2D9C359F00AE3FE5 /* PBXContainerItemProxy */;
+		};
+		CEED32562D9C359F00AE3FE5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CEED323B2D9C359E00AE3FE5 /* ChattyChannels */;
+			targetProxy = CEED32552D9C359F00AE3FE5 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		CEED325C2D9C359F00AE3FE5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 664X7G9P7V;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.3;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		CEED325D2D9C359F00AE3FE5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 664X7G9P7V;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		CEED325F2D9C359F00AE3FE5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ChattyChannels/ChattyChannels.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 664X7G9P7V;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.ChattyChannels;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		CEED32602D9C359F00AE3FE5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ChattyChannels/ChattyChannels.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 664X7G9P7V;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.ChattyChannels;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		CEED32622D9C359F00AE3FE5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 664X7G9P7V;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.3;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.ChattyChannelsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ChattyChannels.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ChattyChannels";
+			};
+			name = Debug;
+		};
+		CEED32632D9C359F00AE3FE5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 664X7G9P7V;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.3;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.ChattyChannelsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ChattyChannels.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ChattyChannels";
+			};
+			name = Release;
+		};
+		CEED32652D9C359F00AE3FE5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 664X7G9P7V;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.ChattyChannelsUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = ChattyChannels;
+			};
+			name = Debug;
+		};
+		CEED32662D9C359F00AE3FE5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 664X7G9P7V;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.ChattyChannelsUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = ChattyChannels;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CEED32372D9C359E00AE3FE5 /* Build configuration list for PBXProject "ChattyChannels" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CEED325C2D9C359F00AE3FE5 /* Debug */,
+				CEED325D2D9C359F00AE3FE5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CEED325E2D9C359F00AE3FE5 /* Build configuration list for PBXNativeTarget "ChattyChannels" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CEED325F2D9C359F00AE3FE5 /* Debug */,
+				CEED32602D9C359F00AE3FE5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CEED32612D9C359F00AE3FE5 /* Build configuration list for PBXNativeTarget "ChattyChannelsTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CEED32622D9C359F00AE3FE5 /* Debug */,
+				CEED32632D9C359F00AE3FE5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CEED32642D9C359F00AE3FE5 /* Build configuration list for PBXNativeTarget "ChattyChannelsUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CEED32652D9C359F00AE3FE5 /* Debug */,
+				CEED32662D9C359F00AE3FE5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = CEED32342D9C359E00AE3FE5 /* Project object */;
+}

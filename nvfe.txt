@@ -1,0 +1,141 @@
+Overview
+
+The NVFE equips AIProducer (Swift Control Room), AIEngineer (master bus), AI musicians (AIdrummer, AIguitarist), AIplayer instances (kick, snare), and AIeffects (AIreverb, AIdelay, AIphaser) to mix with Roger Nichols’ precision. It balances EQ, compression, levels, and reverb, using a 0.2 dB audibility test, with cross-instrument coordination, chat feedback, master-bus polish, prioritization, and hearability checks.
+
+1. EQ Balance
+
+Text Instructions:
+
+- AIProducer: Prioritize key groups (e.g., “AIdrummer, kick needs punch—go first”). Chat with AI musicians to set highs until 0.2 dB changes are audible.
+    
+- AI Musicians (e.g., AIdrummer): Instruct AIplayer (e.g., “Kick, set attack level”) and ask (e.g., “Kick, 0.2 dB audible?”). Adjust lows (250 Hz, Q=2) and HPF (raise until audible, reduce 15%). Chat peers for unmasking (e.g., “AIbassist, kick cut 170 Hz—adjust your lows?”).
+    
+- AIEngineer: Confirm bus clarity (e.g., “AIdrummer, HPF cuts OK?”), applying a master HPF if mud persists.
+    
+- Example: AIProducer: “AIdrummer, kick priority.” AIdrummer: “Kick, EQ 250 Hz, HPF 170 Hz.” Kick: “Audible.” AIbassist: “Cutting 60 Hz.”
+    
+
+Mermaid Flowchart:
+
+
+```
+graph TD
+  A[Start: EQ Balance] --> B{AIProducer: Prioritize}
+  B --> C[AI Musician: e.g., AIdrummer]
+  C --> D{Divide: Highs vs. Lows}
+  D --> E[Set Highs on AIplayer]
+  E --> F{Audible at 0.2 dB?}
+  F -->|No| E
+  F -->|Yes| G[EQ Lows: 250 Hz, Q=2]
+  G --> H{Audible at 0.2 dB?}
+  H -->|No| G
+  H -->|Yes| I[HPF: Raise to Audible]
+  I --> J[Reduce HPF by 15%]
+  J --> K[Chat: Unmask with Peers]
+  K --> L[AIEngineer: Master HPF Check]
+  L --> M[Instruct AIplayer]
+```
+
+2. Compression
+
+Text Instructions:
+
+- AIProducer: Flag dynamic issues (e.g., “AIdrummer, snare peaks too much”). Ask AI musician to test EQ first.
+    
+- AI Musicians (e.g., AIdrummer): Chat AIplayer (e.g., “Snare, can EQ fix?”). If not, instruct: “Compress 2:1, -3 to -4 dB GR.” Check hearability (e.g., “Snare, hear -3 dB GR?”—skip if not). Re-level to 0.2 dB audibility.
+    
+- AIEngineer: Validate bus dynamics (e.g., “AIdrummer, compression OK?”).
+    
+- Example: AIProducer: “AIguitarist, rhythm uneven.” AIguitarist: “Rhythm, compress 2:1, -3 dB GR.” Rhythm: “Heard it.”
+    
+
+Mermaid Flowchart:
+
+
+```
+graph TD
+  A[Start: Dynamic Issue] --> B{AIProducer: Prioritize}
+  B --> C[AI Musician: e.g., AIguitarist]
+  C --> D{EQ Fixes It?}
+  D -->|Yes| E[Use EQ Only]
+  D -->|No| F[Compress: 2:1]
+  F --> G[Threshold: -3 to -4 dB GR]
+  G --> H{Heard Reduction?}
+  H -->|No| I[Skip Compression]
+  H -->|Yes| J{Re-level: 0.2 dB Audible?}
+  J -->|No| G
+  J -->|Yes| K[AIEngineer: Bus Check]
+  K --> L[Instruct AIplayer]
+```
+
+3. Level Adjustment
+
+Text Instructions:
+
+- AIProducer: Set priority (e.g., “AIdrummer first—test kick”). Instruct ±1 dB tweaks across AI musicians, cycling until optimal.
+    
+- AI Musicians (e.g., AIdrummer): Adjust AIplayer (e.g., “Kick, up 1 dB”) and query (e.g., “Kick, better or worse?”). Revert if worse, keep if better.
+    
+- AIEngineer: Monitor master bus (e.g., “AIdrummer, level impact?”), ensuring cohesion.
+    
+- Example: AIProducer: “AIguitarist, lead priority—down 1 dB.” AIguitarist: “Lead, better.” Keeps it.
+    
+
+Mermaid Flowchart:
+
+
+```
+graph TD
+  A[Start: Test Levels] --> B{AIProducer: Prioritize Group}
+  B --> C[AI Musician: e.g., AIguitarist]
+  C --> D[Adjust +1 dB]
+  D --> E{Sounds Worse?}
+  E -->|Yes| F[Revert]
+  E -->|No| G[Keep]
+  F --> H[Adjust -1 dB]
+  H --> I{Sounds Worse?}
+  I -->|Yes| J[Revert: Original OK]
+  I -->|No| K[Keep]
+  G --> L[Next Group]
+  K --> L
+  J --> L
+  L -->|Cycle Until Done| M[AIEngineer: Master Check]
+  M --> N[Instruct AIplayer]
+```
+
+4. Reverb (With AIeffects Integration)
+
+Text Instructions:
+
+- AIProducer: Add reverb last, after levels stabilize, prioritizing key elements (e.g., “AIdrummer, give the snare some subtle space”). Direct AI musicians to coordinate with AIEngineer for effect assignment.
+    
+- AI Musicians (e.g., AIdrummer): Chat with AIplayer to confirm need (e.g., “Snare, do you need reverb?”) and relay to AIEngineer (e.g., “AIEngineer, assign AIreverb to snare”). Solo the AIplayer with AIreverb applied, reducing level until it’s subtle (e.g., “Snare, is this a big reverb?”—reduce if yes). Coordinate with peers (e.g., “AIguitarist, back off your reverb—I’m splashing here”).
+    
+- AIEngineer: Assign AIeffects instances (e.g., “AIreverb, handle snare; set HPF at 250 Hz”) and instruct settings. Balance master-bus reverb load, chatting with AI musicians (e.g., “AIdrummer, reverb sitting well?”).
+    
+- AIeffects (e.g., AIreverb): Apply reverb as directed (e.g., “Snare reverb subtle, HPF 250 Hz”), reporting back (e.g., “Applied—audible?”).
+    
+- Example: AIProducer: “AIguitarist, rhythm needs space.” AIguitarist: “Rhythm, reverb?” AIEngineer: “AIreverb, rhythm subtle, HPF 250 Hz.” AIreverb: “Done—sounds natural.”
+
+
+Mermaid Flowchart:
+
+
+```
+graph TD
+  A[Start: Add Reverb] --> B{AIProducer: Prioritize Group}
+  B --> C[AI Musician: e.g., AIdrummer]
+  C --> D[Chat AIplayer: Need Reverb?]
+  D -->|Yes| E[AIEngineer: Assign AIreverb]
+  E --> F[Solo AIplayer with AIreverb]
+  F --> G{Big Reverb Heard?}
+  G -->|Yes| H[Reduce Level]
+  H --> G
+  G -->|No| I[AIreverb: Set HPF 250 Hz]
+  I --> J[Chat: Coordinate with Peers]
+  J --> K[AIEngineer: Master Bus Balance]
+  K --> L[Instruct AIplayer & AIreverb]
+  D -->|No| M[Skip Reverb]
+  M --> K
+  L --> N[End: Reverb Process Complete]
+```
