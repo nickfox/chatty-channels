@@ -15,17 +15,16 @@ This file tracks the project's progress using a task list format.
 *   **[2025-04-11]** Resolved initial Gemini API connection issues.
 *   **[2025-04-11]** Documented V2+ roadmap features (advanced `AIplayer` capabilities).
 *   **[2025-04-11]** Defined Nichols Vocal Flow Engine (NVFE) instruction set (`nvfe.txt`).
+*   **[2025-04-11]** Setup AIplayer JUCE project (v0.2): Created project, integrated `juce_osc`, built AU, verified load in Logic Pro.
 
 ## Current Tasks
 
-*   **Implement V1 `AIproducer` Swift App:**
-    *   Develop SwiftUI UI ("Control Room").
-    *   Integrate `NetworkService` for Gemini API calls.
-    *   Implement `ChatModel` for state management and persistence.
-    *   Ensure production quality standards (logging, error handling, etc.).
-
+*   **(V1 - On Hold)** Implement V1 `AIproducer` Swift App.
+*   **Implement AIplayer Plugin (v0.2+):**
+    *   Develop basic plugin editor UI.
+    *   Implement core audio pass-through or basic processing.
+    *   Refine OSC communication logic (sending/receiving).
 ## Next Steps
 
-*   **V1 Completion:** Finalize and test the `AIproducer` Swift app.
-*   **V2 Planning:** Detail the architecture and implementation plan for JUCE plugins (`AIplayer`, `AIdrummer`, etc.), OSC communication, advanced features (unmasking, balancing, MIDI generation), and NVFE integration.
-*   **V2 Implementation:** Begin development of the JUCE plugins, inter-app communication, and NVFE logic within AI agents.
+*   **(V1 - On Hold)** Finalize and test the `AIproducer` Swift app.
+*   **V2 Implementation (AIplayer Focus):** Continue development of the `AIplayer` JUCE plugin (UI, DSP, OSC). Plan and implement other V2 features (`AIdrummer`, advanced capabilities, NVFE) subsequently.

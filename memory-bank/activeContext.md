@@ -5,17 +5,18 @@
   2025-04-11 15:01:00 - Initial Memory Bank setup.
   2025-04-11 17:44:02 - Updated focus to V1 AIproducer app, logged recent decisions and V2+ roadmap items.
   2025-04-11 19:51:15 - Logged definition of NVFE and added to V2+ considerations.
+  2025-04-11 23:48:00 - Shifted focus to V2 implementation, starting with AIplayer plugin setup. Logged successful v0.2 build and validation.
 
 *
 
 ## Current Focus
 
-*   **V1 Implementation:** Develop the `AIproducer` Swift macOS application ("Control Room"). This includes:
-    *   Building the chat UI (SwiftUI).
-    *   Integrating with the Gemini API (`gemini-2.5-pro-exp-03-25`).
-    *   Implementing chat history saving and loading (`chatHistory.json`).
-    *   Ensuring production quality (error handling, logging, secure API key management, sandbox entitlements).
-
+*   **V2 Implementation (AIplayer):** Develop the `AIplayer` JUCE plugin. Current status (v0.2):
+    *   Basic JUCE project created (`AIplayer.jucer`).
+    *   `juce_osc` module integrated for OSC communication (replacing `oscpack`).
+    *   Basic OSC sending logic implemented in `PluginProcessor`.
+    *   Audio Unit (AU) successfully built and validated in Logic Pro.
+*   **(V1 - On Hold):** `AIproducer` Swift app development paused.
 ## Recent Changes
 
 *   **[2025-04-11]** Defined the full "Chatty Channels" vision, including the AI crew roles (`AIproducer`, `AIplayer`/Bus AIs, `AIeffects`, `AIengineer`).
@@ -24,7 +25,11 @@
 *   **[2025-04-11]** Confirmed technology stack: Swift for `AIproducer`, JUCE for plugins, OSC for communication, AppleScript for Logic control, external LLM APIs.
 *   **[2025-04-11]** Resolved initial Gemini API connection issues (model name, sandbox entitlements).
 *   **[2025-04-11]** Defined the Nichols Vocal Flow Engine (NVFE) based on Roger Nichols' mixing advice, using a hybrid text/Mermaid format. Added to V2+ roadmap for integration into `AIProducer` and `AIEngineer`. (See `nvfe.txt` and `systemPatterns.md`).
-
+*   **[2025-04-11]** Started V2 implementation with `AIplayer` plugin.
+*   **[2025-04-11]** Created initial `AIplayer` JUCE project structure using Projucer.
+*   **[2025-04-11]** Switched OSC implementation from `oscpack` to integrated `juce_osc` module.
+*   **[2025-04-11]** Successfully built `AIplayer` v0.2 as an Audio Unit and confirmed validation in Logic Pro.
 ## Open Questions/Issues
 
-*   None currently identified for V1 scope. Future considerations for V2+ include plugin architecture details, OSC protocol design, specific algorithms for unmasking/balancing, and NVFE implementation details within the AI agents.
+*   **AIplayer v0.3+ Scope:** Define specific UI requirements for the editor, implement basic audio pass-through or simple DSP, refine OSC message handling (receiving messages, potentially more complex sending).
+*   **V2 General:** Plugin architecture details, full OSC protocol design, algorithms for unmasking/balancing, NVFE implementation details within AI agents.
