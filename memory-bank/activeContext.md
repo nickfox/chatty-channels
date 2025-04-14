@@ -6,16 +6,16 @@
   2025-04-11 17:44:02 - Updated focus to V1 AIproducer app, logged recent decisions and V2+ roadmap items.
   2025-04-11 19:51:15 - Logged definition of NVFE and added to V2+ considerations.
   2025-04-11 23:48:00 - Shifted focus to V2 implementation, starting with AIplayer plugin setup. Logged successful v0.2 build and validation.
-
+  2025-04-12 00:11:00 - Planned AIplayer v0.3 architecture (Plugin <-> Swift <-> LLM via OSC).
+  2025-04-14 02:34:00 - Implemented and verified basic OSC send/receive and file logging within AIplayer plugin.
+  2025-04-14 03:09:00 - Finalized AIproducer OSC plan: Use OSCKit library, listen 9001, send 9000. Added OSCKit dependency.
 *
 
 ## Current Focus
 
-*   **V2 Implementation (AIplayer):** Develop the `AIplayer` JUCE plugin. Current status (v0.2):
-    *   Basic JUCE project created (`AIplayer.jucer`).
-    *   `juce_osc` module integrated for OSC communication (replacing `oscpack`).
-    *   Basic OSC sending logic implemented in `PluginProcessor`.
-    *   Audio Unit (AU) successfully built and validated in Logic Pro.
+*   **V2 Implementation (AIplayer v0.3 - Plugin Side):** Basic OSC send/receive and file logging implemented and verified. Basic chat UI exists. Processor<->Editor link via direct calls implemented.
+*   **V2 Implementation (AIproducer v0.3 - Swift Side):** Next step is to implement OSC receiver/sender using `OSCKit`, routing logic to Gemini, and instance ID handling in the `AIproducer` Swift app (Listen: 9001, Send: 9000).
+*   **(V2 - AIplayer v0.2 Completed):** Basic JUCE project setup, `juce_osc` integration, AU build validated.
 *   **(V1 - On Hold):** `AIproducer` Swift app development paused.
 ## Recent Changes
 
@@ -29,7 +29,14 @@
 *   **[2025-04-11]** Created initial `AIplayer` JUCE project structure using Projucer.
 *   **[2025-04-11]** Switched OSC implementation from `oscpack` to integrated `juce_osc` module.
 *   **[2025-04-11]** Successfully built `AIplayer` v0.2 as an Audio Unit and confirmed validation in Logic Pro.
+*   **[2025-04-12]** Defined AIplayer v0.3 architecture and OSC communication plan (Ports: Plugin sends to 9001, listens on 9000).
+*   **[2025-04-14]** Implemented basic chat UI in `PluginEditor`.
+*   **[2025-04-14]** Implemented OSC sender/receiver in `PluginProcessor` using `juce_osc`.
+*   **[2025-04-14]** Implemented manual file logging (`FileOutputStream`) to `logs/AIplayer.log`.
+*   **[2025-04-14]** Verified basic OSC send (Plugin->Monitor) and receive (Tool->Plugin) functionality.
+*   **[2025-04-14]** Selected `OSCKit` as the Swift OSC library and added it via SPM.
 ## Open Questions/Issues
 
-*   **AIplayer v0.3+ Scope:** Define specific UI requirements for the editor, implement basic audio pass-through or simple DSP, refine OSC message handling (receiving messages, potentially more complex sending).
+*   **AIplayer v0.3 Implementation Details:** Specific UI design, ValueTree structure for state sharing, precise OSC port allocation/discovery strategy if needed, error handling for OSC/network failures.
+*   **(Resolved)** Swift App OSC Library confirmed as `OSCKit`.
 *   **V2 General:** Plugin architecture details, full OSC protocol design, algorithms for unmasking/balancing, NVFE implementation details within AI agents.

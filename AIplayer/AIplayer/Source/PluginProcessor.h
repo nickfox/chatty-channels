@@ -14,7 +14,8 @@
 //==============================================================================
 /**
 */
-class AIplayerAudioProcessor  : public juce::AudioProcessor
+class AIplayerAudioProcessor  : public juce::AudioProcessor,
+                                public juce::OSCReceiver::Listener<juce::OSCReceiver::MessageLoopCallback> // Inherit from OSCReceiver Listener
 {
 public:
     //==============================================================================
@@ -55,13 +56,29 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
-    // Custom methods
-    void sendOSC(const juce::String& instrument, const juce::String& action, const juce::String& message);
+    /** Called by the PluginEditor when the user sends a chat message. */
+    void sendChatMessage(const juce::String& message);
 
 private:
     //==============================================================================
-    // OSC Sender
-    juce::OSCSender sender;
+    // OSC Message Callback
+    /** Handles incoming OSC messages received by the receiver. */
+    void oscMessageReceived (const juce::OSCMessage& message) override;
+
+    // Custom internal methods
+    /** Sends an OSC message with an instance ID and a message string. */
+    void sendOSC(const juce::String& addressPattern, int instanceID, const juce::String& message);
+
     //==============================================================================
+    // OSC Sender / Receiver
+    juce::OSCSender sender;
+    juce::OSCReceiver receiver;
+
+    // Logging
+    std::unique_ptr<juce::FileOutputStream> logStream;
+    void logMessage (const juce::String& message);
+
+    //==============================================================================
+    JUCE_DECLARE_WEAK_REFERENCEABLE (AIplayerAudioProcessor) // Make this class usable with WeakReference
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AIplayerAudioProcessor)
 };

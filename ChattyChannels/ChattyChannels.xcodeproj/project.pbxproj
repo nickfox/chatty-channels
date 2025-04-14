@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		CEFB850B2DAC9A6F00BB2D78 /* OSCKit in Frameworks */ = {isa = PBXBuildFile; productRef = CEFB850A2DAC9A6F00BB2D78 /* OSCKit */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		CEED324B2D9C359F00AE3FE5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CEFB850B2DAC9A6F00BB2D78 /* OSCKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +83,7 @@
 				CEED323E2D9C359E00AE3FE5 /* ChattyChannels */,
 				CEED324D2D9C359F00AE3FE5 /* ChattyChannelsTests */,
 				CEED32572D9C359F00AE3FE5 /* ChattyChannelsUITests */,
+				CEFB85092DAC9A6F00BB2D78 /* Frameworks */,
 				CEED323D2D9C359E00AE3FE5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,6 +96,13 @@
 				CEED32542D9C359F00AE3FE5 /* ChattyChannelsUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		CEFB85092DAC9A6F00BB2D78 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -112,6 +125,7 @@
 			);
 			name = ChattyChannels;
 			packageProductDependencies = (
+				CEFB850A2DAC9A6F00BB2D78 /* OSCKit */,
 			);
 			productName = ChattyChannels;
 			productReference = CEED323C2D9C359E00AE3FE5 /* ChattyChannels.app */;
@@ -195,6 +209,9 @@
 			);
 			mainGroup = CEED32332D9C359E00AE3FE5;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				CEFB85082DAC993400BB2D78 /* XCRemoteSwiftPackageReference "OSCKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CEED323D2D9C359E00AE3FE5 /* Products */;
 			projectDirPath = "";
@@ -551,6 +568,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CEFB85082DAC993400BB2D78 /* XCRemoteSwiftPackageReference "OSCKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/orchetect/OSCKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CEFB850A2DAC9A6F00BB2D78 /* OSCKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CEFB85082DAC993400BB2D78 /* XCRemoteSwiftPackageReference "OSCKit" */;
+			productName = OSCKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CEED32342D9C359E00AE3FE5 /* Project object */;
 }

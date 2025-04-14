@@ -4,5 +4,7 @@
 	<dict>
 	    <key>geminiApiKey</key>
 	    <string>AIzaSyAYFhO9ZDR1HjTJYRqD7h88mINXPAw71GM</string>
+	    <key>ProjectDataDirectory</key>
+	    <string>/Users/nickfox137/Documents/chatty-channel</string>
 	</dict>
 	</plist>

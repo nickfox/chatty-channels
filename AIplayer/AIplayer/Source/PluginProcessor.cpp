@@ -9,6 +9,8 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+#include <juce_core/juce_core.h> // Needed for FileOutputStream, Time, etc.
+
 //==============================================================================
 AIplayerAudioProcessor::AIplayerAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -22,17 +24,70 @@ AIplayerAudioProcessor::AIplayerAudioProcessor()
                        )
 #endif
 {
-    // Connect the OSC sender to localhost on port 9000
-    if (!sender.connect("127.0.0.1", 9000))
+    // --- Manual File Logging Setup ---
+    // Construct path relative to user's home/Documents directory
+    juce::File logDirectory = juce::File::getSpecialLocation (juce::File::userHomeDirectory)
+                                .getChildFile ("Documents")
+                                .getChildFile ("chatty-channel")
+                                .getChildFile ("logs");
+
+    if (!logDirectory.exists())
+        logDirectory.createDirectory(); // Attempt to create logs directory
+
+    if (logDirectory.isDirectory())
     {
-        // Handle connection error - e.g., log a message
-        DBG("Error: Could not connect OSC sender.");
-        // Consider alternative error handling for release builds
+        juce::File logFile = logDirectory.getChildFile("AIplayer.log");
+        logStream = logFile.createOutputStream(); // Create/open the file stream
+
+        if (logStream != nullptr)
+        {
+            logStream->setPosition(logFile.getSize()); // Append to existing file
+            logMessage("--- AIplayer Plugin Starting ---");
+            logMessage("Log Path: " + logFile.getFullPathName());
+        }
+        else
+        {
+            DBG("Error: Could not create FileOutputStream for log file: " + logFile.getFullPathName());
+            // logStream remains nullptr
+        }
     }
+    else
+    {
+         DBG("Error: Could not create or access log directory: " + logDirectory.getFullPathName());
+         // logStream remains nullptr
+    }
+    // --- End Logging Setup ---
+
+    // Connect the OSC sender to Swift App's listening port (e.g., 9001)
+    // Note: We assume Swift App listens on 9001 for requests from plugins
+    if (!sender.connect("127.0.0.1", 9001))
+    {
+        logMessage("Error: Could not connect OSC sender to 127.0.0.1:9001");
+    }
+    else
+    {
+        logMessage("OSC Sender connected to 127.0.0.1:9001");
+    }
+
+    // Connect the OSC receiver to listen on a port for responses (e.g., 9000)
+    // Note: This port needs to be unique per instance or managed carefully if multiple instances run
+    // For now, using a fixed port 9000. Swift App needs to know to send responses here.
+    if (!receiver.connect(9000))
+    {
+         logMessage("Error: Could not connect OSC receiver to port 9000");
+    }
+    else
+    {
+        logMessage("OSC Receiver connected to port 9000");
+    }
+
+    // Register listener for incoming OSC messages
+    receiver.addListener(this);
 }
 
 AIplayerAudioProcessor::~AIplayerAudioProcessor()
 {
+    // logStream unique_ptr will automatically delete the stream when processor is destroyed
 }
 
 //==============================================================================
@@ -86,15 +141,18 @@ int AIplayerAudioProcessor::getCurrentProgram()
 
 void AIplayerAudioProcessor::setCurrentProgram (int index)
 {
+    juce::ignoreUnused (index);
 }
 
 const juce::String AIplayerAudioProcessor::getProgramName (int index)
 {
+    juce::ignoreUnused (index);
     return {};
 }
 
 void AIplayerAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
+    juce::ignoreUnused (index, newName);
 }
 
 //==============================================================================
@@ -102,6 +160,7 @@ void AIplayerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    juce::ignoreUnused (sampleRate, samplesPerBlock);
 }
 
 void AIplayerAudioProcessor::releaseResources()
@@ -138,6 +197,7 @@ bool AIplayerAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts)
 
 void AIplayerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
+    juce::ignoreUnused (midiMessages);
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
@@ -160,6 +220,7 @@ void AIplayerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
+        juce::ignoreUnused (channelData); // Avoid unused variable warning
 
         // ..do something to the data...
     }
@@ -182,36 +243,115 @@ void AIplayerAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+    juce::ignoreUnused (destData);
 }
 
 void AIplayerAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+    juce::ignoreUnused (data, sizeInBytes);
 }
 
 //==============================================================================
-// Custom methods implementation
-void AIplayerAudioProcessor::sendOSC(const juce::String& instrument, const juce::String& action, const juce::String& message)
+//==============================================================================
+// Custom Public Methods Implementation
+void AIplayerAudioProcessor::sendChatMessage(const juce::String& message)
+{
+    // TODO: Add instance ID logic here if needed
+    // For now, using a fixed address pattern
+    int placeholderInstanceID = 1; // Placeholder - needs proper instance management later
+    sendOSC("/aiplayer/chat/request", placeholderInstanceID, message);
+}
+
+//==============================================================================
+// OSC Message Handling
+/**
+    Callback function that gets invoked when an OSC message is received.
+*/
+void AIplayerAudioProcessor::oscMessageReceived (const juce::OSCMessage& message)
+{
+    logMessage("OSC Message Received: " + message.getAddressPattern().toString());
+
+    // Check if the message is the chat response we expect
+    if (message.getAddressPattern() == "/aiplayer/chat/response")
+    {
+        // Expecting one string argument: the AI response
+        if (message.size() == 1 && message[0].isString())
+        {
+            const juce::String response = message[0].getString();
+            logMessage("Received chat response via OSC: " + response);
+
+            // Safely get the active editor and update it
+            // Use WeakReference to avoid issues if editor is deleted while message is processing
+            juce::WeakReference<AIplayerAudioProcessor> weakSelf = this;
+            juce::MessageManager::callAsync([weakSelf, response]() {
+                if (weakSelf == nullptr) return; // Processor was deleted
+
+                if (auto* editor = weakSelf->getActiveEditor())
+                {
+                    // Cast to our specific editor type to call the custom method
+                    if (auto* aiEditor = dynamic_cast<AIplayerAudioProcessorEditor*>(editor))
+                    {
+                        aiEditor->displayReceivedMessage(response);
+                    }
+                    else
+                    {
+                        weakSelf->logMessage("Error: Could not cast active editor to AIplayerAudioProcessorEditor in oscMessageReceived callback."); // Call via weakSelf
+                    }
+                }
+                 // else { weakSelf->logMessage("Warning: No active editor found to display received message."); } // Call via weakSelf
+            });
+        }
+        else
+        {
+             logMessage("Warning: Received /aiplayer/chat/response message with unexpected arguments. Size: "
+                                      + juce::String(message.size()));
+        }
+    }
+    // TODO: Add handling for other incoming OSC messages if needed
+}
+
+//==============================================================================
+// Custom Internal Methods Implementation (Logging)
+void AIplayerAudioProcessor::logMessage(const juce::String& message)
+{
+    if (logStream != nullptr)
+    {
+        // Add timestamp
+        juce::String timestamp = juce::Time::getCurrentTime().toString (true, true, true, true);
+        logStream->writeString (timestamp + " | " + message + juce::newLine);
+        logStream->flush(); // Ensure it's written immediately for debugging
+    }
+    else
+    {
+        // Fallback to DBG if file stream isn't open
+        DBG (message);
+    }
+}
+
+//==============================================================================
+// Custom Internal Methods Implementation (OSC Sending)
+void AIplayerAudioProcessor::sendOSC(const juce::String& addressPattern, int instanceID, const juce::String& message)
 {
     // Note: juce::OSCSender::send() returns false if not connected or on other errors.
     // The check below handles this.
 
-    // Construct the OSC address pattern dynamically
-    juce::String address = "/" + instrument;
-
     // Create the OSC message with the address pattern
-    juce::OSCMessage oscMessage(address);
+    juce::OSCMessage oscMessage(addressPattern);
 
-    // Add arguments (action and message strings)
-    oscMessage.addString(action);
+    // Add arguments: instance ID (int32) first, then message (string)
+    oscMessage.addInt32(instanceID);
     oscMessage.addString(message);
 
     // Send the OSC message
     if (!sender.send(oscMessage))
     {
-        // Handle send error - e.g., log a message
-        DBG("Error: Failed to send OSC message.");
+        logMessage("Error: Failed to send OSC message to " + addressPattern + " with ID: " + juce::String(instanceID) + ", Msg: " + message);
+    }
+    else
+    {
+        logMessage("OSC message sent to " + addressPattern + ": ID=" + juce::String(instanceID) + ", Msg=" + message);
     }
 }
 

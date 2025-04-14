@@ -21,7 +21,28 @@ class ChatModel: ObservableObject {
     @Published private(set) var isLoading = false
     
     private let logger = Logger(subsystem: "com.nickfox.ChattyChannels", category: "ChatModel")
-    private let fileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("chatHistory.json")
+    // Construct path by reading base directory from Config.plist
+    private let fileURL: URL = {
+        guard let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
+              let config = NSDictionary(contentsOfFile: path),
+              let projectDataDir = config["ProjectDataDirectory"] as? String,
+              !projectDataDir.isEmpty else {
+            // Log error and crash if config is missing or invalid - essential for operation
+            let errorMsg = "FATAL ERROR: Could not load 'ProjectDataDirectory' from Config.plist. Please ensure the key exists and has a valid path string."
+            Logger(subsystem: Bundle.main.bundleIdentifier ?? "unknown", category: "ChatModel").critical("\(errorMsg)")
+            fatalError(errorMsg)
+        }
+
+        // Ensure the directory exists (though it should, being the project dir)
+        let fileManager = FileManager.default
+        if !fileManager.fileExists(atPath: projectDataDir) {
+             Logger(subsystem: Bundle.main.bundleIdentifier ?? "unknown", category: "ChatModel").warning("ProjectDataDirectory specified in Config.plist does not exist: \(projectDataDir)")
+             // Proceed anyway, writing the file might create intermediate dirs if possible, or fail later.
+        }
+
+        // Construct the final URL
+        return URL(fileURLWithPath: projectDataDir).appendingPathComponent("chatHistory.json")
+    }()
     
     func addMessage(_ message: ChatMessage) {
         DispatchQueue.main.async {

@@ -4,6 +4,7 @@ import os.log
 
 struct ContentView: View {
     @StateObject private var chatModel = ChatModel()
+    @EnvironmentObject private var networkService: NetworkService // Inject NetworkService
     @State private var chatInput = ""
     
     private let logger = Logger(subsystem: "com.nickfox.ChattyChannels", category: "UI")
@@ -65,7 +66,8 @@ struct ContentView: View {
         
         Task {
             do {
-                let response = try await NetworkService.shared.sendToGemini(input: chatInput)
+                // Use injected networkService and correct function name
+                let response = try await networkService.sendMessage(chatInput)
                 let producerMessage = ChatMessage(source: "Producer", text: response, timestamp: Date())
                 await MainActor.run {
                     chatModel.addMessage(producerMessage)
@@ -85,4 +87,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(NetworkService()) // Provide dummy service for preview
 }

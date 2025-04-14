@@ -67,7 +67,7 @@
 	<key>DTXcodeBuild</key>
 	<string>16E140</string>
 	<key>LSMinimumSystemVersion</key>
-	<string>10.13</string>
+	<string>11.0</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
 </dict>

@@ -104,3 +104,48 @@ Provides a structured, proven approach to achieving clear and balanced mixes, al
 *   The NVFE logic (steps for EQ, Compression, Levels, Reverb with 0.2dB checks and interaction rules) will be integrated into the prompts and decision-making processes of `AIProducer` and `AIEngineer` (V2+).
 *   AI agents will use NVFE to generate instructions for `AIplayer`/Bus AIs and `AIeffects`.
 *   The instruction set is documented separately in `nvfe.txt` and referenced in `systemPatterns.md`.
+
+---
+
+## Decision [2025-04-12]
+Define communication flow and components for AIplayer v0.3 (Plugin <-> Swift App <-> LLM interaction).
+
+## Rationale
+To enable the AIplayer plugin to leverage the AIproducer Swift app's connection to the Gemini LLM for chat functionality, establishing a clear communication protocol and identifying necessary components is required.
+
+## Implementation Details
+*   **Protocol:** OSC (as previously decided).
+*   **Flow:** Plugin UI -> Plugin Processor (OSC Send) -> Swift App (OSC Receive, LLM Call) -> Gemini -> Swift App (OSC Send) -> Plugin Processor (OSC Receive) -> Plugin UI.
+*   **Plugin Components (v0.3):**
+    *   Simple Chat UI (`PluginEditor`).
+    *   Processor <-> Editor communication (e.g., ValueTree).
+    *   `juce::OSCReceiver` implementation (`PluginProcessor`).
+    *   `juce::OSCSender` usage refinement (`PluginProcessor`).
+*   **Swift App Components (v0.3):**
+    *   OSC Receiver implementation (e.g., SwiftOSC).
+    *   OSC Sender implementation.
+    *   Logic to route OSC messages to/from `NetworkService` (Gemini).
+    *   Mechanism to manage plugin instances and route responses.
+*   **Instance Strategy:** Use Instance ID + Predictable Ports (Plugins listen starting at 9000, include unique ID in requests; Swift app maps ID to port for responses).
+*   **OSC Scheme (Preliminary):**
+    *   Plugin -> Swift: `/aiplayer/chat/request` (Args: `int` instanceID, `string` userMessage)
+    *   Swift -> Plugin: `/aiplayer/chat/response` (Args: `string` geminiResponse)
+*   **Ports (Initial):**
+    *   Plugin Sends Requests TO: `127.0.0.1:9001` (Swift App Listener)
+    *   Plugin Listens for Responses ON: Port `9000` (Swift App Sends To This Port)
+
+---
+
+## Decision [2025-04-14]
+Select `OSCKit` as the Swift OSC library and finalize AIproducer OSC parameters.
+
+## Rationale
+`OSCKit` (`https://github.com/orchetect/OSCKit.git`) appears to be a modern, well-maintained Swift library suitable for OSC communication, unlike previously considered options. Finalizing parameters enables implementation.
+
+## Implementation Details
+*   **Library:** `OSCKit` added via Swift Package Manager.
+*   **AIproducer Listen Port:** `9001` (UDP)
+*   **AIproducer Send Port:** `9000` (UDP) - Target for AIplayer plugins.
+*   **Incoming Message:** `/aiplayer/chat/request` (Args: `int` instanceID, `string` userMessage)
+*   **Outgoing Message:** `/aiplayer/chat/response` (Args: `string` geminiResponse)
+*   **Service:** Implement logic within `OSCService.swift`.

@@ -1,5 +1,6 @@
 // /Users/nickfox137/Documents/chatty-channel/ChattyChannels/ChattyChannels/NetworkService.swift
 import Foundation
+import Combine // Needed for ObservableObject
 import os.log
 
 enum NetworkError: Error, LocalizedError {
@@ -20,12 +21,13 @@ enum NetworkError: Error, LocalizedError {
     }
 }
 
-class NetworkService {
-    static let shared = NetworkService()
-    private let logger = Logger(subsystem: "com.nickfox.ChattyChannels", category: "Network")
-    private let modelName = "gemini-2.5-pro-exp-03-25"
-    
-    private init() {}
+final class NetworkService: ObservableObject { // Make final and conform
+    // No longer a singleton
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "NetworkService") // Use bundle ID
+    private let modelName = "gemini-1.5-flash-latest" // Using a potentially more standard/available model
+
+    // Public initializer
+    init() {}
     
     private func loadApiKey() throws -> String {
         guard let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
@@ -37,7 +39,8 @@ class NetworkService {
         return apiKey
     }
     
-    func sendToGemini(input: String) async throws -> String {
+    // Renamed function to match call site
+    func sendMessage(_ input: String) async throws -> String {
         let apiKey = try loadApiKey()
         guard let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models/\(modelName):generateContent?key=\(apiKey)") else {
             logger.error("Invalid Gemini URL for model: \(self.modelName)")
