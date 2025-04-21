@@ -55,7 +55,7 @@ The system consists of three main components:
 
 ## Open Source Commitment
 
-Chatty Channels builds on the developer's 15+ year history of creating and maintaining successful open source projects:
+Chatty Channels builds on the developer's 25+ year history of creating and maintaining successful open source projects:
 
 - **GPS Tracker**: [2.2+ million downloads](https://sourceforge.net/projects/gpsmapper/files/stats/timeline?dates=2000-01-21+to+2025-04-21), actively maintained since 2007
 - **Commitment to Quality**: Production-grade code with comprehensive documentation
