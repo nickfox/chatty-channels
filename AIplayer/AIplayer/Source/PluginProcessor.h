@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include <juce_osc/juce_osc.h> // Include the JUCE OSC module header
+#include <juce_audio_processors/juce_audio_processors.h> // Include APVTS header
 
 //==============================================================================
 /**
@@ -59,7 +60,16 @@ public:
     /** Called by the PluginEditor when the user sends a chat message. */
     void sendChatMessage(const juce::String& message);
 
+    //==============================================================================
+    // Parameter Handling
+    juce::AudioProcessorValueTreeState apvts; // Add APVTS member
+
 private:
+    // Helper function to create parameter layout
+    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+
+    // Parameter pointers for real-time access
+    std::atomic<float>* gainParameter = nullptr;
     //==============================================================================
     // OSC Message Callback
     /** Handles incoming OSC messages received by the receiver. */

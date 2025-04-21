@@ -65,3 +65,18 @@ fastlane/test_output
 **/Builds/
 **/JuceLibraryCode/
 *.jucer.user*
+
+# Files and directories to ignore (added by user)
+.DS_Store
+v0.3 plugin communication loop complete
+AIplayer audio unit created
+.roomodes
+control room swift app created
+.roorules-architect
+.roorules-ask
+.roorules-code
+.roorules-debug
+.roorules-test
+chattychannels.txt
+chattychannels2.txt
+memory-bank/

@@ -16,7 +16,8 @@
 */
 class AIplayerAudioProcessorEditor  : public juce::AudioProcessorEditor,
                                       public juce::TextButton::Listener, // Inherit from TextButton Listener
-                                      public juce::TextEditor::Listener  // Inherit from TextEditor Listener
+                                      public juce::TextEditor::Listener, // Inherit from TextEditor Listener
+                                      private juce::Slider::Listener     // Inherit from Slider Listener (optional but good practice)
 {
 public:
     AIplayerAudioProcessorEditor (AIplayerAudioProcessor&);
@@ -33,6 +34,7 @@ private:
     // Listener Callbacks
     void buttonClicked (juce::Button* button) override;
     void textEditorReturnKeyPressed (juce::TextEditor& editor) override;
+    void sliderValueChanged (juce::Slider* slider) override; // Add slider callback
     // Private Helper Methods
     void sendMessage();
 
@@ -44,6 +46,10 @@ private:
     juce::TextEditor chatDisplay;
     juce::TextEditor messageInput;
     juce::TextButton sendButton;
+    juce::Slider gainSlider;
+    juce::Label gainLabel;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gainAttachment;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AIplayerAudioProcessorEditor)
 };

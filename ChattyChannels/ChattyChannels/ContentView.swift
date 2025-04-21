@@ -1,14 +1,32 @@
 // /Users/nickfox137/Documents/chatty-channel/ChattyChannels/ChattyChannels/ContentView.swift
+
+/// ContentView provides the main user interface for the ChattyChannels app.
+///
+/// This view presents a chat-style interface that allows the user to interact with
+/// the AI assistant. It displays the chat history and provides a text field for
+/// sending new messages.
 import SwiftUI
 import os.log
 
+/// The main view of the ChattyChannels app.
+///
+/// ContentView presents a chat interface for interacting with the AI assistant.
+/// It displays messages from both the user and the AI, and provides a text input
+/// field for sending new messages.
 struct ContentView: View {
+    /// The model that manages chat messages and state.
     @StateObject private var chatModel = ChatModel()
-    @EnvironmentObject private var networkService: NetworkService // Inject NetworkService
+    
+    /// The service for communicating with the AI.
+    @EnvironmentObject private var networkService: NetworkService
+    
+    /// The current text in the chat input field.
     @State private var chatInput = ""
     
+    /// System logger for UI-related events.
     private let logger = Logger(subsystem: "com.nickfox.ChattyChannels", category: "UI")
     
+    /// The view's body, defining the user interface layout and behavior.
     var body: some View {
         VStack(spacing: 10) {
             Text("Control Room")
@@ -54,6 +72,14 @@ struct ContentView: View {
         }
     }
     
+    /// Sends the current chat input to the AI and processes the response.
+    ///
+    /// This method is triggered when the user submits a message. It:
+    /// 1. Validates that the input is not empty
+    /// 2. Creates a message from the user's input and adds it to the chat history
+    /// 3. Sends the message to the NetworkService to get an AI response
+    /// 4. Adds the AI's response to the chat history
+    /// 5. Handles any errors that occur during the process
     private func sendChat() {
         guard !chatInput.isEmpty else {
             logger.warning("Empty chat input ignored")

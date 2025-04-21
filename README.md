@@ -55,7 +55,11 @@ The system consists of three main components:
 
 ## Open Source Commitment
 
+<<<<<<< HEAD
 Chatty Channels builds on the developer's 15+ year history of creating and maintaining successful open source projects:
+=======
+Chatty Channels builds on the developer's 20+ year history of creating and maintaining successful open source projects:
+>>>>>>> 5becfd8943475f5ac3743a87f7c74160fca0af0a
 
 - **GPS Tracker**: [2.2+ million downloads](https://sourceforge.net/projects/gpsmapper/files/stats/timeline?dates=2000-01-21+to+2025-04-21), actively maintained since 2007
 - **Commitment to Quality**: Production-grade code with comprehensive documentation
@@ -100,4 +104,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
+<<<<<<< HEAD
 *Chatty Channels is not affiliated with or endorsed by Apple Inc. Logic Pro and all related trademarks are the property of Apple Inc.*
+=======
+*Chatty Channels is not affiliated with or endorsed by Apple Inc. Logic Pro and all related trademarks are the property of Apple Inc.*
+>>>>>>> 5becfd8943475f5ac3743a87f7c74160fca0af0a

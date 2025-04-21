@@ -12,6 +12,26 @@
 #include <juce_core/juce_core.h> // Needed for FileOutputStream, Time, etc.
 
 //==============================================================================
+// Helper function to create the parameter layout
+juce::AudioProcessorValueTreeState::ParameterLayout AIplayerAudioProcessor::createParameterLayout()
+{
+    std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
+
+    // Add Gain parameter
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        "GAIN",                                     // Parameter ID
+        "Gain",                                     // Parameter Name
+        juce::NormalisableRange<float>(-60.0f, 0.0f, 0.1f), // Range (-60dB to 0dB, 0.1 step)
+        0.0f,                                       // Default value (0dB)
+        "dB"                                        // Unit Suffix
+    ));
+
+    // Add more parameters here if needed in the future
+
+    return { params.begin(), params.end() };
+}
+
+
 AIplayerAudioProcessor::AIplayerAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
@@ -21,9 +41,19 @@ AIplayerAudioProcessor::AIplayerAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
+#else
+     :
 #endif
+       apvts (*this, nullptr, "Parameters", createParameterLayout()) // Initialize APVTS here
 {
+    // Get the raw pointer to the gain parameter after APVTS initialization
+    gainParameter = apvts.getRawParameterValue("GAIN");
+    if (gainParameter)
+        logMessage("Gain parameter pointer acquired.");
+    else
+        logMessage("Error: Failed to acquire Gain parameter pointer.");
+
     // --- Manual File Logging Setup ---
     // Construct path relative to user's home/Documents directory
     juce::File logDirectory = juce::File::getSpecialLocation (juce::File::userHomeDirectory)
@@ -202,28 +232,28 @@ void AIplayerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
+    // Clear extra output channels
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
+    // --- Apply Gain Parameter ---
+    // Get the current gain value in dB from the atomic pointer
+    float currentGainDb = gainParameter->load();
+    // Convert dB to a gain factor
+    float gainFactor = juce::Decibels::decibelsToGain(currentGainDb);
+
+    // Apply the gain to all input channels
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
-        auto* channelData = buffer.getWritePointer (channel);
-        juce::ignoreUnused (channelData); // Avoid unused variable warning
-
-        // ..do something to the data...
+        buffer.applyGain(channel, 0, buffer.getNumSamples(), gainFactor);
     }
+
+    // --- (Original processing loop placeholder - can be removed if only gain is applied) ---
+    // for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    // {
+    //     auto* channelData = buffer.getWritePointer (channel);
+    //     // ..do something else to the data if needed...
+    // }
 }
 
 //==============================================================================
@@ -242,15 +272,34 @@ void AIplayerAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
-    juce::ignoreUnused (destData);
+    // Use APVTS to store the state
+    auto state = apvts.copyState();
+    std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    copyXmlToBinary (*xml, destData);
+    logMessage("Plugin state saved.");
 }
 
 void AIplayerAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
-    juce::ignoreUnused (data, sizeInBytes);
+    // Use APVTS to restore the state
+    std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+
+    if (xmlState != nullptr)
+    {
+        if (xmlState->hasTagName (apvts.state.getType()))
+        {
+            apvts.replaceState (juce::ValueTree::fromXml (*xmlState));
+            logMessage("Plugin state restored.");
+        }
+         else
+        {
+             logMessage("Error: Failed to restore state - XML tag mismatch.");
+        }
+    }
+     else
+    {
+         logMessage("Error: Failed to restore state - Could not get XML from binary.");
+    }
 }
 
 //==============================================================================
@@ -307,8 +356,55 @@ void AIplayerAudioProcessor::oscMessageReceived (const juce::OSCMessage& message
         {
              logMessage("Warning: Received /aiplayer/chat/response message with unexpected arguments. Size: "
                                       + juce::String(message.size()));
-        }
-    }
+       }
+   }
+   // Handle parameter setting messages
+   else if (message.getAddressPattern() == "/aiplayer/set_parameter")
+   {
+       // Expecting: string parameterID, float value
+       if (message.size() == 2 && message[0].isString() && message[1].isFloat32()) // Corrected: isFloat32()
+       {
+           juce::String paramID = message[0].getString();
+           float value = message[1].getFloat32();
+
+           logMessage("Received parameter set request via OSC: ParamID=" + paramID + ", Value=" + juce::String(value));
+
+           // Find the parameter in the APVTS
+           if (auto* parameter = apvts.getParameter(paramID))
+           {
+               // Convert the received value (assumed to be in the parameter's actual range, e.g., -60 to 0 dB)
+               // to the normalized 0.0 to 1.0 range required by setValueNotifyingHost.
+               float normalizedValue = parameter->convertTo0to1(value);
+
+               // Clamp the normalized value just in case
+               normalizedValue = juce::jlimit(0.0f, 1.0f, normalizedValue);
+
+               // Set the parameter value and notify the host
+               parameter->setValueNotifyingHost(normalizedValue);
+
+               logMessage("Parameter " + paramID + " set to " + juce::String(value) + " (Normalized: " + juce::String(normalizedValue) + ")");
+           }
+           else
+           {
+               logMessage("Error: Parameter with ID '" + paramID + "' not found.");
+           }
+       }
+       else
+       {
+           logMessage("Warning: Received /aiplayer/set_parameter message with unexpected arguments. Size: "
+                                     + juce::String(message.size()));
+           // Log argument types for debugging (getTypeString() is not a valid method)
+           // We already know the types/count didn't match the expectation.
+           logMessage("Arguments received did not match expected types (String, Float32).");
+           // Example of checking specific types if needed for more detail:
+           // for (int i = 0; i < message.size(); ++i) {
+           //     if (message[i].isString()) logMessage("Arg " + juce::String(i) + " is String");
+           //     else if (message[i].isFloat32()) logMessage("Arg " + juce::String(i) + " is Float32");
+           //     // ... add other types as needed
+           //     else logMessage("Arg " + juce::String(i) + " is of unexpected type.");
+           // }
+           }
+       }
     // TODO: Add handling for other incoming OSC messages if needed
 }
 

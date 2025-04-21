@@ -1,13 +1,38 @@
 // /Users/nickfox137/Documents/chatty-channel/ChattyChannels/ChattyChannels/NetworkService.swift
+
+/// NetworkService handles communication with external AI services.
+///
+/// This service is responsible for connecting to Google's Gemini API,
+/// sending user messages, and receiving AI responses. It handles authentication,
+/// request formatting, and error handling for the AI communication channel.
 import Foundation
 import Combine // Needed for ObservableObject
 import os.log
 
+/// Error types that can occur during network operations.
+///
+/// These errors provide specific information about what went wrong during
+/// communication with the AI service, allowing for appropriate error handling
+/// and user feedback.
 enum NetworkError: Error, LocalizedError {
+    /// The API URL is malformed or invalid.
     case invalidURL
+    
+    /// The request failed to be sent or processed.
+    /// - Parameter message: Description of what went wrong
     case requestFailed(String)
+    
+    /// The server returned an unsuccessful status code.
+    /// - Parameter code: The HTTP status code
+    /// - Parameter details: Additional information about the error
     case invalidResponse(Int, String)
+    
+    /// The response couldn't be decoded into the expected format.
+    /// - Parameter details: Description of the decoding failure
     case decodingFailed(String)
+    
+    /// The network is unavailable or the connection failed.
+    /// - Parameter message: Details about the connectivity issue
     case networkUnreachable(String)
     
     var errorDescription: String? {
@@ -21,14 +46,33 @@ enum NetworkError: Error, LocalizedError {
     }
 }
 
-final class NetworkService: ObservableObject { // Make final and conform
-    // No longer a singleton
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "NetworkService") // Use bundle ID
-    private let modelName = "gemini-1.5-flash-latest" // Using a potentially more standard/available model
+/// Service for handling communication with the Gemini AI API.
+///
+/// NetworkService manages all aspects of communicating with Google's Gemini API:
+/// - Loading API keys from configuration
+/// - Constructing properly formatted requests
+/// - Sending requests with system instructions
+/// - Processing and parsing responses
+/// - Error handling and reporting
+///
+/// This service is designed to be injected into views via SwiftUI's environment.
+final class NetworkService: ObservableObject {
+    /// System logger for network-related events.
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "NetworkService")
+    
+    /// The Gemini model identifier to use for AI requests.
+    private let modelName = "gemini-1.5-flash-latest"
 
-    // Public initializer
+    /// Creates a new NetworkService instance.
+    ///
+    /// The initializer is empty as the actual configuration is loaded from Config.plist
+    /// when needed, rather than at initialization time.
     init() {}
     
+    /// Loads the Gemini API key from the configuration file.
+    ///
+    /// - Returns: The API key as a string.
+    /// - Throws: NetworkError.requestFailed if the key is missing or invalid.
     private func loadApiKey() throws -> String {
         guard let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
               let config = NSDictionary(contentsOfFile: path),
@@ -39,7 +83,19 @@ final class NetworkService: ObservableObject { // Make final and conform
         return apiKey
     }
     
-    // Renamed function to match call site
+    /// Sends a message to the Gemini AI service and receives a response.
+    ///
+    /// This method handles the full lifecycle of an AI request:
+    /// 1. Retrieves the API key
+    /// 2. Constructs the API URL
+    /// 3. Formats the request with system instructions
+    /// 4. Sends the request
+    /// 5. Processes and validates the response
+    /// 6. Extracts the AI-generated text
+    ///
+    /// - Parameter input: The user's message to send to the AI
+    /// - Returns: The AI's response as a string
+    /// - Throws: Various NetworkError types based on what goes wrong
     func sendMessage(_ input: String) async throws -> String {
         let apiKey = try loadApiKey()
         guard let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models/\(modelName):generateContent?key=\(apiKey)") else {
@@ -51,10 +107,27 @@ final class NetworkService: ObservableObject { // Make final and conform
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
+        // --- System Instruction for AI ---
+        let systemInstruction = """
+        You are an AI assistant integrated into a music production environment.
+        When the user asks you to change the main gain, volume, or level parameter, respond ONLY with a JSON object in the following format, ALWAYS using "GAIN" as the parameter_id:
+        {"command": "set_parameter", "parameter_id": "GAIN", "value": <float_value>}
+        Replace <float_value> with the numerical value requested.
+        For example, if the user says "Set gain to -6dB", respond with:
+        {"command": "set_parameter", "parameter_id": "GAIN", "value": -6.0}
+        If the user asks to change a *different* specific parameter (that isn't gain/volume/level), use its correct ID if you know it.
+        If the user asks a general question or makes a request you cannot fulfill with a parameter change, respond normally in plain text.
+        """
+
+        // Combine system instruction with user input
+        let fullPrompt = "\(systemInstruction)\n\nUser Request: \(input)"
+        // --- End System Instruction ---
+
         let body: [String: Any] = [
             "contents": [
-                ["parts": [["text": input]]]
+                ["parts": [["text": fullPrompt]]] // Use the combined prompt
             ]
+            // TODO: Consider adding system_instruction field if API supports it better
         ]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
