@@ -78,6 +78,14 @@ class ChatModel: ObservableObject {
         DispatchQueue.main.async {
             self.messages.append(message)
             self.saveChatHistory()
+            
+            // If the message is from the user, set isLoading to true
+            if message.source == "You" {
+                self.isLoading = true
+            } else {
+                // When receiving a response, set isLoading to false
+                self.isLoading = false
+            }
         }
     }
     

@@ -28,44 +28,58 @@ struct ContentView: View {
     
     /// The view's body, defining the user interface layout and behavior.
     var body: some View {
-        VStack(spacing: 10) {
-            Text("Control Room")
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-                .padding(.top, 10)
-            
+        VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 8) {
-                    ForEach(chatModel.messages) { message in
-                        Text("\(message.source): \(message.text)")
-                            .foregroundColor(.white)
-                            .padding(8)
-                            .background(message.source == "You" ? Color.teal.opacity(0.2) : Color.gray.opacity(0.2))
-                            .cornerRadius(5)
-                            .frame(maxWidth: .infinity, alignment: message.source == "You" ? .trailing : .leading)
+                ScrollViewReader { scrollView in
+                    ZStack {
+                        // Background that fills entire scroll area
+                        Color(NSColor.windowBackgroundColor).opacity(0.9)
+                            .ignoresSafeArea()
+                        
+                        // Messages container
+                        VStack(alignment: .leading, spacing: 12) {
+                            ForEach(chatModel.messages) { message in
+                                MessageBubble(message: message)
+                                    .id(message.id)
+                            }
+                            
+                            // Spacer to push content to the top when there are few messages
+                            if !chatModel.messages.isEmpty {
+                                Spacer(minLength: 20)
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .leading)
+                    }
+                    .onChange(of: chatModel.messages.count) { _, _ in
+                        withAnimation {
+                            scrollView.scrollTo(chatModel.messages.last?.id, anchor: .bottom)
+                        }
                     }
                 }
-                .padding(.horizontal)
+            }
+            .background(Color(NSColor.windowBackgroundColor).opacity(0.9))
+            .padding([.top, .leading, .trailing])
+            .padding(.trailing, 8) // Extra padding for scrollbar
+            
+            // Loading indicator
+            if chatModel.isLoading {
+                HStack {
+                    Spacer()
+                    ProgressView()
+                        .scaleEffect(0.7)
+                        .padding(.trailing)
+                }
+                .padding(.top, 4)
             }
             
-            HStack {
-                TextField("Chat with Producer", text: $chatInput)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .submitLabel(.send)
-                    .onSubmit { sendChat() }
-                    .disabled(chatModel.isLoading)
-                
-                if chatModel.isLoading {
-                    ProgressView()
-                }
-            }
-            .padding(.horizontal)
+            // Text input field
+            GrowingTextInput(text: $chatInput, onSubmit: sendChat)
+                .padding()
         }
-        .frame(width: 350, height: 400)
-        .background(Color.black.opacity(0.9))
-        .cornerRadius(10)
-        .shadow(radius: 5)
+        .frame(minWidth: 800, minHeight: 600)
+        .background(Color(NSColor.windowBackgroundColor))
         .onAppear {
             logger.info("Control Room UI loaded")
             chatModel.loadChatHistory()
@@ -81,7 +95,7 @@ struct ContentView: View {
     /// 4. Adds the AI's response to the chat history
     /// 5. Handles any errors that occur during the process
     private func sendChat() {
-        guard !chatInput.isEmpty else {
+        guard !chatInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             logger.warning("Empty chat input ignored")
             return
         }
