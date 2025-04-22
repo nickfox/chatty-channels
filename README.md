@@ -4,7 +4,7 @@
 
 ## AI-Powered Recording Studio Experience for Logic Pro
 
-Chatty Channels is an innovative open-source project that integrates AI with Logic Pro to create an authentic recording studio experience. The system places AI plugins on each channel (representing musicians or instruments) that interact with an AI engineer plugin on the master bus, all orchestrated through a Swift-based Control Room application where the producer AI lives.
+Chatty Channels is an innovative open-source project that integrates AI with Logic Pro to create an authentic recording studio experience. The system places AI plugins on each channel (representing musicians or instruments) that interact with an AI engineer plugin on the master bus, all orchestrated through a Swift-based Control Room application where the producer AI lives and communicates with you.
 
 *From the creator of [GPS Tracker](https://github.com/nickfox/GpsTracker) (2.2+ million downloads)*
 
