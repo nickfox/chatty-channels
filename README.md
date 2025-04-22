@@ -1,6 +1,6 @@
 # Chatty Channels
 
-![Chatty Channels](https://github.com/nickfox/chatty-channels/blob/main/logos/chatty-channels-256.png)
+![Chatty Channels](https://github.com/nickfox/chatty-channels/blob/main/logos/chatty-channels-2-256.png)
 
 ## AI-Powered Recording Studio Experience for Logic Pro
 
