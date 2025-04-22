@@ -98,7 +98,7 @@ Contributions are welcome! As the project is in early development, please reach 
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the Apache version 2.0 License - see the LICENSE file for details.
 
 ---
 
