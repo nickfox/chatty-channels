@@ -44,7 +44,7 @@ The project follows a methodical risk-driven development approach, addressing ke
 ┌───────────────────┐        ┌───────────────────┐
 │                   │        │                   │
 │  Channel AI #1    │        │  Channel AI #2    │
-│  (Instrument)     │        │  (Musician)       │
+│  (Instrument)     │◄─────► │  (Musician)       │
 │                   │        │                   │
 └───────────────────┘        └───────────────────┘
 ```
