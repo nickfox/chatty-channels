@@ -2,18 +2,23 @@ name: CI
 on: [push]
 jobs:
   build:
-    runs-on: macos-13
+    runs-on: macos-latest # Use macos-latest (likely macOS 15.x as of April 2025)
     env:
       ACTIONS_STEP_DEBUG: true
     steps:
       - uses: actions/checkout@v4
       - uses: maxim-lobanov/setup-xcode@v1.6.0
         with:
-          xcode-version: '14.3.1'
+          xcode-version: '16.3' # Confirm Xcode 16.3 is available
+      - name: Verify Xcode version
+        run: xcodebuild -version
       - name: List root directory contents
         run: ls -la
       - name: List ChattyChannels directory contents
         run: ls -la ChattyChannels
+      - name: Check project file permissions
+        working-directory: ./ChattyChannels
+        run: ls -la ChattyChannels.xcodeproj
       - name: List available schemes
         working-directory: ./ChattyChannels
         run: xcodebuild -list -project ChattyChannels.xcodeproj
@@ -25,7 +30,7 @@ jobs:
                      -configuration Debug \
                      build \
                      CODE_SIGNING_ALLOWED=NO
-      - name: Run unit test
+      - name: Run unit tests
         working-directory: ./ChattyChannels
         run: |
           xcodebuild test -project ChattyChannels.xcodeproj \
