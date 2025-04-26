@@ -1,33 +1,34 @@
-name: macOS build & test
-
-on: [push, pull_request]
-
+name: CI
+on: [push]
 jobs:
   build:
     runs-on: macos-13
+    env:
+      ACTIONS_STEP_DEBUG: true
     steps:
-      - name: Checkout sources
-        uses: actions/checkout@v4
-
-      - name: Set up Xcode
-        uses: maxim-lobanov/setup-xcode@v1.6.0
+      - uses: actions/checkout@v4
+      - uses: maxim-lobanov/setup-xcode@v1.6.0
         with:
-          xcode-version: "14.3.1"
-
-      - name: Build ControlRoom target
-	    working-directory: ./ChattyChannels
+          xcode-version: '14.3.1'
+      - name: List root directory contents
+        run: ls -la
+      - name: List ChattyChannels directory contents
+        run: ls -la ChattyChannels
+      - name: List available schemes
+        working-directory: ./ChattyChannels
+        run: xcodebuild -list -project ChattyChannels.xcodeproj
+      - name: Build
+        working-directory: ./ChattyChannels
         run: |
           xcodebuild -project ChattyChannels.xcodeproj \
                      -scheme ControlRoom \
                      -configuration Debug \
-                     build CODE_SIGNING_ALLOWED=NO
-
-      - name: Run unit tests
-	    working-directory: ./ChattyChannels
+                     build \
+                     CODE_SIGNING_ALLOWED=NO
+      - name: Run unit test
+        working-directory: ./ChattyChannels
         run: |
           xcodebuild test -project ChattyChannels.xcodeproj \
                           -scheme ControlRoom \
                           -destination 'platform=macOS' \
                           CODE_SIGNING_ALLOWED=NO
-
-
