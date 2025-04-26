@@ -28,7 +28,7 @@ jobs:
         working-directory: ./ChattyChannels
         run: |
           xcodebuild -project ChattyChannels.xcodeproj \
-                     -scheme ControlRoom \
+                     -scheme ChattyChannels \
                      -configuration Debug \
                      build \
                      CODE_SIGNING_ALLOWED=NO
@@ -36,6 +36,6 @@ jobs:
         working-directory: ./ChattyChannels
         run: |
           xcodebuild test -project ChattyChannels.xcodeproj \
-                          -scheme ControlRoom \
+                          -scheme ChattyChannels \
                           -destination 'platform=macOS' \
                           CODE_SIGNING_ALLOWED=NO
