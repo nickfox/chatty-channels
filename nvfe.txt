@@ -1,6 +1,6 @@
 Overview
 
-The NVFE equips AIProducer (Swift Control Room), AIEngineer (master bus), AI musicians (AIdrummer, AIguitarist), AIplayer instances (kick, snare), and AIeffects (AIreverb, AIdelay, AIphaser) to mix with Roger Nichols’ precision. It balances EQ, compression, levels, and reverb, using a 0.2 dB audibility test, with cross-instrument coordination, chat feedback, master-bus polish, prioritization, and hearability checks.
+The NVFE (Nichols Vocal Flow Engine) equips AIProducer (Swift Control Room), AIEngineer (master bus), AI musicians (AIdrummer, AIguitarist), AIplayer instances (kick, snare), and AIeffects (AIreverb, AIdelay, AIphaser) to mix with Roger Nichols’ precision. It balances EQ, compression, levels, and reverb, using a 0.2 dB audibility test, with cross-instrument coordination, chat feedback, master-bus polish, prioritization, and hearability checks.
 
 1. EQ Balance
 
