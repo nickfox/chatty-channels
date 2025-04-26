@@ -1,8 +1,10 @@
 # Chatty Channels
 
 
+![Chatty Channels](https://github.com/nickfox/chatty-channels/blob/main/logos/chatty-channels-2-256.png)
 
-## AI‑Powered Recording‑Studio Magic — Right Inside Logic Pro 🎚️✨
+
+## AI‑Powered Recording‑Studio Magic — Right Inside Logic Pro ✨
 
 *What if every track in your session could talk back?*
 
