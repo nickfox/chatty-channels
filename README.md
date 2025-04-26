@@ -16,14 +16,14 @@ Chatty Channels drops a tiny **AIplayer** plugin onto *every* channel so each i
 
 ## Project Vision
 
-> Chatty Channels transforms music production by enabling multi-agent AI collaboration directly within professional DAW environments. Instead of replacing human creativity, it enhances it by providing a virtual collaborative studio experience:\
->
->
-> - AI Musicians on Channels: Specialized AI entities that understand their instruments and respond to direction
-> - AI Engineer on Master Bus: Provides mixing suggestions and technical guidance
-> - Producer Control Room: Central Swift application where you orchestrate the session
->
-> Unlike standalone AI music generators, Chatty Channels integrates directly into your existing Logic Pro workflow, preserving your creative control while adding collaborative intelligence.
+Chatty Channels transforms music production by enabling multi-agent AI collaboration directly within professional DAW environments. Instead of replacing human creativity, it enhances it by providing a virtual collaborative studio experience:\
+
+
+- AI Musicians on Channels: Specialized AI entities that understand their instruments and respond to direction
+- AI Engineer on Master Bus: Provides mixing suggestions and technical guidance
+- Producer Control Room: Central Swift application where you orchestrate the session
+
+Unlike standalone AI music generators, Chatty Channels integrates directly into your existing Logic Pro workflow, preserving your creative control while adding collaborative intelligence.
 
 ---
 
