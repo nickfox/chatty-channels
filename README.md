@@ -1,105 +1,129 @@
 # Chatty Channels
 
-![Chatty Channels](https://github.com/nickfox/chatty-channels/blob/main/logos/chatty-channels-2-256.png)
 
-## AI-Powered Recording Studio Experience for Logic Pro
 
-Chatty Channels is an innovative open-source project that integrates AI with Logic Pro to create an authentic recording studio experience. The system places AI plugins on each channel (representing musicians or instruments) that interact with an AI engineer plugin on the master bus, all orchestrated through a Swift-based Control Room application where the producer AI lives and communicates with you.
+## AI‑Powered Recording‑Studio Magic — Right Inside Logic Pro 🎚️✨
 
-*From the creator of [GPS Tracker](https://github.com/nickfox/GpsTracker) (2.2+ million downloads)*
+*What if every track in your session could talk back?*
 
-## Project Vision
+Chatty Channels drops a tiny **AIplayer** plugin onto *every* channel so each instrument becomes a chatty band‑mate. A master‑bus **AIengineer** lends seasoned ears. Up in the **Control Room** a SwiftUI app hosts a producer‑AI (fueled by OpenAI o3) that understands your creative direction and drives Logic Pro via AppleScript + MIDI.
 
-Chatty Channels transforms music production by enabling multi-agent AI collaboration directly within professional DAW environments. Instead of replacing human creativity, it enhances it by providing a virtual collaborative studio experience:
-
-- **AI Musicians on Channels**: Specialized AI entities that understand their instruments and respond to direction
-- **AI Engineer on Master Bus**: Provides mixing suggestions and technical guidance
-- **Producer Control Room**: Central Swift application where you orchestrate the session
-
-Unlike standalone AI music generators, Chatty Channels integrates directly into your existing Logic Pro workflow, preserving your creative control while adding collaborative intelligence.
-
-## Current Development Status
-
-The project follows a methodical risk-driven development approach, addressing key technical uncertainties before scaling to the full vision:
-
-- ✅ **OSC Communication**: Working bidirectional communication between Logic Pro plugins and Swift app
-- ✅ **AI Integration**: Successful remote AI model integration with conversational capabilities
-- ✅ **Parameter Control**: Natural language processing to adjust audio parameters (e.g., "turn down the gain by 3dB")
-- 🔄 **Multi-Agent Framework**: Architecture for multiple AI personalities with contextual awareness
-- 🔄 **Audio Analysis**: Integration of spectral analysis with AI understanding
-
-## Technical Architecture
-
-```
-┌───────────────────┐        ┌───────────────────┐
-│                   │        │                   │
-│  Swift Control    │◄─────► │  Master Bus       │
-│  Room Application │        │  Engineer AI      │
-│  (Producer Hub)   │        │                   │
-│                   │        └───────────────────┘
-└─────────┬─────────┘                 ▲
-          │                           │
-          │                           │
-          ▼                           │
-┌───────────────────┐        ┌───────────────────┐
-│                   │        │                   │
-│  Channel AI #1    │        │  Channel AI #2    │
-│  (Instrument)     │◄─────► │  (Musician)       │
-│                   │        │                   │
-└───────────────────┘        └───────────────────┘
-```
-
-The system consists of three main components:
-
-1. **Logic Pro Plugins**: JUCE-based audio plugins hosting AI entities
-2. **Swift Control Room**: macOS application for producer interaction and AI orchestration
-3. **AI Integration**: Language models with domain-specific knowledge of music production
-
-## Open Source Commitment
-
-Chatty Channels builds on the developer's 20+ year history of creating and maintaining successful open source projects (and 10 years as a sound engineer):
-
-- **GPS Tracker**: [2.2+ million downloads](https://sourceforge.net/projects/gpsmapper/files/stats/timeline?dates=2000-01-21+to+2025-04-21), actively maintained since 2007
-- **Commitment to Quality**: Production-grade code with comprehensive documentation
-- **Community Focus**: Designed to be extended and customized by the community
-
-## Applications
-
-Chatty Channels democratizes access to collaborative music production:
-
-- **Independent Musicians**: Access a virtual studio team regardless of location or budget
-- **Education**: Learn production techniques through AI guidance and collaboration
-- **Remote Collaboration**: Bridge geographic barriers in music creation
-- **Efficiency**: Streamline workflows for professional producers
-
-## Getting Started
-
-> **Note**: This project is in active development. Installation instructions will be updated as the project progresses.
-
-### Prerequisites
-
-- macOS 14.0+
-- Logic Pro 10.7+ 
-- Xcode 16.2+ (for development)
-
-## Roadmap
-
-- [x] Establish core OSC communication framework
-- [x] Implement AI integration with parameter control
-- [ ] Create multi-agent communication protocol
-- [ ] Develop specialized AI personalities for different roles
-- [ ] Implement audio analysis integration
-- [ ] Release beta version for community testing
-- [ ] Publish comprehensive documentation and tutorials
-
-## Contributing
-
-Contributions are welcome! As the project is in early development, please reach out before making significant contributions to ensure alignment with the project direction.
-
-## License
-
-This project is licensed under the Apache version 2.0 License - see the LICENSE file for details.
+*Tell the kick drum to "lower the volume by 3 dB," solo the bass for a sanity‑check, or ask the engineer to "put a little more reverb on the lead vocal"—all in plain English while the music keeps rolling.*
 
 ---
 
-*Chatty Channels is not affiliated with or endorsed by Apple Inc. Logic Pro and all related trademarks are the property of Apple Inc.*
+## Project Vision
+
+> Chatty Channels transforms music production by enabling multi-agent AI collaboration directly within professional DAW environments. Instead of replacing human creativity, it enhances it by providing a virtual collaborative studio experience:\
+>
+>
+> - AI Musicians on Channels: Specialized AI entities that understand their instruments and respond to direction
+> - AI Engineer on Master Bus: Provides mixing suggestions and technical guidance
+> - Producer Control Room: Central Swift application where you orchestrate the session
+>
+> Unlike standalone AI music generators, Chatty Channels integrates directly into your existing Logic Pro workflow, preserving your creative control while adding collaborative intelligence.
+
+---
+
+## Why it matters
+
+- **Human‑in‑the‑loop** — the AI proposes mix moves; you approve.
+- **Studio realism** — PID feedback loops, follow‑solo VU meters, and Roger‑Nichols‑inspired NVFE logic mimic a real session.
+- **Hackable** — SwiftUI + JUCE, permissive license, modular components.
+
+---
+
+## Open‑Source Commitment
+
+Chatty Channels is developed **in the open** and draws on two decades of the author’s OSS track record — including the mobile project **GPS Tracker** (> 2.2 million downloads since 2007).
+
+- **Demonstrated reach** – GPS Tracker’s adoption shows long‑term support and community engagement.
+- **Quality first** – production‑grade code, DocC / Doxygen comments, CI tests, layered error‑handling.
+- **Community focus** – Chatty Channels is modular (SwiftUI, JUCE, OSC) so contributors can add new AI personas, effects, or DAW integrations.
+
+---
+
+## High‑level architecture
+
+```mermaid
+sequenceDiagram
+    participant LP as Logic Pro
+    participant AP as AIplayer (AU)
+    participant CR as Control Room.app
+    participant LLM as Remote LLM (o3‑high)
+
+    Note over AP: per‑track\nRMS / FFT
+    AP-->>CR: OSC /telemetry {rms:-18dB}
+    CR-->>LP: AppleScript set fader "Kick" -3.0
+    LP--)CR: ok
+    CR-)AP: OSC /query rms?
+    AP-->>CR: OSC /telemetry {rms:-21dB}
+    CR-->>LLM: producer‑prompt JSON
+    LLM-->CR: reply
+```
+
+- **AIplayer** — lightweight sensor on every channel; streams RMS/FFT and answers queries.
+- **Control Room** — orchestration UI + producer‑AI; moves faders via AppleScript/MIDI.
+- **Remote LLM** — initially OpenAI o3‑high; architecture is model‑agnostic.
+- **PID feedback** — Control Room never trusts a change until the plugin confirms it.
+
+---
+
+## Milestones & risk status
+
+| Target                | Core risk retired                                       | Key deliverable                             |
+| --------------------- | ------------------------------------------------------- | ------------------------------------------- |
+| **v0.5 (🚧 current)** | H1 AppleScript round‑trip, H3 OSC latency, H4 PID maths | Kick‑track closed‑loop demo                 |
+| **v0.6**              | H2 track‑UUID mapping, H5 telemetry scaling             | Auto‑follow VU meters, 64‑track stress test |
+| **v0.7**              | H3 UDP retry logic                                      | Loss‑tolerant OSC transport                 |
+| **v0.8**              | H5 lazy FFT, band‑energy payload                        | Telemetry v1.1                              |
+| **v0.9**              | H6 LLM JSON schema                                      | Strict validator + prompt templates         |
+| **v1.0 (ALPHA)**      | Full NVFE pass                                          | Public alpha release                        |
+
+*(Detailed backlog & risk matrix in ****************************************************[`docs/plan.md`](docs/plan.md)****************************************************.)*
+
+---
+
+## Getting started (early‑alpha)
+
+### Prerequisites
+
+- macOS 14 +
+- Logic Pro 10.7 +
+- Xcode 16.2 +
+- JUCE 7 (for AU projects)
+- Python 3.11 (build scripts)
+
+### Quick clone & build
+
+```bash
+git clone https://github.com/nickfox/chatty-channels.git
+cd chatty-channels
+Scripts/bootstrap.sh         # pulls JUCE, installs git‑hooks
+xcodebuild -project ChattyChannels.xcodeproj -scheme ControlRoom
+```
+
+---
+
+## 📚 Docs
+
+- Architecture & risk backlog — [`docs/plan.md`](docs/plan.md)
+- Iteration diary — [`docs/iterations.md`](docs/iterations.md)
+
+---
+
+## Contributing
+
+Pull requests welcome!\
+Open a Discussion before major work so we stay aligned with the risk‑driven roadmap.
+
+---
+
+## License
+
+Apache 2.0 — see `LICENSE`.
+
+---
+
+*Chatty Channels is an independent project; Logic Pro® and related marks are property of Apple Inc.*
+
