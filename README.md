@@ -119,7 +119,6 @@ xcodebuild -project ChattyChannels.xcodeproj -scheme ControlRoom
 
 ## Contributing
 
-
 Found a glitch? [Open an issue](https://github.com/nickfox/chatty-channels/issues/new).
 
 Pull requests welcome!\
