@@ -6,6 +6,7 @@
 //
 
 import Testing
+import Foundation
 import OSCKit // Need OSCKit for OSCMessage
 @testable import ChattyChannels
 
@@ -36,20 +37,11 @@ struct ChattyChannelsTests {
 
         #expect(arg1 == testParameterID, "First argument should be the parameter ID string")
         #expect(arg2 == testValue, "Second argument should be the float value")
-
-        // Optional: Check specific type encoding if OSCKit provides it,
-        // but checking the Swift type after casting is usually sufficient.
     }
 
     @Test func testNetworkServicePromptConstruction_Placeholder() {
         // TODO: Refactor NetworkService or use network mocking to properly test prompt construction.
         // This placeholder confirms the test suite structure.
-        let service = NetworkService()
-        let input = "Test user input"
-        // let expectedStart = "You are an AI assistant integrated..." // Start of system prompt
-        // In a real test with mocking, we would capture the request body
-        // and assert that body.contents[0].parts[0].text starts with expectedStart
-        // and contains the input string.
         #expect(true, "Placeholder test for NetworkService prompt construction")
     }
 
@@ -75,12 +67,22 @@ struct ChattyChannelsTests {
         let decoder = JSONDecoder()
 
         // Expect decoding to throw an error
-        #expect(throws: DecodingError.self) {
+        do {
             _ = try decoder.decode(ParameterCommand.self, from: jsonData)
+            #expect(Bool(false), "Expected decoding to fail due to invalid JSON")
+        } catch let error as DecodingError {
+            switch error {
+            case .dataCorrupted(let context):
+                #expect(context.debugDescription.contains("The given data was not valid JSON"), "Expected error to indicate invalid JSON")
+            default:
+                #expect(Bool(false), "Expected a dataCorrupted error, but got \(error)")
+            }
+        } catch {
+            #expect(Bool(false), "Expected a DecodingError, but got \(error)")
         }
     }
 
-     @Test func testParameterCommandDecoding_WrongCommand() throws {
+    @Test func testParameterCommandDecoding_WrongCommand() throws {
         let wrongCommandJsonString = """
         {"command": "other_action", "parameter_id": "GAIN", "value": -3.5}
         """
@@ -93,40 +95,72 @@ struct ChattyChannelsTests {
         // The logic in ChattyChannelsApp should handle this by not triggering sendParameterChange
     }
 
-     @Test func testParameterCommandDecoding_MissingKey() {
+    @Test func testParameterCommandDecoding_MissingKey() {
         let missingKeyJsonString = """
         {"command": "set_parameter", "value": -3.5}
         """
         let jsonData = Data(missingKeyJsonString.utf8)
         let decoder = JSONDecoder()
 
-        // Expect decoding to throw a keyNotFound error (or similar)
-         #expect(throws: DecodingError.keyNotFound) {
-             _ = try decoder.decode(ParameterCommand.self, from: jsonData)
-         }
+        // Catch the error and verify it's a keyNotFound error
+        do {
+            _ = try decoder.decode(ParameterCommand.self, from: jsonData)
+            #expect(Bool(false), "Expected decoding to fail due to missing key")
+        } catch let error as DecodingError {
+            switch error {
+            case .keyNotFound(let key, let context):
+                #expect(key.stringValue == "parameter_id", "Expected missing key to be 'parameter_id'")
+                #expect(context.debugDescription.contains("No value associated with key"), "Expected error to indicate missing key")
+            default:
+                #expect(Bool(false), "Expected a keyNotFound error, but got \(error)")
+            }
+        } catch {
+            #expect(Bool(false), "Expected a DecodingError, but got \(error)")
+        }
     }
 
-     @Test func testParameterCommandDecoding_WrongType() {
+    @Test func testParameterCommandDecoding_WrongType() {
         let wrongTypeJsonString = """
         {"command": "set_parameter", "parameter_id": "GAIN", "value": "-3.5"}
         """ // Value is a string, not float
         let jsonData = Data(wrongTypeJsonString.utf8)
         let decoder = JSONDecoder()
 
-        // Expect decoding to throw a typeMismatch error
-         #expect(throws: DecodingError.typeMismatch) {
-             _ = try decoder.decode(ParameterCommand.self, from: jsonData)
-         }
+        // Catch the error and verify it's a typeMismatch error
+        do {
+            _ = try decoder.decode(ParameterCommand.self, from: jsonData)
+            #expect(Bool(false), "Expected decoding to fail due to type mismatch")
+        } catch let error as DecodingError {
+            switch error {
+            case .typeMismatch(let type, let context):
+                #expect(type == Float.self, "Expected type mismatch on Float")
+                #expect(context.debugDescription.contains("Expected to decode Float"), "Expected error to indicate type mismatch")
+            default:
+                #expect(Bool(false), "Expected a typeMismatch error, but got \(error)")
+            }
+        } catch {
+            #expect(Bool(false), "Expected a DecodingError, but got \(error)")
+        }
     }
 
-     @Test func testParameterCommandDecoding_PlainText() {
+    @Test func testParameterCommandDecoding_PlainText() {
         let plainTextString = "This is just normal text."
         let textData = Data(plainTextString.utf8)
         let decoder = JSONDecoder()
 
-        // Expect decoding to throw a dataCorrupted error (or similar)
-         #expect(throws: DecodingError.dataCorrupted) {
-             _ = try decoder.decode(ParameterCommand.self, from: textData)
-         }
+        // Catch the error and verify it's a dataCorrupted error
+        do {
+            _ = try decoder.decode(ParameterCommand.self, from: textData)
+            #expect(Bool(false), "Expected decoding to fail due to invalid JSON")
+        } catch let error as DecodingError {
+            switch error {
+            case .dataCorrupted(let context):
+                #expect(context.debugDescription.contains("The given data was not valid JSON"), "Expected error to indicate invalid JSON")
+            default:
+                #expect(Bool(false), "Expected a dataCorrupted error, but got \(error)")
+            }
+        } catch {
+            #expect(Bool(false), "Expected a DecodingError, but got \(error)")
+        }
     }
 }
