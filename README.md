@@ -54,7 +54,7 @@ sequenceDiagram
     participant CR as Control Room.app
     participant LLM as Remote LLM (o3‑high)
 
-    Note over AP: per‑track\nRMS / FFT
+    Note over AP: per‑track RMS / FFT
     AP-->>CR: OSC /telemetry {rms:-18dB}
     CR-->>LP: AppleScript set fader "Kick" -3.0
     LP--)CR: ok
