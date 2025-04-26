@@ -1,8 +1,9 @@
 # Chatty Channels
 
 
-![Chatty Channels](https://github.com/nickfox/chatty-channels/blob/main/logos/chatty-channels-2-256.png)
+![Chatty Channels logo](https://github.com/nickfox/chatty-channels/blob/main/logos/chatty-channels-2-256.png)
 
+![CI](https://github.com/nickfox/chatty-channels/actions/workflows/ci.yml/badge.svg)
 
 ## AI‑Powered Recording‑Studio Magic — Right Inside Logic Pro ✨
 
@@ -88,6 +89,8 @@ sequenceDiagram
 
 ## Getting started (early‑alpha)
 
+kick -3dB
+
 ### Prerequisites
 
 - macOS 14 +
@@ -115,6 +118,9 @@ xcodebuild -project ChattyChannels.xcodeproj -scheme ControlRoom
 ---
 
 ## Contributing
+
+
+Found a glitch? [Open an issue](https://github.com/nickfox/chatty-channels/issues/new).
 
 Pull requests welcome!\
 Open a Discussion before major work so we stay aligned with the risk‑driven roadmap.

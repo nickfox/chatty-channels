@@ -1,0 +1,29 @@
+name: macOS build & test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: macos-14  # Apple-silicon runner
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v3
+        with:
+          xcode-version: "16.2"
+
+      - name: Build ControlRoom target
+        run: |
+          xcodebuild -project ChattyChannels.xcodeproj \
+                     -scheme ControlRoom \
+                     -configuration Debug \
+                     build CODE_SIGNING_ALLOWED=NO
+
+      - name: Run unit tests
+        run: |
+          xcodebuild test -project ChattyChannels.xcodeproj \
+                          -scheme ControlRoom \
+                          -destination 'platform=macOS' \
+                          CODE_SIGNING_ALLOWED=NO
