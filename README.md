@@ -28,14 +28,6 @@ Unlike standalone AI music generators, Chatty Channels integrates directly into 
 
 ---
 
-## Why it matters
-
-- **Human‑in‑the‑loop** — the AI proposes mix moves; you approve.
-- **Studio realism** — PID feedback loops, follow‑solo VU meters, and Roger Nichols inspired NVFE logic mimic a real session.
-- **Hackable** — SwiftUI + JUCE, permissive license, modular components.
-
----
-
 ## Open‑Source Commitment
 
 Chatty Channels is developed **in the open** and draws on two decades of the author’s OSS track record — including the project [GPSTracker ](https://github.com/nickfox/GpsTracker)(over 2.2 million downloads since 2007).
