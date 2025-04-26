@@ -3,7 +3,6 @@
 
 ![Chatty Channels logo](https://github.com/nickfox/chatty-channels/blob/main/logos/chatty-channels-2-256.png)
 
-
 ![CI](https://github.com/nickfox/chatty-channels/actions/workflows/ci.yml/badge.svg)
 
 ## AI‑Powered Recording‑Studio Magic — Right Inside Logic Pro ✨
@@ -32,14 +31,14 @@ Unlike standalone AI music generators, Chatty Channels integrates directly into 
 ## Why it matters
 
 - **Human‑in‑the‑loop** — the AI proposes mix moves; you approve.
-- **Studio realism** — PID feedback loops, follow‑solo VU meters, and Roger‑Nichols‑inspired NVFE logic mimic a real session.
+- **Studio realism** — PID feedback loops, follow‑solo VU meters, and Roger Nichols inspired NVFE logic mimic a real session.
 - **Hackable** — SwiftUI + JUCE, permissive license, modular components.
 
 ---
 
 ## Open‑Source Commitment
 
-Chatty Channels is developed **in the open** and draws on two decades of the author’s OSS track record — including the project [GPSTracker] (https://github.com/nickfox/GpsTracker)(over 2.2 million downloads since 2007).
+Chatty Channels is developed **in the open** and draws on two decades of the author’s OSS track record — including the project [GPSTracker ](https://github.com/nickfox/GpsTracker)(over 2.2 million downloads since 2007).
 
 - **Demonstrated reach** – GPS Tracker’s adoption shows long‑term support and community engagement.
 - **Quality first** – production‑grade code, DocC / Doxygen comments, CI tests, layered error‑handling.
