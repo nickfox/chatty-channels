@@ -39,7 +39,7 @@ Unlike standalone AI music generators, Chatty Channels integrates directly into 
 
 ## Open‑Source Commitment
 
-Chatty Channels is developed **in the open** and draws on two decades of the author’s OSS track record — including the project [GPSTracker](https://github.com/nickfox/GpsTracker)(> 2.2 million downloads since 2007).
+Chatty Channels is developed **in the open** and draws on two decades of the author’s OSS track record — including the project [GPSTracker] (https://github.com/nickfox/GpsTracker)(over 2.2 million downloads since 2007).
 
 - **Demonstrated reach** – GPS Tracker’s adoption shows long‑term support and community engagement.
 - **Quality first** – production‑grade code, DocC / Doxygen comments, CI tests, layered error‑handling.
