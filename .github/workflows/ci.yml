@@ -1,11 +1,41 @@
-name: List Xcode Versions
+name: CI
 on: [push]
 jobs:
-  check-xcode:
-    runs-on: macos-15 # Or macos-latest
+  build:
+    runs-on: macos-15 # macos-15 confirmed to have Xcode 16.3
+    env:
+      ACTIONS_STEP_DEBUG: true
     steps:
       - uses: actions/checkout@v4
       - name: List available Xcode versions
         run: ls -la /Applications | grep Xcode
-      - name: Check Xcode version
+      - uses: maxim-lobanov/setup-xcode@v1.6.0
+        with:
+          xcode-version: '16.3.0' # Try 16.3.0 instead of 16.3
+      - name: Verify Xcode version
         run: xcodebuild -version
+      - name: List root directory contents
+        run: ls -la
+      - name: List ChattyChannels directory contents
+        run: ls -la ChattyChannels
+      - name: Check project file permissions
+        working-directory: ./ChattyChannels
+        run: ls -la ChattyChannels.xcodeproj
+      - name: List available schemes
+        working-directory: ./ChattyChannels
+        run: xcodebuild -list -project ChattyChannels.xcodeproj
+      - name: Build
+        working-directory: ./ChattyChannels
+        run: |
+          xcodebuild -project ChattyChannels.xcodeproj \
+                     -scheme ControlRoom \
+                     -configuration Debug \
+                     build \
+                     CODE_SIGNING_ALLOWED=NO
+      - name: Run unit tests
+        working-directory: ./ChattyChannels
+        run: |
+          xcodebuild test -project ChattyChannels.xcodeproj \
+                          -scheme ControlRoom \
+                          -destination 'platform=macOS' \
+                          CODE_SIGNING_ALLOWED=NO
