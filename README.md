@@ -3,6 +3,7 @@
 
 ![Chatty Channels logo](https://github.com/nickfox/chatty-channels/blob/main/logos/chatty-channels-2-256.png)
 
+
 ![CI](https://github.com/nickfox/chatty-channels/actions/workflows/ci.yml/badge.svg)
 
 ## AI‑Powered Recording‑Studio Magic — Right Inside Logic Pro ✨
