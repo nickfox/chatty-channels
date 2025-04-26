@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: macos-13  
+    runs-on: macos-13
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -15,6 +15,7 @@ jobs:
           xcode-version: "14.3.1"
 
       - name: Build ControlRoom target
+	    working-directory: ./ChattyChannels
         run: |
           xcodebuild -project ChattyChannels.xcodeproj \
                      -scheme ControlRoom \
@@ -22,8 +23,11 @@ jobs:
                      build CODE_SIGNING_ALLOWED=NO
 
       - name: Run unit tests
+	    working-directory: ./ChattyChannels
         run: |
           xcodebuild test -project ChattyChannels.xcodeproj \
                           -scheme ControlRoom \
                           -destination 'platform=macOS' \
                           CODE_SIGNING_ALLOWED=NO
+
+
