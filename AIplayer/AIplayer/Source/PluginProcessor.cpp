@@ -113,17 +113,31 @@ AIplayerAudioProcessor::AIplayerAudioProcessor()
 
     // Register listener for incoming OSC messages
     receiver.addListener(this);
+    
+    // Start the timer for RMS telemetry at 333 Hz (~3ms period)
+    // This frequency gives approximately one update per 128 samples at 44.1 kHz
+    startTimerHz(333);
+    logMessage("RMS telemetry timer started at 333 Hz");
 }
 
 AIplayerAudioProcessor::~AIplayerAudioProcessor()
 {
+    // Stop the timer before destruction
+    stopTimer();
+    logMessage("RMS telemetry timer stopped");
+    
+    // Unregister OSC listener
+    receiver.removeListener(this);
+    
     // logStream unique_ptr will automatically delete the stream when processor is destroyed
 }
 
 //==============================================================================
 const juce::String AIplayerAudioProcessor::getName() const
 {
-    return JucePlugin_Name;
+    // Returning a literal avoids relying on JucePlugin_Name macro,
+    // which is only defined when the full JUCE plug-in wrapper headers are included.
+    return "AIplayer";
 }
 
 bool AIplayerAudioProcessor::acceptsMidi() const
@@ -254,6 +268,11 @@ void AIplayerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     //     auto* channelData = buffer.getWritePointer (channel);
     //     // ..do something else to the data if needed...
     // }
+    
+    // Store a copy of the processed buffer for RMS calculation
+    // This avoids potential threading issues with the timer callback
+    const juce::ScopedLock sl(bufferLock);
+    lastProcessedBuffer.makeCopyOf(buffer);
 }
 
 //==============================================================================
@@ -457,4 +476,77 @@ void AIplayerAudioProcessor::sendOSC(const juce::String& addressPattern, int ins
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new AIplayerAudioProcessor();
+}
+
+//==============================================================================
+// Timer and RMS Implementation
+
+void AIplayerAudioProcessor::timerCallback()
+{
+    // This method is called regularly at the frequency set by startTimerHz()
+    sendRMSTelemetry();
+}
+
+void AIplayerAudioProcessor::sendRMSTelemetry()
+{
+    // Calculate RMS from the last processed buffer
+    float rmsValue = 0.0f;
+    
+    {
+        // Thread-safe access to lastProcessedBuffer
+        const juce::ScopedLock sl(bufferLock);
+        
+        // Only calculate if we have samples
+        if (lastProcessedBuffer.getNumSamples() > 0)
+        {
+            rmsValue = calculateRMS(lastProcessedBuffer);
+        }
+        else
+        {
+            // If no buffer is available yet, use a very low value
+            rmsValue = 0.0001f;
+        }
+    }
+    
+    // Create the OSC message for RMS
+    juce::OSCMessage rmsMessage("/aiplayer/rms");
+    rmsMessage.addFloat32(rmsValue);
+    
+    // Send the OSC message
+    if (!sender.send(rmsMessage))
+    {
+        logMessage("Error: Failed to send RMS telemetry via OSC");
+    }
+    else
+    {
+        // Uncomment for debugging, but note this could flood the log
+        // logMessage("Sent RMS telemetry: " + juce::String(rmsValue));
+    }
+}
+
+float AIplayerAudioProcessor::calculateRMS(const juce::AudioBuffer<float>& buffer)
+{
+    float sum = 0.0f;
+    int numChannels = buffer.getNumChannels();
+    int numSamples = buffer.getNumSamples();
+    
+    // Sum squared samples across all channels
+    for (int channel = 0; channel < numChannels; ++channel)
+    {
+        const float* channelData = buffer.getReadPointer(channel);
+        
+        for (int sample = 0; sample < numSamples; ++sample)
+        {
+            float value = channelData[sample];
+            sum += value * value; // Square the sample value
+        }
+    }
+    
+    // Calculate the mean of all squared samples
+    float meanSquare = sum / (numChannels * numSamples);
+    
+    // Take the square root to get the RMS value
+    float rms = std::sqrt(meanSquare);
+    
+    return rms;
 }

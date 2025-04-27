@@ -1,6 +1,6 @@
 // /Users/nickfox137/Documents/chatty-channel/AIplayer/Source/PluginEditor.h
 #pragma once
-#include <JuceHeader.h>
+#include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
 
 class AIplayerAudioProcessorEditor : public juce::AudioProcessorEditor {

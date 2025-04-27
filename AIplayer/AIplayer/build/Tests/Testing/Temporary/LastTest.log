@@ -1,0 +1,22 @@
+Start testing: Apr 27 00:56 CEST
+----------------------------------------------------------
+1/1 Testing: RMSCircularBuffer basic functionality
+1/1 Test: RMSCircularBuffer basic functionality
+Command: "/Users/nickfox137/Documents/chatty-channel/AIplayer/AIplayer/build/Tests/RMSBufferTests" "RMSCircularBuffer basic functionality"
+Directory: /Users/nickfox137/Documents/chatty-channel/AIplayer/AIplayer/build/Tests
+"RMSCircularBuffer basic functionality" start time: Apr 27 00:56 CEST
+Output:
+----------------------------------------------------------
+Filters: RMSCircularBuffer basic functionality
+===============================================================================
+All tests passed (7 assertions in 1 test case)
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"RMSCircularBuffer basic functionality" end time: Apr 27 00:56 CEST
+"RMSCircularBuffer basic functionality" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Apr 27 00:56 CEST

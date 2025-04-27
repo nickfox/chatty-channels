@@ -1,7 +1,7 @@
 name: CI
 on: [push]
 jobs:
-  build:
+  build-and-test-swift:
     runs-on: macos-15 # macos-15 confirmed to have Xcode 16.3
     env:
       ACTIONS_STEP_DEBUG: true
@@ -39,3 +39,29 @@ jobs:
                           -scheme ChattyChannels \
                           -destination 'platform=macOS' \
                           CODE_SIGNING_ALLOWED=NO
+      - name: Upload test logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: swift-test-logs
+          path: ./ChattyChannels/build/logs
+          
+  build-and-test-cpp:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install CMake and Catch2
+        run: brew install cmake catch2
+      - name: Configure CMake
+        working-directory: ./AIplayer
+        run: cmake --preset juce -DCMAKE_BUILD_TYPE=Debug
+      - name: Build AIplayer
+        working-directory: ./AIplayer
+        run: cmake --build --preset juce-debug
+      - name: Run Tests
+        working-directory: ./AIplayer
+        run: ctest --output-on-failure --preset juce-debug
+      - name: Upload manual integration test log
+        uses: actions/upload-artifact@v3
+        with:
+          name: iteration_v0.5.log
+          path: ./docs/logs/iteration_v0.5.log

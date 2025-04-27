@@ -16,7 +16,8 @@
 /**
 */
 class AIplayerAudioProcessor  : public juce::AudioProcessor,
-                                public juce::OSCReceiver::Listener<juce::OSCReceiver::MessageLoopCallback> // Inherit from OSCReceiver Listener
+                                public juce::OSCReceiver::Listener<juce::OSCReceiver::MessageLoopCallback>, // Inherit from OSCReceiver Listener
+                                public juce::Timer // Inherit from Timer for RMS sending
 {
 public:
     //==============================================================================
@@ -87,6 +88,16 @@ private:
     // Logging
     std::unique_ptr<juce::FileOutputStream> logStream;
     void logMessage (const juce::String& message);
+    
+    //==============================================================================
+    // RMS Timer - Implements juce::Timer
+    void timerCallback() override; // Called at regular intervals by the Timer
+    void sendRMSTelemetry(); // Sends the current RMS value via OSC
+    float calculateRMS(const juce::AudioBuffer<float>& buffer); // Calculate RMS from audio buffer
+    
+    // Audio analysis
+    juce::AudioBuffer<float> lastProcessedBuffer; // Stores the last processed buffer for RMS calculation
+    juce::CriticalSection bufferLock; // Thread-safe access to lastProcessedBuffer
 
     //==============================================================================
     JUCE_DECLARE_WEAK_REFERENCEABLE (AIplayerAudioProcessor) // Make this class usable with WeakReference

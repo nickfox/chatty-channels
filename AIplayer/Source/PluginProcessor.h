@@ -1,10 +1,10 @@
 // /Users/nickfox137/Documents/chatty-channel/AIplayer/Source/PluginProcessor.h
 #pragma once
-#include <JuceHeader.h>
+#include "../JuceLibraryCode/JuceHeader.h"
 #include "oscpack/ip/UdpSocket.h"
 #include "oscpack/osc/OscOutboundPacketStream.h"
 
-class AIplayerAudioProcessor : public juce::AudioProcessor {
+class AIplayerAudioProcessor : public juce::AudioProcessor, public juce::Timer {
 public:
     AIplayerAudioProcessor();
     ~AIplayerAudioProcessor() override;
@@ -28,6 +28,7 @@ public:
     void setStateInformation(const void*, int) override {}
 
     void sendOSC(const juce::String& instrument, const juce::String& action, const juce::String& message);
+    void timerCallback() override;
 
 private:
     UdpTransmitSocket* socket;

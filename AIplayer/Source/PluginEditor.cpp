@@ -1,4 +1,5 @@
 // /Users/nickfox137/Documents/chatty-channel/AIplayer/Source/PluginEditor.cpp
+#include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginEditor.h"
 
 AIplayerAudioProcessorEditor::AIplayerAudioProcessorEditor(AIplayerAudioProcessor& p)

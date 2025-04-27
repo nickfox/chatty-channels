@@ -100,14 +100,20 @@ struct ContentView: View {
             return
         }
         
-        let userMessage = ChatMessage(source: "You", text: chatInput, timestamp: Date())
+        // Store the input in a local variable to ensure it doesn't get cleared before use
+        let userInputText = chatInput
+        
+        let userMessage = ChatMessage(source: "You", text: userInputText, timestamp: Date())
         chatModel.addMessage(userMessage)
-        logger.info("User sent: \(chatInput)")
+        logger.info("User sent: \(userInputText)")
+        
+        // Clear the input field immediately to improve UI responsiveness
+        chatInput = ""
         
         Task {
             do {
-                // Use injected networkService and correct function name
-                let response = try await networkService.sendMessage(chatInput)
+                // Use the stored input instead of chatInput which is now empty
+                let response = try await networkService.sendMessage(userInputText)
                 let producerMessage = ChatMessage(source: "Producer", text: response, timestamp: Date())
                 await MainActor.run {
                     chatModel.addMessage(producerMessage)
@@ -121,7 +127,6 @@ struct ContentView: View {
                 }
             }
         }
-        chatInput = ""
     }
 }
 
