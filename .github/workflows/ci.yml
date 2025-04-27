@@ -2,14 +2,16 @@ name: CI
 on: [push]
 jobs:
   build:
-    runs-on: macos-15 
+    runs-on: macos-15 # macos-15 confirmed to have Xcode 16.3
     env:
       ACTIONS_STEP_DEBUG: true
     steps:
       - uses: actions/checkout@v4
+      - name: List available Xcode versions
+        run: ls -la /Applications | grep Xcode
       - uses: maxim-lobanov/setup-xcode@v1.6.0
         with:
-          xcode-version: '16.3.0'
+          xcode-version: '16.3.0' # Try 16.3.0 instead of 16.3
       - name: Verify Xcode version
         run: xcodebuild -version
       - name: List root directory contents
@@ -26,7 +28,7 @@ jobs:
         working-directory: ./ChattyChannels
         run: |
           xcodebuild -project ChattyChannels.xcodeproj \
-                     -scheme ControlRoom \
+                     -scheme ChattyChannels \
                      -configuration Debug \
                      build \
                      CODE_SIGNING_ALLOWED=NO
@@ -34,11 +36,6 @@ jobs:
         working-directory: ./ChattyChannels
         run: |
           xcodebuild test -project ChattyChannels.xcodeproj \
-                          -scheme ControlRoom \
+                          -scheme ChattyChannels \
                           -destination 'platform=macOS' \
                           CODE_SIGNING_ALLOWED=NO
-      - name: Upload test logs
-        uses: actions/upload-artifact@v3
-        with:
-          name: swift-test-logs
-          path: ./ChattyChannels/build/logs
