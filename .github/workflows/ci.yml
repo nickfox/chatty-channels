@@ -39,7 +39,7 @@ jobs:
           ls -la ./AIplayer
 
       - name: Build Project
-        working-directory: ./chatty-channels/ChattyChannels # Assuming project is in this subfolder
+        working-directory: ChattyChannels # Assuming project is in this subfolder
         run: |
           xcodebuild -project ChattyChannels.xcodeproj \
                      -scheme ChattyChannels \
@@ -50,7 +50,7 @@ jobs:
       - name: Run Tests (Including UI Tests)
         # This step will likely fail based on previous logs, triggering the artifact upload.
         # Once you diagnose the crash using the artifact, you might modify this step.
-        working-directory: ./chatty-channels/ChattyChannels
+        working-directory: ChattyChannels
         run: |
           xcodebuild test -project ChattyChannels.xcodeproj \
                           -scheme ChattyChannels \
@@ -76,7 +76,7 @@ jobs:
         # Run this even if the test step failed, to capture failure logs
         if: success() || failure() 
         id: find_xcresult
-        working-directory: ./chatty-channels/ChattyChannels # Ensure find starts from correct relative path if needed
+        working-directory: ChattyChannels # Ensure find starts from correct relative path if needed
         run: |
           # Default DerivedData location is relative to the user's home directory on the runner
           XCRESULT_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name '*.xcresult' -print -quit)
@@ -112,17 +112,17 @@ jobs:
         run: brew install cmake catch2
 
       - name: Configure CMake
-        working-directory: ./chatty-channels/AIplayer/AIplayer # Assuming C++ project is in this subfolder
+        working-directory: AIplayer/AIplayer # Assuming C++ project is in this subfolder
         # Assuming you have a CMake Preset named 'juce'
         run: cmake --preset juce -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build Project
-        working-directory: ./chatty-channels/AIplayer/AIplayer
+        working-directory: AIplayer/AIplayer
         # Assuming you have a CMake Preset named 'juce-debug' for building
         run: cmake --build --preset juce-debug
 
       - name: Run C++ Tests (CTest)
-        working-directory: ./chatty-channels/AIplayer/AIplayer
+        working-directory: AIplayer/AIplayer
         # Assuming you have a CTest Preset named 'juce-debug' for testing
         run: ctest --output-on-failure --preset juce-debug
 
