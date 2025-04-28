@@ -3,7 +3,7 @@
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
 notes/
-Config,plist
+Config.plist
 
 ## User settings
 xcuserdata/
@@ -83,3 +83,4 @@ control room swift app created
 chattychannels.txt
 chattychannels2.txt
 memory-bank/
+.DS_Store
