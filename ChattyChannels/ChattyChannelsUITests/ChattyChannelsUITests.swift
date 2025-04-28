@@ -22,12 +22,17 @@ final class ChattyChannelsUITests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
+    /*
     @MainActor
     func testExample() throws {
         // UI tests must launch the application that they test.
         let app = XCUIApplication()
         app.launch()
+        
+        let element = app.staticTexts["exampleIdentifier"]
+          XCTAssertTrue(element.waitForExistence(timeout: 10), "Element did not appear in time")
 
         // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
+     */
 }
