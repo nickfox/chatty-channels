@@ -10,12 +10,6 @@ jobs:
     runs-on: macos-15 # User confirmed this runner selection
     
     steps:
-      - name: Debug Directory Structure
-        run: |
-          pwd
-          ls -la ./ChattyChannels
-          ls -la ./ChattyChannels/ChattyChannels
-
       - name: Check out code
         uses: actions/checkout@v4
 
@@ -36,6 +30,12 @@ jobs:
       #   run: ls -la
       # - name: List ChattyChannels directory contents
       #   run: ls -la ChattyChannels
+
+      - name: Debug Directory Structure
+        run: |
+          pwd
+          ls -la ./ChattyChannels
+          ls -la ./ChattyChannels/ChattyChannels
 
       - name: Build Project
         working-directory: ./ChattyChannels/ChattyChannels # Assuming project is in this subfolder
