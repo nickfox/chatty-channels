@@ -32,7 +32,7 @@ jobs:
       #   run: ls -la ChattyChannels
 
       - name: Build Project
-        working-directory: ./ChattyChannels # Assuming project is in this subfolder
+        working-directory: ./ChattyChannels/ChattyChannels # Assuming project is in this subfolder
         run: |
           xcodebuild -project ChattyChannels.xcodeproj \
                      -scheme ChattyChannels \
@@ -69,7 +69,7 @@ jobs:
         # Run this even if the test step failed, to capture failure logs
         if: success() || failure() 
         id: find_xcresult
-        working-directory: ./ChattyChannels # Ensure find starts from correct relative path if needed
+        working-directory: ./ChattyChannels/ChattyChannels # Ensure find starts from correct relative path if needed
         run: |
           # Default DerivedData location is relative to the user's home directory on the runner
           XCRESULT_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name '*.xcresult' -print -quit)
