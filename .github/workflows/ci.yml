@@ -65,6 +65,12 @@ jobs:
           #                 CODE_SIGNING_ALLOWED=NO
           # -------------------------------------------------------------------------
 
+      - name: Debug Directory Structure
+        run: |
+          pwd
+          ls -la ./ChattyChannels
+          ls -la ./ChattyChannels/ChattyChannels
+
       - name: Find xcresult path
         # Run this even if the test step failed, to capture failure logs
         if: success() || failure() 
