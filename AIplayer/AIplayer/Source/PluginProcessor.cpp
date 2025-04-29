@@ -17,12 +17,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout AIplayerAudioProcessor::crea
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
-    // Add Gain parameter
+    // Add Gain parameter with a version hint using ParameterID
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
-        "GAIN",                                     // Parameter ID
+        juce::ParameterID("GAIN", 1),               // Parameter ID with version hint
         "Gain",                                     // Parameter Name
         juce::NormalisableRange<float>(-60.0f, 0.0f, 0.1f), // Range (-60dB to 0dB, 0.1 step)
-        0.0f,                                       // Default value (0dB)
+        0.0f,                                       // Default value
         "dB"                                        // Unit Suffix
     ));
 
@@ -30,7 +30,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout AIplayerAudioProcessor::crea
 
     return { params.begin(), params.end() };
 }
-
 
 AIplayerAudioProcessor::AIplayerAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -469,7 +468,6 @@ void AIplayerAudioProcessor::sendOSC(const juce::String& addressPattern, int ins
         logMessage("OSC message sent to " + addressPattern + ": ID=" + juce::String(instanceID) + ", Msg=" + message);
     }
 }
-
 
 //==============================================================================
 // This creates new instances of the plugin..

@@ -1,5 +1,3 @@
-# .github/workflows/ci.yml
-
 name: CI
 
 on: [push]
@@ -7,29 +5,19 @@ on: [push]
 jobs:
   build-and-test-swift:
     name: Build & Test Swift (Xcode)
-    runs-on: macos-15 # User confirmed this runner selection
+    runs-on: macos-15
     
     steps:
       - name: Check out code
         uses: actions/checkout@v4
 
-      # No need to list Xcode versions manually if using setup-xcode
-      # - name: List available Xcode versions
-      #   run: ls -la /Applications | grep Xcode
-
       - name: Select Xcode version
         uses: maxim-lobanov/setup-xcode@v1.6.0
         with:
-          xcode-version: '16.3.0' # As specified by user
+          xcode-version: '16.3.0'
 
       - name: Verify Xcode version
         run: xcodebuild -version
-
-      # Optional: List directories if needed for debugging paths
-      # - name: List root directory contents
-      #   run: ls -la
-      # - name: List ChattyChannels directory contents
-      #   run: ls -la ChattyChannels
 
       - name: Debug Directory Structure
         run: |
@@ -39,7 +27,7 @@ jobs:
           ls -la ./AIplayer
 
       - name: Build Project
-        working-directory: ChattyChannels 
+        working-directory: ChattyChannels
         run: |
           xcodebuild -project ChattyChannels.xcodeproj \
                      -scheme ChattyChannels \
@@ -47,61 +35,43 @@ jobs:
                      build \
                      CODE_SIGNING_ALLOWED=NO
 
-      - name: Run Tests (Including UI Tests)
-        # This step will likely fail based on previous logs, triggering the artifact upload.
-        # Once you diagnose the crash using the artifact, you might modify this step.
+      - name: Run Tests (Unit Tests Only)
         working-directory: ChattyChannels
         run: |
-         # xcodebuild test -project ChattyChannels.xcodeproj \
-         #                 -scheme ChattyChannels \
-         #                 -destination 'platform=macOS' \
-         #                 CODE_SIGNING_ALLOWED=NO
-
-          # --- ALTERNATIVE TEST COMMANDS (Uncomment ONE if needed after diagnosis) ---
-          # 1. If it's an iOS App, specify a simulator:
-          # xcodebuild test -project ChattyChannels.xcodeproj \
-          #                 -scheme ChattyChannels \
-          #                 -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
-          #                 CODE_SIGNING_ALLOWED=NO
-
-          # 2. To run ONLY Unit Tests (skip failing UI tests temporarily):
-           xcodebuild test -project ChattyChannels.xcodeproj \
-                           -scheme ChattyChannels \
-                           -destination 'platform=macOS' \
-                           -skip-testing:ChattyChannelsUITests \
-                           CODE_SIGNING_ALLOWED=NO
+          xcodebuild test -project ChattyChannels.xcodeproj \
+                          -scheme ChattyChannels \
+                          -destination 'platform=macOS' \
+                          -skip-testing:ChattyChannelsUITests \
+                          CODE_SIGNING_ALLOWED=NO
 
       - name: Find xcresult path
-        # Run this even if the test step failed, to capture failure logs
-        if: success() || failure() 
+        if: success() || failure()
         id: find_xcresult
-        working-directory: ChattyChannels # Ensure find starts from correct relative path if needed
+        working-directory: ChattyChannels
         run: |
-          # Default DerivedData location is relative to the user's home directory on the runner
           XCRESULT_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name '*.xcresult' -print -quit)
           if [[ -z "$XCRESULT_PATH" ]]; then
             echo "ERROR: xcresult bundle not found in ~/Library/Developer/Xcode/DerivedData."
-            # You could search other potential locations if your project overrides DerivedData path
-            # exit 1 # Optionally fail the job if results are critical
           else
             echo "Found xcresult at: $XCRESULT_PATH"
-            # Output the path for the next step
             echo "xcresult_path=$XCRESULT_PATH" >> $GITHUB_OUTPUT
           fi
 
+      - name: Debug xcresult output
+        run: echo "xcresult_path=${{ steps.find_xcresult.outputs.xcresult_path }}"
+
       - name: Upload Test Results Artifact
-        # Run this even if tests failed, but only if an xcresult path was found
         if: steps.find_xcresult.outputs.xcresult_path != ''
         uses: actions/upload-artifact@v4
         with:
-          name: swift-test-results # Artifact name in GitHub Actions summary
+          name: swift-test-results
           path: ${{ steps.find_xcresult.outputs.xcresult_path }}
-          retention-days: 7 # Optional: Adjust artifact retention
+          retention-days: 7
 
   build-and-test-cpp:
     name: Build & Test C++ (CMake)
-    runs-on: macos-15 # Match runner OS if there are potential interactions, otherwise can differ
-    needs: build-and-test-swift # Optional: Run sequentially if needed, remove if they can run in parallel
+    runs-on: macos-15
+    needs: build-and-test-swift
 
     steps:
       - name: Check out code
@@ -111,27 +81,31 @@ jobs:
         run: brew install cmake
 
       - name: Configure CMake
-        working-directory: AIplayer/AIplayer # Assuming C++ project is in this subfolder
-        # Assuming you have a CMake Preset named 'juce'
+        working-directory: AIplayer/AIplayer
         run: cmake --preset juce -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build Project
         working-directory: AIplayer/AIplayer
-        # Assuming you have a CMake Preset named 'juce-debug' for building
         run: cmake --build --preset juce-debug
+
+      - name: Install AU Plugin for Validation
+        working-directory: AIplayer/AIplayer
+        run: |
+          mkdir -p ~/Library/Audio/Plug-Ins/Components
+          cp -r ./build/AIplayer_artefacts/Debug/AIplayer.component ~/Library/Audio/Plug-Ins/Components/
+
+      - name: Validate AU Plugin with auval
+        run: auval -v aufx Dm4q Manu
 
       - name: Run C++ Tests (CTest)
         working-directory: AIplayer/AIplayer
-        # Assuming you have a CTest Preset named 'juce-debug' for testing
         run: ctest --output-on-failure --preset juce-debug
 
       - name: Upload C++ Log Artifact
-        # Run this even if previous steps failed, to capture potential logs
-        if: always() 
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cpp-manual-log # Artifact name
-          # Check this path exists. If not, the upload might warn/fail.
-          path: ./docs/logs/iteration_v0.5.log 
-          if-no-files-found: warn # Don't fail the job if the log isn't there
+          name: cpp-manual-log
+          path: ./docs/logs/iteration_v0.5.log
+          if-no-files-found: warn
           retention-days: 7
