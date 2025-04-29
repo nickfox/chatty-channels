@@ -70,7 +70,6 @@ jobs:
                            -destination 'platform=macOS' \ # Or iOS simulator if needed
                            -skip-testing:ChattyChannelsUITests \
                            CODE_SIGNING_ALLOWED=NO
-          # -------------------------------------------------------------------------
 
       - name: Find xcresult path
         # Run this even if the test step failed, to capture failure logs
