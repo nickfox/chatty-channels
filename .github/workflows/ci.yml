@@ -108,7 +108,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Dependencies (CMake, Catch2)
-        run: brew install cmake catch2
+        run: brew install cmake
 
       - name: Configure CMake
         working-directory: AIplayer/AIplayer # Assuming C++ project is in this subfolder
