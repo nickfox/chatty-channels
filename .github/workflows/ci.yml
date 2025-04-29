@@ -39,7 +39,7 @@ jobs:
           ls -la ./AIplayer
 
       - name: Build Project
-        working-directory: ChattyChannels # Assuming project is in this subfolder
+        working-directory: ChattyChannels 
         run: |
           xcodebuild -project ChattyChannels.xcodeproj \
                      -scheme ChattyChannels \
@@ -67,7 +67,7 @@ jobs:
           # 2. To run ONLY Unit Tests (skip failing UI tests temporarily):
            xcodebuild test -project ChattyChannels.xcodeproj \
                            -scheme ChattyChannels \
-                           -destination 'platform=macOS' \ # Or iOS simulator if needed
+                           -destination 'platform=macOS' \
                            -skip-testing:ChattyChannelsUITests \
                            CODE_SIGNING_ALLOWED=NO
 
