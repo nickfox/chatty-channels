@@ -6,7 +6,7 @@ jobs:
   build-and-test-swift:
     name: Build & Test Swift (Xcode)
     runs-on: macos-15
-    
+
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -77,29 +77,37 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Install Dependencies (CMake, Catch2)
-        run: brew install cmake
+      - name: Install CMake + Ninja
+        run: brew install cmake ninja
+
+      - name: Fetch JUCE
+        working-directory: AIplayer/AIplayer
+        run: git clone --depth 1 https://github.com/juce-framework/JUCE.git
 
       - name: Configure CMake
         working-directory: AIplayer/AIplayer
-        run: cmake --preset juce -DCMAKE_BUILD_TYPE=Debug
+        run: |
+          cmake -S . -B build \
+                -G Ninja \
+                -DCMAKE_BUILD_TYPE=Debug \
+                -DJUCE_MODULES_DIR=$PWD/JUCE/modules
 
       - name: Build Project
         working-directory: AIplayer/AIplayer
-        run: cmake --build --preset juce-debug
-
-      - name: Install AU Plugin for Validation
-        working-directory: AIplayer/AIplayer
-        run: |
-          mkdir -p ~/Library/Audio/Plug-Ins/Components
-          cp -r ./build/AIplayer_artefacts/Debug/AIplayer.component ~/Library/Audio/Plug-Ins/Components/
-
-      - name: Validate AU Plugin with auval
-        run: auval -v aufx Dm4q Manu
+        run: cmake --build build --config Debug -- -v
 
       - name: Run C++ Tests (CTest)
         working-directory: AIplayer/AIplayer
-        run: ctest --output-on-failure --preset juce-debug
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Install AU Plugin for Validation
+        run: |
+          mkdir -p ~/Library/Audio/Plug-Ins/Components
+          cp -r AIplayer/AIplayer/build/AIplayer_artefacts/Debug/AIplayer.component \
+                ~/Library/Audio/Plug-Ins/Components/
+
+      - name: Validate AU Plugin with auval
+        run: auval -v aufx Dm4q Manu
 
       - name: Upload C++ Log Artifact
         if: always()
@@ -109,3 +117,4 @@ jobs:
           path: ./docs/logs/iteration_v0.5.log
           if-no-files-found: warn
           retention-days: 7
+
