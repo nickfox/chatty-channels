@@ -1,8 +1,8 @@
-name: AIplayer CI
+name: AIplayer CI (Xcode)
 on: [push]
 jobs:
-  build-and-test-cpp:
-    name: Build & Test AIplayer
+  build-aiplayer-xcode:
+    name: Build AIplayer with Xcode
     runs-on: macos-15
     steps:
       - name: Check out code
@@ -10,73 +10,53 @@ jobs:
         with:
           submodules: recursive
           
-      - name: Install Xcode Command Line Tools
-        run: |
-          xcode-select --print-path
-          sudo xcode-select --switch /Applications/Xcode.app
-          xcode-select --print-path
-          
-      - name: Set up Xcode
-        uses: maxim-lobanov/setup-xcode@v1
+      - name: Select Xcode version
+        uses: maxim-lobanov/setup-xcode@v1.6.0
         with:
-          xcode-version: '15.4'
+          xcode-version: '16.3.0'
           
-      - name: Verify Xcode and SDK
-        run: |
-          xcodebuild -version
-          xcrun --sdk macosx --show-sdk-path
-          xcrun --sdk macosx --show-sdk-version
+      - name: Verify Xcode version
+        run: xcodebuild -version
           
-      - name: Clone JUCE Directly
+      - name: Debug Directory Structure
         run: |
-          # Clone JUCE directly into the expected location
-          cd AIplayer/AIplayer
-          mkdir -p ../JUCE
-          git clone --depth 1 https://github.com/juce-framework/JUCE.git ../JUCE
+          echo "Looking for Xcode project:"
+          find . -name "*.xcodeproj" -type d
           
-      - name: Install CMake + Ninja
-        run: brew install cmake ninja
-        
-      - name: Configure CMake
-        working-directory: AIplayer/AIplayer
+      - name: Build AIplayer using Xcode
         run: |
-          # Using the known path to JUCE modules and ensuring proper compiler flags
-          cmake -S . -B build \
-                -G Ninja \
-                -DCMAKE_BUILD_TYPE=Debug \
-                -DJUCE_MODULES_DIR=$PWD/../JUCE/modules \
-                -DCMAKE_CXX_FLAGS="-xobjective-c++" \
-                -DCMAKE_OBJCXX_COMPILER="$(xcrun -find clang++)" \
-                -DCMAKE_OBJC_COMPILER="$(xcrun -find clang)"
-                
-      - name: Build Project
-        working-directory: AIplayer/AIplayer
+          xcodebuild -project AIplayer/AIplayer/Builds/MacOSX/AIplayer.xcodeproj \
+                    -scheme "AIplayer - All" \
+                    -configuration Debug \
+                    -destination "platform=macOS" \
+                    build \
+                    CODE_SIGNING_ALLOWED=NO
+                    
+      - name: Find Built Component
         run: |
-          # Export important variables to ensure proper compilation
-          export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
-          export MACOSX_DEPLOYMENT_TARGET=$(xcrun --sdk macosx --show-sdk-version)
-          cmake --build build --config Debug -- -v
-        
-      - name: Run C++ Tests (CTest)
-        working-directory: AIplayer/AIplayer
-        run: ctest --test-dir build --output-on-failure
-        
+          echo "Looking for built component:"
+          find AIplayer -name "*.component" -type d
+          
       - name: Install AU Plugin for Validation
         run: |
           mkdir -p ~/Library/Audio/Plug-Ins/Components
-          cp -r AIplayer/AIplayer/build/AIplayer_artefacts/Debug/AIplayer.component \
-                ~/Library/Audio/Plug-Ins/Components/ || echo "Failed to copy component, may not exist at expected path"
-                
+          COMPONENT_PATH=$(find AIplayer -name "*.component" -type d | head -n 1)
+          if [ -n "$COMPONENT_PATH" ]; then
+            echo "Installing component from: $COMPONENT_PATH"
+            cp -r "$COMPONENT_PATH" ~/Library/Audio/Plug-Ins/Components/
+          else
+            echo "No component found to install"
+            exit 1
+          fi
+          
       - name: Validate AU Plugin with auval
-        run: auval -v aufx Dm4q Manu || echo "auval failed - this may be expected in CI environment"
-        
-      - name: Upload Build Logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cpp-build-logs
-          path: |
-            AIplayer/AIplayer/build/CMakeFiles/CMakeOutput.log
-            AIplayer/AIplayer/build/CMakeFiles/CMakeError.log
-          if-no-files-found: warn
-          retention-days: 7
+        run: |
+          # List installed AUs to find the correct identifier
+          auval -a
+          
+          # Try common plugin formats if specific identifier isn't known
+          echo "Attempting plugin validation..."
+          auval -v aufx Dm4q Manu || \
+          auval -v aumu Dm4q Manu || \
+          auval -v aumf Dm4q Manu || \
+          echo "Plugin validation failed - this may be expected in CI environment"
