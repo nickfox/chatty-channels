@@ -10,21 +10,22 @@ jobs:
         with:
           submodules: recursive
           
-      - name: Debug Git Submodules
+      - name: Install Xcode Command Line Tools
         run: |
-          echo "Checking Git submodules..."
-          git submodule status
-          git submodule foreach git status
-
-      - name: Debug Directory Structure
+          xcode-select --print-path
+          sudo xcode-select --switch /Applications/Xcode.app
+          xcode-select --print-path
+          
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '15.4'
+          
+      - name: Verify Xcode and SDK
         run: |
-          echo "Current directory structure:"
-          pwd
-          ls -la
-          echo "AIplayer directory:"
-          ls -la ./AIplayer || echo "AIplayer directory not found"
-          echo "AIplayer/AIplayer directory:"
-          ls -la ./AIplayer/AIplayer || echo "AIplayer/AIplayer directory not found"
+          xcodebuild -version
+          xcrun --sdk macosx --show-sdk-path
+          xcrun --sdk macosx --show-sdk-version
           
       - name: Clone JUCE Directly
         run: |
@@ -33,32 +34,28 @@ jobs:
           mkdir -p ../JUCE
           git clone --depth 1 https://github.com/juce-framework/JUCE.git ../JUCE
           
-      - name: Verify JUCE Clone
-        run: |
-          echo "Verifying JUCE clone..."
-          ls -la AIplayer/JUCE/modules || echo "JUCE modules not found in AIplayer/JUCE"
-          
       - name: Install CMake + Ninja
         run: brew install cmake ninja
         
       - name: Configure CMake
         working-directory: AIplayer/AIplayer
         run: |
-          # Using the known path to JUCE modules
+          # Using the known path to JUCE modules and ensuring proper compiler flags
           cmake -S . -B build \
                 -G Ninja \
                 -DCMAKE_BUILD_TYPE=Debug \
-                -DJUCE_MODULES_DIR=$PWD/../JUCE/modules
-          
-      - name: Check CMake Configuration
-        working-directory: AIplayer/AIplayer
-        run: |
-          echo "Checking CMake cache..."
-          cat build/CMakeCache.txt | grep JUCE
-          
+                -DJUCE_MODULES_DIR=$PWD/../JUCE/modules \
+                -DCMAKE_CXX_FLAGS="-xobjective-c++" \
+                -DCMAKE_OBJCXX_COMPILER="$(xcrun -find clang++)" \
+                -DCMAKE_OBJC_COMPILER="$(xcrun -find clang)"
+                
       - name: Build Project
         working-directory: AIplayer/AIplayer
-        run: cmake --build build --config Debug -- -v
+        run: |
+          # Export important variables to ensure proper compilation
+          export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+          export MACOSX_DEPLOYMENT_TARGET=$(xcrun --sdk macosx --show-sdk-version)
+          cmake --build build --config Debug -- -v
         
       - name: Run C++ Tests (CTest)
         working-directory: AIplayer/AIplayer
