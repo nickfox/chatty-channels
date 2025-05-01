@@ -1,0 +1,3 @@
+[submodule "AIplayer/AIplayer/JUCE"]
+	path = AIplayer/AIplayer/JUCE
+	url = https://github.com/juce-framework/JUCE.git

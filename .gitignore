@@ -68,7 +68,6 @@ fastlane/test_output
 
 # JUCE / Projucer Build Files
 **/Builds/
-**/JuceLibraryCode/
 *.jucer.user*
 
 # Files and directories to ignore (added by user)

@@ -8,10 +8,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Debug)
 
-# -----------------------------------------------------------------------------
-# JUCE configuration (adjust paths as needed)
-# -----------------------------------------------------------------------------
-set(JUCE_MODULES_DIR "/Users/nickfox137/Downloads/JUCE/modules")
+# --- JUCE configuration -------------------------------------------------
+set(JUCE_MODULES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../JUCE/modules")
+
 add_definitions(-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1 -DDEBUG=1)
 include_directories(${JUCE_MODULES_DIR})
 

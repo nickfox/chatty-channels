@@ -10,6 +10,7 @@ add_library(JuceLibraryCode STATIC ${JUCE_SOURCES})
 
 target_include_directories(JuceLibraryCode PUBLIC
                            ${CMAKE_CURRENT_LIST_DIR})
+						   ${JUCE_MODULES_DIR}
 
 # macOS frameworks (they’re no-ops on Linux/Windows)
 if(APPLE)
