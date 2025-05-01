@@ -4,7 +4,7 @@
 
 [![CI status — macOS build & test](https://github.com/nickfox/chatty-channels/actions/workflows/ci.yml/badge.svg)](https://github.com/nickfox/chatty-channels/actions/workflows/ci.yml)
 
-## AI‑Powered Recording‑Studio Magic — Right Inside Logic Pro ✨
+## AI‑Powered Recording‑Studio Magic Right Inside Logic Pro ✨
 
 *What if every track in your session could talk back?*
 
