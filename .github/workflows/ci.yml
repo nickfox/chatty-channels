@@ -1,8 +1,8 @@
 name: AIplayer CI (Fix Paths)
 on: [push]
 jobs:
-  fix-paths-and-build:
-    name: Fix JUCE Paths and Build
+  fix-and-build:
+    name: Fix Paths and Build AIplayer
     runs-on: macos-15
     steps:
       - name: Check out code
@@ -14,56 +14,41 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1.6.0
         with:
           xcode-version: '16.3.0'
-          
-      - name: Verify Xcode version
-        run: xcodebuild -version
       
-      - name: Clone JUCE to temporary location
+      - name: Clone JUCE
         run: |
+          # Clone JUCE to a consistent location
           git clone --depth 1 https://github.com/juce-framework/JUCE.git /tmp/JUCE
-      
-      - name: Find hardcoded paths in project file
+          
+      - name: Replace hardcoded paths in project file
         run: |
-          echo "Finding Xcode project file..."
-          XCODEPROJ=$(find AIplayer -name "*.xcodeproj" -type d | head -n 1)
-          echo "Found project: $XCODEPROJ"
+          # Find and fix the Xcode project file
+          find AIplayer -name "*.xcodeproj" -type d -exec find {} -name "project.pbxproj" \; | while read PROJECT_FILE; do
+            echo "Fixing paths in $PROJECT_FILE"
+            sed -i '' 's|/Users/nickfox137/Downloads/JUCE|/tmp/JUCE|g' "$PROJECT_FILE"
+          done
           
-          echo "Checking for hardcoded paths in project.pbxproj..."
-          PROJECT_FILE="$XCODEPROJ/project.pbxproj"
-          grep -n "/Users/nickfox137" "$PROJECT_FILE" || echo "No hardcoded paths found in project file"
-          
-      - name: Update paths in project file
+      - name: Skip VST3 Manifest Helper
         run: |
-          XCODEPROJ=$(find AIplayer -name "*.xcodeproj" -type d | head -n 1)
-          PROJECT_FILE="$XCODEPROJ/project.pbxproj"
+          # Find the Xcode project file
+          PROJECT_FILE=$(find AIplayer -name "*.xcodeproj" -type d -exec find {} -name "project.pbxproj" \; | head -n 1)
           
-          # Create a backup
-          cp "$PROJECT_FILE" "$PROJECT_FILE.bak"
+          # Disable VST3 Manifest Helper from the build
+          echo "Disabling VST3 Manifest Helper in $PROJECT_FILE"
+          sed -i '' '/name = "AIplayer - VST3 Manifest Helper"/,/};/s/buildSettings/buildSettings = { ENABLE_TESTABILITY = NO; };/g' "$PROJECT_FILE"
           
-          # Replace hardcoded paths - adjust this based on the grep output
-          sed -i '' 's|/Users/nickfox137/Downloads/JUCE|/tmp/JUCE|g' "$PROJECT_FILE"
-          
-          # Check if the replacement worked
-          grep -n "/tmp/JUCE" "$PROJECT_FILE" || echo "Replacement didn't find any matches"
-          
-      - name: Find JuceHeader.h and check paths
+      - name: Build AIplayer (AU only)
         run: |
-          echo "Finding JuceHeader.h..."
-          find AIplayer -name "JuceHeader.h" -type f | xargs grep -l "/Users/nickfox137" || echo "No hardcoded paths in JuceHeader.h"
-      
-      - name: Update paths in any other configuration files
-        run: |
-          # Find and fix paths in other potential files
-          find AIplayer -name "*.h" -o -name "*.cpp" -o -name "*.mm" | xargs grep -l "/Users/nickfox137" || echo "No other files with hardcoded paths"
-          
-          # If we find any, we would fix them here
-          # find AIplayer -name "*.h" -o -name "*.cpp" -o -name "*.mm" | xargs grep -l "/Users/nickfox137" | xargs sed -i '' 's|/Users/nickfox137/Downloads/JUCE|/tmp/JUCE|g'
-          
-      - name: Build after path fixes
-        run: |
-          xcodebuild -project AIplayer/AIplayer/Builds/MacOSX/AIplayer.xcodeproj \
-                    -scheme "AIplayer - All" \
+          # Build only the AU component
+          cd AIplayer/AIplayer/Builds/MacOSX
+          xcodebuild -project AIplayer.xcodeproj \
+                    -scheme "AIplayer - AU" \
                     -configuration Debug \
-                    -destination "platform=macOS" \
                     build \
-                    CODE_SIGNING_ALLOWED=NO
+                    CODE_SIGNING_ALLOWED=NO \
+                    SKIP_INSTALL=YES
+                    
+      - name: Find Built Component
+        run: |
+          echo "Looking for built component:"
+          find AIplayer -name "*.component" -type d
