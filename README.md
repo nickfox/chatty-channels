@@ -28,7 +28,7 @@ Unlike standalone AI music generators, Chatty Channels integrates seamlessly int
 
 ## Open‑Source Commitment
 
-Chatty Channels is developed in the open, building on the creator's two decades of open source experience and 10 years as a sound engineer. Previous projects include [GPSTracker](https://github.com/nickfox/GpsTracker), which has garnered over 2.2 million downloads since 2007.
+Chatty Channels is developed in the open, building on the developer's two decades of open source experience and 10 years as a sound engineer. Previous projects include [GPSTracker](https://github.com/nickfox/GpsTracker), which has garnered over 2.2 million downloads since 2007.
 
 - **Production-Grade Code**: Comprehensive DocC/Doxygen documentation, automated CI testing, and robust error handling
 - **Modular Architecture**: Built with SwiftUI, JUCE, and OSC to enable contributors to easily add new AI personas, effects, or DAW integrations
