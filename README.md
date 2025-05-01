@@ -8,7 +8,7 @@
 
 *What if every track in your session could talk back?*
 
-Chatty Channels transforms your DAW into a collaborative studio environment by placing a lightweight **AIplayer** plugin on each channel, turning instruments into responsive band members. The master bus hosts an **AIengineer** with decades of mixing expertise, while the **Control Room** SwiftUI app hosts an **AIproducer** fueled by OpenAI o3, orchestrating your Logic Pro session through AppleScript and MIDI. 
+Chatty Channels transforms your DAW into a collaborative studio environment by placing a lightweight **AIplayer** plugin on each channel, turning instruments into responsive band members. The master bus hosts an **AIengineer** with years of mixing expertise, while the **Control Room** SwiftUI app hosts an **AIproducer** fueled by OpenAI o3, orchestrating your Logic Pro session through AppleScript and MIDI. 
 
 *Simply tell the kick drum to "lower the volume by 3 dB," ask the bass to solo itself, or request the engineer to "add more reverb to the lead vocal"—all using natural language while your session continues playback.*
 
