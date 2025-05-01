@@ -1092,7 +1092,7 @@
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MTL_HEADER_SEARCH_PATHS = "/Users/nickfox137/Downloads/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode /Users/nickfox137/Downloads/JUCE/modules $(SRCROOT)/../../../../../../Downloads/JUCE/modules /Users/nickfox137/Downloads/JUCE/modules/juce_audio_plugin_client/AU";
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.AIplayer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.AIplayer;
 				PRODUCT_NAME = AIplayer;
 				SKIP_INSTALL = YES;
 				USE_HEADERMAP = NO;
@@ -1209,7 +1209,7 @@
 					"-lAIplayer",
 				);
 				OTHER_REZFLAGS = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64 -d arm64_$arm64 -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers -I \"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\" -I \"$(DEVELOPER_DIR)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AudioUnit.framework/Headers\"";
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.AIplayer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.AIplayer;
 				PRODUCT_NAME = AIplayer;
 				USE_HEADERMAP = NO;
 				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
@@ -1318,7 +1318,7 @@
 				INFOPLIST_PREPROCESS = NO;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MTL_HEADER_SEARCH_PATHS = "/Users/nickfox137/Downloads/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode /Users/nickfox137/Downloads/JUCE/modules $(SRCROOT)/../../../../../../Downloads/JUCE/modules /Users/nickfox137/Downloads/JUCE/modules/juce_audio_plugin_client/AU";
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.AIplayer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.AIplayer;
 				PRODUCT_NAME = juce_vst3_helper;
 				USE_HEADERMAP = NO;
 				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
@@ -1427,7 +1427,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MTL_HEADER_SEARCH_PATHS = "/Users/nickfox137/Downloads/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode /Users/nickfox137/Downloads/JUCE/modules $(SRCROOT)/../../../../../../Downloads/JUCE/modules /Users/nickfox137/Downloads/JUCE/modules/juce_audio_plugin_client/AU";
 				OTHER_LDFLAGS = "-lAIplayer";
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.AIplayer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.AIplayer;
 				PRODUCT_NAME = AIplayer;
 				USE_HEADERMAP = NO;
 				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
@@ -1543,7 +1543,7 @@
 					"-lAIplayer",
 				);
 				OTHER_REZFLAGS = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64 -d arm64_$arm64 -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers -I \"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\" -I \"$(DEVELOPER_DIR)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AudioUnit.framework/Headers\"";
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.AIplayer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.AIplayer;
 				PRODUCT_NAME = AIplayer;
 				USE_HEADERMAP = NO;
 				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
@@ -1652,7 +1652,7 @@
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MTL_HEADER_SEARCH_PATHS = "/Users/nickfox137/Downloads/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode /Users/nickfox137/Downloads/JUCE/modules $(SRCROOT)/../../../../../../Downloads/JUCE/modules /Users/nickfox137/Downloads/JUCE/modules/juce_audio_plugin_client/AU";
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.AIplayer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.AIplayer;
 				PRODUCT_NAME = AIplayer;
 				SKIP_INSTALL = YES;
 				USE_HEADERMAP = NO;
@@ -1762,7 +1762,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MTL_HEADER_SEARCH_PATHS = "/Users/nickfox137/Downloads/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode /Users/nickfox137/Downloads/JUCE/modules $(SRCROOT)/../../../../../../Downloads/JUCE/modules /Users/nickfox137/Downloads/JUCE/modules/juce_audio_plugin_client/AU";
 				OTHER_LDFLAGS = "-lAIplayer";
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.AIplayer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.AIplayer;
 				PRODUCT_NAME = AIplayer;
 				USE_HEADERMAP = NO;
 				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
@@ -1877,7 +1877,7 @@
 					"-bundle",
 					"-lAIplayer",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.AIplayer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.AIplayer;
 				PRODUCT_NAME = AIplayer;
 				USE_HEADERMAP = NO;
 				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
@@ -2038,7 +2038,7 @@
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MTL_HEADER_SEARCH_PATHS = "/Users/nickfox137/Downloads/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode /Users/nickfox137/Downloads/JUCE/modules $(SRCROOT)/../../../../../../Downloads/JUCE/modules /Users/nickfox137/Downloads/JUCE/modules/juce_audio_plugin_client/AU";
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.AIplayer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.AIplayer;
 				PRODUCT_NAME = juce_vst3_helper;
 				USE_HEADERMAP = NO;
 				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
@@ -2153,7 +2153,7 @@
 					"-bundle",
 					"-lAIplayer",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.AIplayer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.AIplayer;
 				PRODUCT_NAME = AIplayer;
 				USE_HEADERMAP = NO;
 				VALID_ARCHS = "i386 x86_64 arm64 arm64e";

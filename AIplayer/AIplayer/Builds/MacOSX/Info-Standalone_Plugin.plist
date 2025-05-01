@@ -8,7 +8,7 @@
     <key>CFBundleIconFile</key>
     <string></string>
     <key>CFBundleIdentifier</key>
-    <string>com.yourcompany.AIplayer</string>
+    <string>com.websmithing.AIplayer</string>
     <key>CFBundleName</key>
     <string>AIplayer</string>
     <key>CFBundleDisplayName</key>
