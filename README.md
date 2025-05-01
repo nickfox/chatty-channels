@@ -20,7 +20,7 @@ Chatty Channels revolutionizes music production by enabling multi-agent AI colla
 
 - **AI Musicians on Channels**: Specialized entities that understand their instruments and respond to nuanced direction
 - **AI Engineer on Master Bus**: Provides real-time mixing suggestions and technical guidance 
-- **Producer Control Room**: Central application where you direct the session with natural language
+- **Producer in the Control Room**: Central application where you direct the session with natural language
 
 Unlike standalone AI music generators, Chatty Channels integrates seamlessly into your existing Logic Pro workflow, preserving creative control while adding collaborative intelligence.
 
