@@ -4,6 +4,8 @@
 
 notes/
 Config.plist
+**/build/
+
 
 ## User settings
 xcuserdata/
