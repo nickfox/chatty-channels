@@ -1,8 +1,6 @@
 # Chatty Channels
 
-
 ![Chatty Channels logo](https://github.com/nickfox/chatty-channels/blob/main/logos/chatty-channels-2-256.png)
-
 
 [![CI status — macOS build & test](https://github.com/nickfox/chatty-channels/actions/workflows/ci.yml/badge.svg)](https://github.com/nickfox/chatty-channels/actions/workflows/ci.yml)
 
@@ -10,35 +8,35 @@
 
 *What if every track in your session could talk back?*
 
-Chatty Channels drops a tiny **AIplayer** plugin onto *every* channel so each instrument becomes a chatty band‑mate. A master‑bus **AIengineer** lends seasoned ears. Up in the **Control Room** a SwiftUI app hosts a producer‑AI (fueled by OpenAI o3) that understands your creative direction and drives Logic Pro via AppleScript + MIDI.
+Chatty Channels transforms your DAW into a collaborative studio environment by placing a lightweight **AIplayer** plugin on each channel, turning instruments into responsive band members. The master bus hosts an **AIengineer** with decades of mixing expertise, while the **Control Room** SwiftUI app powers the entire system with OpenAI's o3, orchestrating your session through AppleScript and MIDI.
 
-*Tell the kick drum to "lower the volume by 3 dB," solo the bass for a sanity‑check, or ask the engineer to "put a little more reverb on the lead vocal"—all in plain English while the music keeps rolling.*
+*Simply tell the kick drum to "lower the volume by 3 dB," ask the bass to solo itself, or request the engineer to "add more reverb to the lead vocal"—all using natural language while your session continues playback.*
 
 ---
 
 ## Project Vision
 
-Chatty Channels transforms music production by enabling multi-agent AI collaboration directly within professional DAW environments. Instead of replacing human creativity, it enhances it by providing a virtual collaborative studio experience:
+Chatty Channels revolutionizes music production by enabling multi-agent AI collaboration within professional DAW environments. Rather than replacing human creativity, it enhances your workflow by creating a virtual collaborative studio:
 
-- AI Musicians on Channels: Specialized AI entities that understand their instruments and respond to direction
-- AI Engineer on Master Bus: Provides mixing suggestions and technical guidance
-- Producer Control Room: Central Swift application where you orchestrate the session
+- **AI Musicians on Channels**: Specialized entities that understand their instruments and respond to nuanced direction
+- **AI Engineer on Master Bus**: Provides real-time mixing suggestions and technical guidance 
+- **Producer Control Room**: Central application where you direct the session with natural language
 
-Unlike standalone AI music generators, Chatty Channels integrates directly into your existing Logic Pro workflow, preserving your creative control while adding collaborative intelligence.
+Unlike standalone AI music generators, Chatty Channels integrates seamlessly into your existing Logic Pro workflow, preserving creative control while adding collaborative intelligence.
 
 ---
 
 ## Open‑Source Commitment
 
-Chatty Channels is developed **in the open** and draws on over two decades of the developer's open source track record (as well as 10 years as a sound engineer) — including the project [GPSTracker](https://github.com/nickfox/GpsTracker) (over 2.2 million downloads since 2007).
+Chatty Channels is developed in the open, building on the creator's two decades of open source experience and 10 years as a sound engineer. Previous projects include [GPSTracker](https://github.com/nickfox/GpsTracker), which has garnered over 2.2 million downloads since 2007.
 
-- **Demonstrated reach** – GPS Tracker's adoption shows long‑term support and community engagement.
-- **Quality first** – production‑grade code, DocC / Doxygen comments, CI tests, layered error‑handling.
-- **Community focus** – Chatty Channels is modular (SwiftUI, JUCE, OSC) so contributors can add new AI personas, effects, or DAW integrations.
+- **Production-Grade Code**: Comprehensive DocC/Doxygen documentation, automated CI testing, and robust error handling
+- **Modular Architecture**: Built with SwiftUI, JUCE, and OSC to enable contributors to easily add new AI personas, effects, or DAW integrations
+- **Community-Focused**: Designed for long-term support and active community engagement
 
 ---
 
-## High‑level architecture
+## High‑level Architecture
 
 ```mermaid
 sequenceDiagram
@@ -57,14 +55,14 @@ sequenceDiagram
     LLM-->CR: reply
 ```
 
-- **AIplayer** — lightweight sensor on every channel; streams RMS/FFT and answers queries.
-- **Control Room** — orchestration UI + producer‑AI; moves faders via AppleScript/MIDI.
-- **Remote LLM** — currently OpenAI o4-mini; architecture is model‑agnostic.
-- **PID feedback** — Control Room never trusts a change until the plugin confirms it.
+- **AIplayer**: Lightweight sensor on every channel that streams RMS/FFT data and responds to queries
+- **Control Room**: Orchestration UI and producer-AI that manipulates parameters via AppleScript/MIDI
+- **Remote LLM**: Currently using OpenAI o4-mini with model-agnostic architecture
+- **PID Feedback**: Closed-loop system that verifies changes through plugin confirmation
 
 ---
 
-## Milestones & risk status
+## Milestones & Development Status
 
 | Target                | Core risk retired                                       | Key deliverable                             | Status |
 | --------------------- | ------------------------------------------------------- | ------------------------------------------- | ------ |
@@ -75,54 +73,84 @@ sequenceDiagram
 | **v0.9**              | H6 LLM JSON schema                                      | Strict validator + prompt templates         | Planned |
 | **v1.0 (ALPHA)**      | Full NVFE pass                                          | Public alpha release                        | Planned |
 
-*(Detailed backlog & risk matrix in [**`docs/plan.md`**](docs/plan.md).)*
+*(Full backlog & risk matrix available in [**`docs/plan.md`**](docs/plan.md).)*
 
 ---
 
-## Getting started
+## Getting Started
 
 ### Prerequisites
 
 - macOS 14+
 - Logic Pro 10.7+
 - Xcode 16.2+
-- JUCE 7 (for AU projects)
-- Python 3.11 (build scripts)
+- JUCE 7 (for AU plugin development)
+- Python 3.11 (for build scripts)
 
-### Quick clone & build
+### Quick Setup
 
 ```bash
 git clone https://github.com/nickfox/chatty-channels.git
 cd chatty-channels
 Scripts/bootstrap.sh         # pulls JUCE, installs git‑hooks
-xcodebuild -project ChattyChannels.xcodeproj -scheme ControlRoom
 ```
 
-### Features implemented in v0.5
+### Building the Control Room App
 
-- Natural language control of Logic Pro gain parameters
-- Real-time parameter adjustments with PID control
-- Low-latency OSC communication (182ms RTT)
-- AppleScript integration with playback safety
-- Direct AI command processing pipeline 
-- Comprehensive DocC documentation
-- Full test coverage with mock objects
+```bash
+xcodebuild -project ChattyChannels.xcodeproj -scheme ControlRoom
+# Or open in Xcode and build the ControlRoom scheme
+```
+
+### Installing the AIplayer Plugin
+
+1. **Build the plugin**:
+   ```bash
+   cd AIplayer/AIplayer/Builds/MacOSX
+   xcodebuild -project AIplayer.xcodeproj -target "AIplayer - AU" -configuration Debug
+   ```
+
+2. **Install the plugin**:
+   ```bash
+   mkdir -p ~/Library/Audio/Plug-Ins/Components
+   cp -r build/Debug/AIplayer.component ~/Library/Audio/Plug-Ins/Components/
+   ```
+
+3. **Validate the installation**:
+   ```bash
+   auval -v aufx Dm4q Manu
+   ```
+
+4. **Debug with Logic Pro**:
+   - Open the AIplayer Xcode project
+   - Select the "AIplayer - AU" scheme
+   - In scheme settings, set the executable to Logic Pro.app
+   - Run the scheme to launch Logic Pro with the plugin in debug mode
+
+### Features Implemented in v0.5
+
+- Natural language control of Logic Pro parameters
+- Real-time adjustments with PID control for precision
+- Low-latency OSC communication (182ms round-trip time)
+- AppleScript integration with playback safety mechanisms
+- Direct AI command processing pipeline
+- Comprehensive documentation and test coverage
 
 ---
 
-## 📚 Docs
+## 📚 Documentation
 
-- Architecture & risk backlog — [`docs/plan.md`](docs/plan.md)
-- Iteration diary — [`docs/iterations.md`](docs/iterations.md)
+- Architecture & Risk Backlog — [`docs/plan.md`](docs/plan.md)
+- Iteration Diary — [`docs/iterations.md`](docs/iterations.md)
 
 ---
 
 ## Contributing
 
-Found a glitch? [Open an issue](https://github.com/nickfox/chatty-channels/issues/new).
+Found a bug? [Open an issue](https://github.com/nickfox/chatty-channels/issues/new).
 
-Pull requests welcome!  
-Open a Discussion before major work so we stay aligned with the risk‑driven roadmap.
+Pull requests are welcome!  
+Please open a Discussion before starting significant work to ensure alignment with the risk-driven roadmap.
 
 ---
 
