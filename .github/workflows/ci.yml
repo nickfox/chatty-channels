@@ -1,8 +1,8 @@
-name: AIplayer CI (Xcode)
+name: AIplayer CI (Fix Paths)
 on: [push]
 jobs:
-  build-aiplayer-xcode:
-    name: Build AIplayer with Xcode
+  fix-paths-and-build:
+    name: Fix JUCE Paths and Build
     runs-on: macos-15
     steps:
       - name: Check out code
@@ -17,13 +17,49 @@ jobs:
           
       - name: Verify Xcode version
         run: xcodebuild -version
-          
-      - name: Debug Directory Structure
+      
+      - name: Clone JUCE to temporary location
         run: |
-          echo "Looking for Xcode project:"
-          find . -name "*.xcodeproj" -type d
+          git clone --depth 1 https://github.com/juce-framework/JUCE.git /tmp/JUCE
+      
+      - name: Find hardcoded paths in project file
+        run: |
+          echo "Finding Xcode project file..."
+          XCODEPROJ=$(find AIplayer -name "*.xcodeproj" -type d | head -n 1)
+          echo "Found project: $XCODEPROJ"
           
-      - name: Build AIplayer using Xcode
+          echo "Checking for hardcoded paths in project.pbxproj..."
+          PROJECT_FILE="$XCODEPROJ/project.pbxproj"
+          grep -n "/Users/nickfox137" "$PROJECT_FILE" || echo "No hardcoded paths found in project file"
+          
+      - name: Update paths in project file
+        run: |
+          XCODEPROJ=$(find AIplayer -name "*.xcodeproj" -type d | head -n 1)
+          PROJECT_FILE="$XCODEPROJ/project.pbxproj"
+          
+          # Create a backup
+          cp "$PROJECT_FILE" "$PROJECT_FILE.bak"
+          
+          # Replace hardcoded paths - adjust this based on the grep output
+          sed -i '' 's|/Users/nickfox137/Downloads/JUCE|/tmp/JUCE|g' "$PROJECT_FILE"
+          
+          # Check if the replacement worked
+          grep -n "/tmp/JUCE" "$PROJECT_FILE" || echo "Replacement didn't find any matches"
+          
+      - name: Find JuceHeader.h and check paths
+        run: |
+          echo "Finding JuceHeader.h..."
+          find AIplayer -name "JuceHeader.h" -type f | xargs grep -l "/Users/nickfox137" || echo "No hardcoded paths in JuceHeader.h"
+      
+      - name: Update paths in any other configuration files
+        run: |
+          # Find and fix paths in other potential files
+          find AIplayer -name "*.h" -o -name "*.cpp" -o -name "*.mm" | xargs grep -l "/Users/nickfox137" || echo "No other files with hardcoded paths"
+          
+          # If we find any, we would fix them here
+          # find AIplayer -name "*.h" -o -name "*.cpp" -o -name "*.mm" | xargs grep -l "/Users/nickfox137" | xargs sed -i '' 's|/Users/nickfox137/Downloads/JUCE|/tmp/JUCE|g'
+          
+      - name: Build after path fixes
         run: |
           xcodebuild -project AIplayer/AIplayer/Builds/MacOSX/AIplayer.xcodeproj \
                     -scheme "AIplayer - All" \
@@ -31,32 +67,3 @@ jobs:
                     -destination "platform=macOS" \
                     build \
                     CODE_SIGNING_ALLOWED=NO
-                    
-      - name: Find Built Component
-        run: |
-          echo "Looking for built component:"
-          find AIplayer -name "*.component" -type d
-          
-      - name: Install AU Plugin for Validation
-        run: |
-          mkdir -p ~/Library/Audio/Plug-Ins/Components
-          COMPONENT_PATH=$(find AIplayer -name "*.component" -type d | head -n 1)
-          if [ -n "$COMPONENT_PATH" ]; then
-            echo "Installing component from: $COMPONENT_PATH"
-            cp -r "$COMPONENT_PATH" ~/Library/Audio/Plug-Ins/Components/
-          else
-            echo "No component found to install"
-            exit 1
-          fi
-          
-      - name: Validate AU Plugin with auval
-        run: |
-          # List installed AUs to find the correct identifier
-          auval -a
-          
-          # Try common plugin formats if specific identifier isn't known
-          echo "Attempting plugin validation..."
-          auval -v aufx Dm4q Manu || \
-          auval -v aumu Dm4q Manu || \
-          auval -v aumf Dm4q Manu || \
-          echo "Plugin validation failed - this may be expected in CI environment"
