@@ -82,10 +82,6 @@ jobs:
       - name: Install CMake + Ninja
         run: brew install cmake ninja
 
-      - name: Fetch JUCE
-        working-directory: AIplayer/AIplayer
-        run: git clone --depth 1 https://github.com/juce-framework/JUCE.git
-
       - name: Configure CMake
         working-directory: AIplayer/AIplayer
         run: |
