@@ -1,2 +1,0 @@
-/usr/bin/ar qc libAIplayerPluginSource.a CMakeFiles/AIplayerPluginSource.dir/PluginProcessor.cpp.o CMakeFiles/AIplayerPluginSource.dir/PluginEditor.cpp.o
-/usr/bin/ranlib libAIplayerPluginSource.a

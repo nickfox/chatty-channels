@@ -1,5 +1,0 @@
-if(EXISTS "/Users/nickfox137/Documents/chatty-channel/AIplayer/AIplayer/build/Tests/RMSBufferTests_tests-b12d07c.cmake")
-  include("/Users/nickfox137/Documents/chatty-channel/AIplayer/AIplayer/build/Tests/RMSBufferTests_tests-b12d07c.cmake")
-else()
-  add_test(RMSBufferTests_NOT_BUILT-b12d07c RMSBufferTests_NOT_BUILT-b12d07c)
-endif()
