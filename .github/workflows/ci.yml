@@ -9,6 +9,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          
+      - name: Debug Git Submodules
+        run: |
+          echo "Checking Git submodules..."
+          git submodule status
+          git submodule foreach git status
 
       - name: Debug Directory Structure
         run: |
@@ -19,58 +25,54 @@ jobs:
           ls -la ./AIplayer || echo "AIplayer directory not found"
           echo "AIplayer/AIplayer directory:"
           ls -la ./AIplayer/AIplayer || echo "AIplayer/AIplayer directory not found"
-          echo "JUCE directory (if exists):"
-          ls -la ./AIplayer/AIplayer/JUCE || echo "JUCE directory not found at expected location"
-
+          
+      - name: Clone JUCE Directly
+        run: |
+          # Clone JUCE directly into the expected location
+          cd AIplayer/AIplayer
+          mkdir -p ../JUCE
+          git clone --depth 1 https://github.com/juce-framework/JUCE.git ../JUCE
+          
+      - name: Verify JUCE Clone
+        run: |
+          echo "Verifying JUCE clone..."
+          ls -la AIplayer/JUCE/modules || echo "JUCE modules not found in AIplayer/JUCE"
+          
       - name: Install CMake + Ninja
         run: brew install cmake ninja
-
+        
       - name: Configure CMake
         working-directory: AIplayer/AIplayer
         run: |
-          # Find JUCE directory
-          if [ -d "JUCE" ]; then
-            echo "Found JUCE in current directory"
-            JUCE_MODULES="$PWD/JUCE/modules"
-          elif [ -d "../JUCE" ]; then
-            echo "Found JUCE in parent directory"
-            JUCE_MODULES="$PWD/../JUCE/modules"
-          else
-            echo "JUCE not found in expected locations, searching..."
-            JUCE_DIR=$(find $(pwd)/.. -name "JUCE" -type d | head -n 1)
-            if [ ! -z "$JUCE_DIR" ]; then
-              echo "Found JUCE at: $JUCE_DIR"
-              JUCE_MODULES="$JUCE_DIR/modules"
-            else
-              echo "ERROR: JUCE directory not found!"
-              exit 1
-            fi
-          fi
-          echo "Using JUCE modules at: $JUCE_MODULES"
-          ls -la $JUCE_MODULES || echo "Cannot list JUCE modules directory"
-          
+          # Using the known path to JUCE modules
           cmake -S . -B build \
                 -G Ninja \
                 -DCMAKE_BUILD_TYPE=Debug \
-                -DJUCE_MODULES_DIR=$JUCE_MODULES
-
+                -DJUCE_MODULES_DIR=$PWD/../JUCE/modules
+          
+      - name: Check CMake Configuration
+        working-directory: AIplayer/AIplayer
+        run: |
+          echo "Checking CMake cache..."
+          cat build/CMakeCache.txt | grep JUCE
+          
       - name: Build Project
         working-directory: AIplayer/AIplayer
         run: cmake --build build --config Debug -- -v
-
+        
       - name: Run C++ Tests (CTest)
         working-directory: AIplayer/AIplayer
         run: ctest --test-dir build --output-on-failure
-
+        
       - name: Install AU Plugin for Validation
         run: |
           mkdir -p ~/Library/Audio/Plug-Ins/Components
           cp -r AIplayer/AIplayer/build/AIplayer_artefacts/Debug/AIplayer.component \
                 ~/Library/Audio/Plug-Ins/Components/ || echo "Failed to copy component, may not exist at expected path"
-
+                
       - name: Validate AU Plugin with auval
         run: auval -v aufx Dm4q Manu || echo "auval failed - this may be expected in CI environment"
-
+        
       - name: Upload Build Logs
         if: always()
         uses: actions/upload-artifact@v4
