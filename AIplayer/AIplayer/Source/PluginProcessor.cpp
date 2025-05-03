@@ -12,7 +12,14 @@
 #include <juce_core/juce_core.h> // Needed for FileOutputStream, Time, etc.
 
 //==============================================================================
-// Helper function to create the parameter layout
+/**
+ * @brief Creates the parameter layout for the AudioProcessorValueTreeState
+ *
+ * Defines all parameters used by the plugin including their ranges,
+ * default values, and skew factors.
+ *
+ * @return The parameter layout containing all plugin parameters
+ */
 juce::AudioProcessorValueTreeState::ParameterLayout AIplayerAudioProcessor::createParameterLayout()
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
@@ -31,6 +38,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout AIplayerAudioProcessor::crea
     return { params.begin(), params.end() };
 }
 
+/**
+ * @brief Constructor for the AIplayerAudioProcessor
+ *
+ * Initializes all member variables, sets up OSC communication,
+ * configures audio processing parameters, and starts the RMS timer.
+ */
 AIplayerAudioProcessor::AIplayerAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
@@ -119,6 +132,11 @@ AIplayerAudioProcessor::AIplayerAudioProcessor()
     logMessage("RMS telemetry timer started at 333 Hz");
 }
 
+/**
+ * @brief Destructor for the AIplayerAudioProcessor
+ *
+ * Cleans up resources and properly shuts down OSC communication.
+ */
 AIplayerAudioProcessor::~AIplayerAudioProcessor()
 {
     // Stop the timer before destruction
@@ -132,6 +150,11 @@ AIplayerAudioProcessor::~AIplayerAudioProcessor()
 }
 
 //==============================================================================
+/**
+ * @brief Gets the name of the processor
+ *
+ * @return The name of the processor as a JUCE String
+ */
 const juce::String AIplayerAudioProcessor::getName() const
 {
     // Returning a literal avoids relying on JucePlugin_Name macro,
@@ -139,6 +162,11 @@ const juce::String AIplayerAudioProcessor::getName() const
     return "AIplayer";
 }
 
+/**
+ * @brief Checks if the processor accepts MIDI input
+ *
+ * @return true if the processor accepts MIDI input, false otherwise
+ */
 bool AIplayerAudioProcessor::acceptsMidi() const
 {
    #if JucePlugin_WantsMidiInput
@@ -148,6 +176,11 @@ bool AIplayerAudioProcessor::acceptsMidi() const
    #endif
 }
 
+/**
+ * @brief Checks if the processor produces MIDI output
+ *
+ * @return true if the processor produces MIDI output, false otherwise
+ */
 bool AIplayerAudioProcessor::producesMidi() const
 {
    #if JucePlugin_ProducesMidiOutput
@@ -157,6 +190,11 @@ bool AIplayerAudioProcessor::producesMidi() const
    #endif
 }
 
+/**
+ * @brief Checks if the processor is a MIDI effect plugin
+ *
+ * @return true if the processor is a MIDI effect, false otherwise
+ */
 bool AIplayerAudioProcessor::isMidiEffect() const
 {
    #if JucePlugin_IsMidiEffect
@@ -166,39 +204,77 @@ bool AIplayerAudioProcessor::isMidiEffect() const
    #endif
 }
 
+/**
+ * @brief Gets the tail length in seconds
+ *
+ * @return The tail length in seconds
+ */
 double AIplayerAudioProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
 
+/**
+ * @brief Gets the number of programs provided by the processor
+ *
+ * @return The number of programs
+ */
 int AIplayerAudioProcessor::getNumPrograms()
 {
     return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
                 // so this should be at least 1, even if you're not really implementing programs.
 }
 
+/**
+ * @brief Gets the index of the current program
+ *
+ * @return The index of the current program
+ */
 int AIplayerAudioProcessor::getCurrentProgram()
 {
     return 0;
 }
 
+/**
+ * @brief Sets the current program
+ *
+ * @param index The index of the program to set as current
+ */
 void AIplayerAudioProcessor::setCurrentProgram (int index)
 {
     juce::ignoreUnused (index);
 }
 
+/**
+ * @brief Gets the name of the specified program
+ *
+ * @param index The index of the program
+ * @return The name of the program as a JUCE String
+ */
 const juce::String AIplayerAudioProcessor::getProgramName (int index)
 {
     juce::ignoreUnused (index);
     return {};
 }
 
+/**
+ * @brief Changes the name of the specified program
+ *
+ * @param index The index of the program to rename
+ * @param newName The new name for the program
+ */
 void AIplayerAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
     juce::ignoreUnused (index, newName);
 }
 
 //==============================================================================
+/**
+ * @brief Called before playback starts to prepare resources
+ *
+ * @param sampleRate The sample rate that will be used for audio processing
+ * @param samplesPerBlock The maximum number of samples in each audio buffer
+ */
 void AIplayerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     // Use this method as the place to do any pre-playback
@@ -206,6 +282,9 @@ void AIplayerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     juce::ignoreUnused (sampleRate, samplesPerBlock);
 }
 
+/**
+ * @brief Called when playback stops to free resources
+ */
 void AIplayerAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
@@ -213,6 +292,12 @@ void AIplayerAudioProcessor::releaseResources()
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
+/**
+ * @brief Checks if the provided bus layout is supported
+ *
+ * @param layouts The bus layout to check
+ * @return true if the layout is supported, false otherwise
+ */
 bool AIplayerAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
   #if JucePlugin_IsMidiEffect
@@ -238,6 +323,16 @@ bool AIplayerAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts)
 }
 #endif
 
+/**
+ * @brief Processes a block of incoming audio data
+ *
+ * This is the main audio processing function that handles incoming audio,
+ * applies gain based on the parameter value, and stores a copy of the
+ * processed buffer for RMS calculation.
+ *
+ * @param buffer The audio buffer containing the input data to process
+ * @param midiMessages Any incoming MIDI messages to process
+ */
 void AIplayerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ignoreUnused (midiMessages);
@@ -260,13 +355,6 @@ void AIplayerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     {
         buffer.applyGain(channel, 0, buffer.getNumSamples(), gainFactor);
     }
-
-    // --- (Original processing loop placeholder - can be removed if only gain is applied) ---
-    // for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    // {
-    //     auto* channelData = buffer.getWritePointer (channel);
-    //     // ..do something else to the data if needed...
-    // }
     
     // Store a copy of the processed buffer for RMS calculation
     // This avoids potential threading issues with the timer callback
@@ -275,17 +363,35 @@ void AIplayerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
 }
 
 //==============================================================================
+/**
+ * @brief Checks if this processor has an editor component
+ *
+ * @return true if the processor has an editor, false otherwise
+ */
 bool AIplayerAudioProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
 }
 
+/**
+ * @brief Creates the plugin's editor component
+ *
+ * @return A pointer to the newly created editor component
+ */
 juce::AudioProcessorEditor* AIplayerAudioProcessor::createEditor()
 {
     return new AIplayerAudioProcessorEditor (*this);
 }
 
 //==============================================================================
+/**
+ * @brief Saves the current state of the processor to a memory block
+ *
+ * Uses the AudioProcessorValueTreeState to store all parameters
+ * in XML format within the memory block.
+ *
+ * @param destData The memory block to store the state in
+ */
 void AIplayerAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     // You should use this method to store your parameters in the memory block.
@@ -297,6 +403,15 @@ void AIplayerAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
     logMessage("Plugin state saved.");
 }
 
+/**
+ * @brief Restores the processor's state from a memory block
+ *
+ * Uses the AudioProcessorValueTreeState to restore all parameters
+ * from XML format within the memory block.
+ *
+ * @param data Pointer to the data to restore from
+ * @param sizeInBytes The size of the data in bytes
+ */
 void AIplayerAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // Use APVTS to restore the state
@@ -322,7 +437,13 @@ void AIplayerAudioProcessor::setStateInformation (const void* data, int sizeInBy
 
 //==============================================================================
 //==============================================================================
-// Custom Public Methods Implementation
+/**
+ * @brief Called by the PluginEditor when the user sends a chat message
+ *
+ * Formats and sends the chat message via OSC.
+ *
+ * @param message The chat message to send
+ */
 void AIplayerAudioProcessor::sendChatMessage(const juce::String& message)
 {
     // TODO: Add instance ID logic here if needed
@@ -332,10 +453,14 @@ void AIplayerAudioProcessor::sendChatMessage(const juce::String& message)
 }
 
 //==============================================================================
-// OSC Message Handling
 /**
-    Callback function that gets invoked when an OSC message is received.
-*/
+ * @brief Handles incoming OSC messages received by the OSCReceiver
+ *
+ * This callback is triggered when an OSC message is received, and it
+ * processes the message based on its address pattern.
+ *
+ * @param message The received OSC message
+ */
 void AIplayerAudioProcessor::oscMessageReceived (const juce::OSCMessage& message)
 {
     logMessage("OSC Message Received: " + message.getAddressPattern().toString());
@@ -427,7 +552,14 @@ void AIplayerAudioProcessor::oscMessageReceived (const juce::OSCMessage& message
 }
 
 //==============================================================================
-// Custom Internal Methods Implementation (Logging)
+/**
+ * @brief Logs a message to the log file
+ *
+ * Adds a timestamp to the message and writes it to the log file.
+ * If the log file is not available, falls back to using DBG.
+ *
+ * @param message The message to log
+ */
 void AIplayerAudioProcessor::logMessage(const juce::String& message)
 {
     if (logStream != nullptr)
@@ -445,7 +577,13 @@ void AIplayerAudioProcessor::logMessage(const juce::String& message)
 }
 
 //==============================================================================
-// Custom Internal Methods Implementation (OSC Sending)
+/**
+ * @brief Sends an OSC message with an instance ID and a message string
+ *
+ * @param addressPattern The OSC address pattern to use
+ * @param instanceID The instance ID to include in the message
+ * @param message The message string to send
+ */
 void AIplayerAudioProcessor::sendOSC(const juce::String& addressPattern, int instanceID, const juce::String& message)
 {
     // Note: juce::OSCSender::send() returns false if not connected or on other errors.
@@ -470,7 +608,14 @@ void AIplayerAudioProcessor::sendOSC(const juce::String& addressPattern, int ins
 }
 
 //==============================================================================
-// This creates new instances of the plugin..
+/**
+ * @brief Creates new instances of the plugin
+ *
+ * This function is called by the host to create new instances of the plugin.
+ * It's exported with C linkage to avoid name mangling.
+ *
+ * @return Pointer to a new AIplayerAudioProcessor
+ */
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new AIplayerAudioProcessor();
@@ -479,12 +624,24 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 //==============================================================================
 // Timer and RMS Implementation
 
+/**
+ * @brief Timer callback method that is called at regular intervals
+ *
+ * This is used to send RMS telemetry data at regular intervals.
+ * The frequency is set by startTimerHz() in the constructor.
+ */
 void AIplayerAudioProcessor::timerCallback()
 {
     // This method is called regularly at the frequency set by startTimerHz()
     sendRMSTelemetry();
 }
 
+/**
+ * @brief Sends the current RMS telemetry via OSC
+ *
+ * Calculates and sends the current RMS values from the audio buffer.
+ * This function is called by the timer callback at regular intervals.
+ */
 void AIplayerAudioProcessor::sendRMSTelemetry()
 {
     // Calculate RMS from the last processed buffer
@@ -522,6 +679,12 @@ void AIplayerAudioProcessor::sendRMSTelemetry()
     }
 }
 
+/**
+ * @brief Calculates the RMS value from an audio buffer
+ *
+ * @param buffer The audio buffer to calculate RMS from
+ * @return The calculated RMS value
+ */
 float AIplayerAudioProcessor::calculateRMS(const juce::AudioBuffer<float>& buffer)
 {
     float sum = 0.0f;
