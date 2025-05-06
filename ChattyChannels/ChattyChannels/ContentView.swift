@@ -20,6 +20,9 @@ struct ContentView: View {
     /// The service for communicating with the AI.
     @EnvironmentObject private var networkService: NetworkService
     
+    /// The service for the VU meter display.
+    @StateObject private var levelMeterService = LevelMeterService(oscService: OSCService())
+    
     /// The current text in the chat input field.
     @State private var chatInput = ""
     
@@ -28,61 +31,102 @@ struct ContentView: View {
     
     /// The view's body, defining the user interface layout and behavior.
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollView {
-                ScrollViewReader { scrollView in
-                    ZStack {
-                        // Background that fills entire scroll area
-                        Color(NSColor.windowBackgroundColor).opacity(0.9)
-                            .ignoresSafeArea()
-                        
-                        // Messages container
-                        VStack(alignment: .leading, spacing: 12) {
-                            ForEach(chatModel.messages) { message in
-                                MessageBubble(message: message)
-                                    .id(message.id)
+        // Wrap everything in a ZStack to put the wooden strip above everything
+        ZStack(alignment: .top) { // Removed explicit return
+            // Main content
+            GeometryReader { geometry in
+                VStack(spacing: 0) {
+                    // Wooden Strip (Neve Console Style)
+                    Rectangle()
+                        .fill(Color(red: 0.4, green: 0.2, blue: 0.1)) // Base solid dark reddish-brown
+                        .frame(height: 23)
+                        .frame(maxWidth: .infinity)
+                        .border(Color.black.opacity(0.4), width: 0.5)
+                        .overlay( // Add subtle grain simulation
+                            Canvas { context, size in
+                                let grainColor = Color.black.opacity(0.1) // Darker, semi-transparent grain
+                                let lineCount = 6 // Increased line count to avoid exact center line
+                                let lineHeight: CGFloat = 0.5 // Thickness of grain lines
+
+                                for i in 0..<lineCount {
+                                    let yPos = (size.height / CGFloat(lineCount + 1)) * CGFloat(i + 1)
+                                    let path = Path { p in
+                                        p.move(to: CGPoint(x: 0, y: yPos))
+                                        p.addLine(to: CGPoint(x: size.width, y: yPos))
+                                    }
+                                    context.stroke(path, with: .color(grainColor), lineWidth: lineHeight)
+                                }
                             }
-                            
-                            // Spacer to push content to the top when there are few messages
-                            if !chatModel.messages.isEmpty {
-                                Spacer(minLength: 20)
+                        )
+
+                    // VU Meter component
+                    VUMeterView(levelService: levelMeterService)
+                        // Removed fixed height to allow natural sizing
+                    
+                    // Main chat interface
+                    VStack(spacing: 0) {
+                    ScrollView {
+                        ScrollViewReader { scrollView in
+                            ZStack {
+                                // Background that fills entire scroll area
+                                Color(NSColor.windowBackgroundColor).opacity(0.9)
+                                    .ignoresSafeArea()
+                                
+                                // Messages container
+                                VStack(alignment: .leading, spacing: 12) {
+                                    ForEach(chatModel.messages) { message in
+                                        MessageBubble(message: message)
+                                            .id(message.id)
+                                    }
+                                    
+                                    // Spacer to push content to the top when there are few messages
+                                    if !chatModel.messages.isEmpty {
+                                        Spacer(minLength: 20)
+                                    }
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .leading)
+                            }
+                            .onChange(of: chatModel.messages.count) { _, _ in
+                                withAnimation {
+                                    scrollView.scrollTo(chatModel.messages.last?.id, anchor: .bottom)
+                                }
                             }
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .leading)
                     }
-                    .onChange(of: chatModel.messages.count) { _, _ in
-                        withAnimation {
-                            scrollView.scrollTo(chatModel.messages.last?.id, anchor: .bottom)
+                    .background(Color(NSColor.windowBackgroundColor).opacity(0.9))
+                    .padding([.leading, .trailing])
+                    .padding(.trailing, 8) // Extra padding for scrollbar
+                    
+                    // Loading indicator
+                    if chatModel.isLoading {
+                        HStack {
+                            Spacer()
+                            ProgressView()
+                                .scaleEffect(0.7)
+                                .padding(.trailing)
                         }
+                        .padding(.top, 4)
                     }
+                    
+                    // Text input field
+                    GrowingTextInput(text: $chatInput, onSubmit: sendChat)
+                        .padding()
+} // <<< Closing brace for inner VStack (Chat Interface)
                 }
             }
-            .background(Color(NSColor.windowBackgroundColor).opacity(0.9))
-            .padding([.top, .leading, .trailing])
-            .padding(.trailing, 8) // Extra padding for scrollbar
             
-            // Loading indicator
-            if chatModel.isLoading {
-                HStack {
-                    Spacer()
-                    ProgressView()
-                        .scaleEffect(0.7)
-                        .padding(.trailing)
-                }
-                .padding(.top, 4)
-            }
-            
-            // Text input field
-            GrowingTextInput(text: $chatInput, onSubmit: sendChat)
-                .padding()
+            // Removed the overlay Rectangle that was here
         }
         .frame(minWidth: 800, minHeight: 600)
         .background(Color(NSColor.windowBackgroundColor))
         .onAppear {
             logger.info("Control Room UI loaded")
             chatModel.loadChatHistory()
+            
+            // Set a demo track name for v0.6
+            levelMeterService.setCurrentTrack("Kick Drum")
         }
     }
     
@@ -128,9 +172,4 @@ struct ContentView: View {
             }
         }
     }
-}
-
-#Preview {
-    ContentView()
-        .environmentObject(NetworkService()) // Provide dummy service for preview
 }

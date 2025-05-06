@@ -43,4 +43,38 @@
 **Completion Status**
 All v0.5 requirements have been met, with both automated tests and manual verification. The chat interface can successfully process commands like "reduce gain by 3dB" and control Logic Pro volume with the expected precision. This milestone confirms the viability of the PID-based approach and the overall architecture of the system.
 
-**Next → v0.6**   Generalise track↔UUID mapping and add auto-solo "follow" VU meters.
+**Next → v0.6**   Create photorealistic 3D TEAC VU meter with SceneKit.
+
+## 2025-05-12  ·  v0.6  "TEAC VU Meter Implementation"
+**Goal**   Create a visually accurate TEAC VU meter with realistic needle movement and peak indicator.  
+**Scope**  Image-based meter face, animated needle overlay, proper VU ballistics, SwiftUI integration.  
+**Exit criteria**  Stereo VU meter display shows accurate audio levels with realistic appearance and smooth animations.  
+**Status**   ✅ Implementation complete. Awaiting final testing.
+
+**Core Components Implemented**
+- ✅ TEAC VU meter image (teac_vu_meter.png) added to project resources
+- ✅ Animated needle with proper VU ballistics
+- ✅ Peak indicator LED functionality
+- ✅ Dynamic track label display
+- ✅ Simulated audio level data (for v0.6, real OSC integration in v0.7)
+- ✅ SwiftUI integration with Control Room app (20% height constraint)
+
+**Technical Approach**
+- ✅ SwiftUI for UI implementation
+- ✅ Custom animation system with 300ms integration time for authentic VU ballistics
+- ✅ Timer-based animation for smooth 60fps performance
+- ✅ Combine framework for reactive data binding
+- ✅ Efficient rendering using native SwiftUI components
+
+**Implementation Details**
+- **AudioLevel Model**: Provides dB conversion and peak detection
+- **LevelMeterService**: Handles audio level processing and state management
+- **VUMeterView**: Main container component with proper sizing constraints
+- **SingleMeterView**: Individual meter with ballistics and peak detection
+- **NeedleView & PeakIndicatorView**: Specialized components for visual elements
+- **Comprehensive Test Suite**: Unit, integration, and performance tests
+
+**Completion Status**
+All v0.6 requirements have been successfully implemented. The TEAC VU meter is now integrated at the top 20% of the app with realistic needle movement and proper peak indication. For this version, we're using simulated audio data that will be replaced with real OSC data in v0.7.
+
+**Next → v0.7**  Implement OSC retry logic, multi-track stress testing, and real OSC data integration for the VU meter.

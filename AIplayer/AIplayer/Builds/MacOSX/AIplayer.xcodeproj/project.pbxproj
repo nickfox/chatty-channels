@@ -101,6 +101,9 @@
 		CE15B17E2DAC665000D007FA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBDFF021AF1C5D40761F31FC /* WebKit.framework */; };
 		CE15B17F2DAC665000D007FA /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF6DDAF7D5787C1361E0D18D /* Metal.framework */; };
 		CE15B1802DAC665000D007FA /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B9D8442B14E088AAA4016FD /* MetalKit.framework */; };
+		CE4A105D2DC78C0A001B937C /* teac_vu_meter.png in Resources */ = {isa = PBXBuildFile; fileRef = CE4A105C2DC78C0A001B937C /* teac_vu_meter.png */; };
+		CE4A105E2DC78C0A001B937C /* teac_vu_meter.png in Resources */ = {isa = PBXBuildFile; fileRef = CE4A105C2DC78C0A001B937C /* teac_vu_meter.png */; };
+		CE4A105F2DC78C0A001B937C /* teac_vu_meter.png in Resources */ = {isa = PBXBuildFile; fileRef = CE4A105C2DC78C0A001B937C /* teac_vu_meter.png */; };
 		CE4B873FDB7EC582B6DDE180 /* include_juce_audio_processors_lv2_libs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA3CE989071659F0766C5901 /* include_juce_audio_processors_lv2_libs.cpp */; };
 		CF4AEB3D90D055E93DF70C24 /* include_juce_graphics.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4B0864B3B63CCD57BB23EEBD /* include_juce_graphics.mm */; };
 		D0BBE68E92A193148CCC8635 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B9D8442B14E088AAA4016FD /* MetalKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
@@ -237,6 +240,7 @@
 		C8214B3947687A0AFBF05A80 /* PluginProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PluginProcessor.h; path = ../../Source/PluginProcessor.h; sourceTree = SOURCE_ROOT; };
 		C8958CDC125B52283C47A2F0 /* Info-AU.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-AU.plist"; sourceTree = SOURCE_ROOT; };
 		CC344C8ED952322518B230C2 /* include_juce_core_CompilationTime.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_core_CompilationTime.cpp; path = ../../JuceLibraryCode/include_juce_core_CompilationTime.cpp; sourceTree = SOURCE_ROOT; };
+		CE4A105C2DC78C0A001B937C /* teac_vu_meter.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = teac_vu_meter.png; sourceTree = "<group>"; };
 		D5B7D716AFF7ACDA7ECCF823 /* juce_core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_core; path = ../../../../../../Downloads/JUCE/modules/juce_core; sourceTree = SOURCE_ROOT; };
 		E79259BC738E326CEA7F7D52 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
 		EE96C2C593EF356061209696 /* juce_audio_devices */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_devices; path = /Users/nickfox137/Downloads/JUCE/modules/juce_audio_devices; sourceTree = "<absolute>"; };
@@ -419,6 +423,7 @@
 		BC93126F36D93B35DCF20B58 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				CE4A105C2DC78C0A001B937C /* teac_vu_meter.png */,
 				6F8B34329FE4445065ACF27A /* Info-VST3.plist */,
 				C8958CDC125B52283C47A2F0 /* Info-AU.plist */,
 				9E45369471B5133A880442B1 /* Info-Standalone_Plugin.plist */,
@@ -741,6 +746,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				019F97444D13CAD279FA39B1 /* RecentFilesMenuTemplate.nib in Resources */,
+				CE4A105D2DC78C0A001B937C /* teac_vu_meter.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -749,6 +755,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE15B1632DAC665000D007FA /* RecentFilesMenuTemplate.nib in Resources */,
+				CE4A105E2DC78C0A001B937C /* teac_vu_meter.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -757,6 +764,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE15B1722DAC665000D007FA /* RecentFilesMenuTemplate.nib in Resources */,
+				CE4A105F2DC78C0A001B937C /* teac_vu_meter.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

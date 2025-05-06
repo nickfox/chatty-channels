@@ -132,8 +132,8 @@ struct ChattyChannelsApp: App {
     /// Also initiates the service subscription setup when the view appears.
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(networkService) // Inject the service
+            ContentView() // Back to original ContentView with ZStack wooden strip
+                .environmentObject(networkService)
                 .task { // Use .task for async setup tied to the Scene lifecycle
                     setupServiceSubscription()
                 }

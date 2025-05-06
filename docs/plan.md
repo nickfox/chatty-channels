@@ -62,7 +62,9 @@
 
 ## 5 · Current sprint focus  (2024‑05‑12 → v0.6)
 
-T‑03 (enhanced track mapping), UI-VU-01 (auto-solo VU meters) – full multi-track monitoring and selection.
+UI-VU-02 (TEAC VU meter) - image-based VU meter implementation with proper needle physics and peak indicator. See detailed plan in `/docs/vu-meter-implementation.md`.
+
+**Status Update**: TEAC VU meter image (teac_vu_meter.png, 728x426px) has been added to the Xcode project resources.
 
 ---
 
@@ -72,7 +74,7 @@ T‑03 (enhanced track mapping), UI-VU-01 (auto-solo VU meters) – full multi-t
 | Version | Headline goal | Key new items | Status |
 |---------|---------------|---------------|--------|
 | **v0.5** *(DEV)* | Kick‑track PID loop proven | T‑01…T‑07 | ✅ Completed Apr 27, 2025 |
-| **v0.6** | Track‑UUID mapping, auto‑follow VU meters | T‑03, T‑08, UI‑VU‑01 | Next sprint |
+| **v0.6** | TEAC VU meter implementation (image-based) | UI-VU-02 | In progress |
 | **v0.7** | Multi‑track OSC stress‑test (64 ch), retry logic hardened | T‑05, T‑06, Net‑Bench‑02 | Planned |
 | **v0.8** | Telemetry v1.1 (band‑energy) + Lazy FFT | T‑08, T‑09 | Planned |
 | **v0.9** | LLM JSON schema enforcement & prompt templates | T‑10, AI‑Prompt‑02 | Planned |
