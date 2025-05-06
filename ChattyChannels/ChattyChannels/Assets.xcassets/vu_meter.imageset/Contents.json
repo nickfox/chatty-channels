@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "teac_vu_meter.png",
+      "filename" : "vu_meter.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "teac_vu_meter@2x.png",
+      "filename" : "vu_meter@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "teac_vu_meter@3x.png",
+      "filename" : "vu_meter@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

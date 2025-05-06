@@ -72,3 +72,37 @@ The primary goal was to implement a functional and visually appealing stereo VU 
     - Integrate SceneKit view into SwiftUI using `UIViewRepresentable`.
     - Optimize rendering (LOD, baked lighting, Metal shaders).
 - **Detailed Plan:** A separate, detailed plan exists outlining research, modeling, texturing, animation, integration, testing, and risk assessment for the 3D version.
+## 5. Current Debugging Status (as of 2025-05-06 evening)
+
+- **Primary Unresolved Issue:** The VU meter images (`SingleMeterView`) are still displaying with distortion, and changes to their frame size or needle length are not consistently reflected visually.
+- **Architectural Change:** The `NeveHorizontalDividerView` has been successfully moved from `VUMeterView` to be managed by `ContentView`, improving the UI hierarchy.
+- **Current Debugging State of `VUMeterView.swift`:**
+    - A debug `.frame(width: 300, height: 100).background(Color.green)` is applied to its main `ZStack`.
+    - `SingleMeterView` instances within it are intended to be framed at 112x69 by `VUMeterView`.
+- **Current Debugging State of `SingleMeterView.swift`:**
+    - Uses `GeometryReader` for internal layout.
+    - `Image("vu_meter")` uses `.resizable().scaledToFit()`.
+    - Needle length multiplier is `0.3` (original length, pending fix of distortion).
+- **Key Observation:** The green debug background applied directly to `VUMeterView`'s `ZStack` is NOT visible. This strongly suggests that `VUMeterView` is collapsing to a zero (or near-zero) size, likely because its parent in `ContentView` is not allocating it space, or its own internal content doesn't provide sufficient intrinsic size. This collapse is the most probable cause of the ongoing distortion and sizing issues for the `SingleMeterView` instances.
+
+## 6. Next Debugging Steps (for new chat session)
+
+The immediate priority is to ensure `VUMeterView` is allocated space and becomes visible.
+
+1.  **Verify `VUMeterView` Visibility and Space Allocation in `ContentView`:**
+    *   In `ContentView.swift`, remove the current debug frame from `VUMeterView`'s `ZStack` (the green one).
+    *   In `ContentView.swift`, apply a very prominent, fixed frame and a *different* debug background color (e.g., `.frame(width: 350, height: 150).background(Color.blue)`) to the `VUMeterView` instance itself.
+    *   **Goal:** Confirm if `ContentView`'s main `VStack` (inside the `GeometryReader`) is actually giving `VUMeterView` any space. If this blue frame doesn't appear, the layout issue is within `ContentView`'s `VStack` structure or how it distributes space to its children.
+    *   If the blue frame *does* appear, it means `ContentView` is allocating space, and the problem of `VUMeterView` collapsing is internal to `VUMeterView.swift`.
+
+2.  **If `VUMeterView` gets space from `ContentView` (blue frame visible):**
+    *   Focus on `VUMeterView.swift`. The `ZStack` containing `Color(NSColor.windowBackgroundColor)` and a `VStack` might be the issue. The inner `VStack` needs to have children that provide intrinsic content size.
+    *   The `SingleMeterView` instances *should* provide this size due to the `.frame(width: 112, height: 69)` applied to them.
+    *   Temporarily give the inner `VStack` (the one holding the meter `HStack` and label `HStack`) a debug background (e.g., yellow) and a flexible frame like `.frame(maxWidth: .infinity, maxHeight: .infinity)` to see if it expands.
+
+3.  **Once `VUMeterView` and its main containers are visibly rendering with defined bounds:**
+    *   Re-address the `SingleMeterView` image distortion. The combination of `.resizable().scaledToFit()` on the `Image` and the `.frame(width: 112, height: 69)` on the `SingleMeterView` instance *should* work if the parent containers are stable.
+    *   Verify the image asset name (`"vu_meter"`) is correct and the asset is properly included in the project.
+
+4.  **Adjust Needle Length:**
+    *   After the meter face distortion is resolved and `SingleMeterView` is rendering at the correct 112x69 size, re-apply the `0.39` multiplier for the needle length in `SingleMeterView.swift`.

@@ -60,6 +60,12 @@ sequenceDiagram
 - **Remote LLM**: Currently using OpenAI o4-mini with model-agnostic architecture
 - **PID Feedback**: Closed-loop system that verifies changes through plugin confirmation
 
+## Control Room Interface
+
+![Control Room UI - First Draft](https://github.com/nickfox/chatty-channels/blob/main/logos/chatty-channels-1.png)
+
+The Control Room is where the AI Producer lives and where you interact with both the producer and your project. This first draft of the interface features a vintage-inspired design reminiscent of classic Neve 1073 console styling, complete with authentic VU meters for monitoring levels. The chat interface allows for natural language communication with the AI Producer, who can then orchestrate changes across your session.
+
 ---
 
 ## Milestones & Development Status

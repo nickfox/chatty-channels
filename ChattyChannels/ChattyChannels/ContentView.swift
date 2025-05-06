@@ -61,15 +61,28 @@ struct ContentView: View {
 
                     // VU Meter component
                     VUMeterView(levelService: levelMeterService)
+                        .frame(maxWidth: .infinity) // Ensure VUMeterView takes full available width
                         // Removed fixed height to allow natural sizing
                     
+// Horizontal divider - Neve console style with padding on sides
+                    HStack {
+                        Spacer()
+                            .frame(width: 20)
+                        
+                        NeveHorizontalDividerView()
+                            .frame(height: 4)
+                        
+                        Spacer()
+                            .frame(width: 20)
+                    }
+                    .padding(.vertical, 5) // Add some vertical spacing around the divider
                     // Main chat interface
                     VStack(spacing: 0) {
                     ScrollView {
                         ScrollViewReader { scrollView in
                             ZStack {
                                 // Background that fills entire scroll area
-                                Color(NSColor.windowBackgroundColor).opacity(0.9)
+                                Color(red: 40/255, green: 41/255, blue: 44/255) // Xcode dark background
                                     .ignoresSafeArea()
                                 
                                 // Messages container
@@ -84,7 +97,7 @@ struct ContentView: View {
                                         Spacer(minLength: 20)
                                     }
                                 }
-                                .padding(.horizontal, 16)
+                                // .padding(.horizontal, 16) // Horizontal padding handled by ScrollView
                                 .padding(.vertical, 12)
                                 .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .leading)
                             }
@@ -95,9 +108,9 @@ struct ContentView: View {
                             }
                         }
                     }
-                    .background(Color(NSColor.windowBackgroundColor).opacity(0.9))
-                    .padding([.leading, .trailing])
-                    .padding(.trailing, 8) // Extra padding for scrollbar
+                    .background(Color(red: 40/255, green: 41/255, blue: 44/255)) // Xcode dark background
+                    .padding(.horizontal, 20) // Consistent horizontal padding
+                    // .padding(.trailing, 8) // Extra padding for scrollbar - removed for now
                     
                     // Loading indicator
                     if chatModel.isLoading {
@@ -112,7 +125,8 @@ struct ContentView: View {
                     
                     // Text input field
                     GrowingTextInput(text: $chatInput, onSubmit: sendChat)
-                        .padding()
+                        .padding(.horizontal, 20) // Consistent horizontal padding
+                        .padding(.vertical)       // Keep default vertical padding
 } // <<< Closing brace for inner VStack (Chat Interface)
                 }
             }
@@ -120,13 +134,13 @@ struct ContentView: View {
             // Removed the overlay Rectangle that was here
         }
         .frame(minWidth: 800, minHeight: 600)
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(Color(red: 40/255, green: 41/255, blue: 44/255)) // Xcode dark background
         .onAppear {
             logger.info("Control Room UI loaded")
             chatModel.loadChatHistory()
             
             // Set a demo track name for v0.6
-            levelMeterService.setCurrentTrack("Kick Drum")
+            levelMeterService.setCurrentTrack("Master Bus")
         }
     }
     

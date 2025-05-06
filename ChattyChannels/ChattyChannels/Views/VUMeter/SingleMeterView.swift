@@ -36,24 +36,26 @@ struct SingleMeterView: View {
     let timer = Timer.publish(every: 1.0/60.0, on: .main, in: .common).autoconnect()
     
     var body: some View {
-        GeometryReader { geometry in
+        GeometryReader { geometry in // Re-introduce GeometryReader
             ZStack {
                 // Meter background image
-                Image("teac_vu_meter")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                
+                Image("vu_meter")
+                    .resizable()   // Correct order: resizable first
+                    .interpolation(.high) // Add high quality interpolation
+                    .scaledToFit() // Then scaledToFit
+                    // Frame is applied in parent view
+
                 // Needle
                 NeedleView(
                     color: .black,
-                    length: geometry.size.height * 0.3,
-                    width: max(1, geometry.size.width * 0.004),
-                    pivotDiameter: max(4, geometry.size.width * 0.02)
+                    length: geometry.size.height * 0.5,
+                    width: max(1, geometry.size.width * 0.004), // Use geometry
+                    pivotDiameter: max(4, geometry.size.width * 0.02) // Use geometry
                 )
                 .rotationEffect(.degrees(needleRotation), anchor: .bottom)
-                .position(x: geometry.size.width * 0.5, 
-                          y: geometry.size.height * 0.67)
-                
+                .position(x: geometry.size.width * 0.5, // Use geometry
+                          y: geometry.size.height * 0.67) // Use geometry
+
                 // Peak indicator - fixed position near the top of the VU meter
                 PeakIndicatorView(
                     isActive: isPeakActive,
@@ -61,9 +63,10 @@ struct SingleMeterView: View {
                     activeColor: .red,
                     inactiveColor: .red.opacity(0.15)
                 )
-                .position(x: geometry.size.width * 0.77, 
-                          y: geometry.size.height * 0.3)
+                .position(x: geometry.size.width * 0.77, // Use geometry
+                          y: geometry.size.height * 0.3) // Use geometry
             }
+            // Removed .clipped()
             .onReceive(timer) { _ in
                 updateMeter()
             }

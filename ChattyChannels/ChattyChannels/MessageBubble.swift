@@ -44,7 +44,7 @@ struct MessageBubble: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(getMessageBackground())
         )
-        .padding(.horizontal, 16)
+        // .padding(.horizontal, 16) // Removed to allow ScrollView to control horizontal padding
         .padding(.vertical, 8)
     }
     

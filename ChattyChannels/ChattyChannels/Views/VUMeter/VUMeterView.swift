@@ -17,7 +17,7 @@ struct VUMeterView: View {
     var body: some View {
         ZStack(alignment: .top) {
             // Base background
-            Color(NSColor.windowBackgroundColor)
+            Color(red: 40/255, green: 41/255, blue: 44/255) // Xcode dark background
             
             VStack(spacing: 0) {
                 // Main meter area
@@ -32,17 +32,17 @@ struct VUMeterView: View {
                         HStack(spacing: 26) { // Increased spacing to match right padding
                             // Left channel meter
                             SingleMeterView(audioLevel: $levelService.leftChannel, channel: .left)
-                                .frame(width: 150, height: 90) // Reduced size by 25%
+                                .frame(width: 112, height: 69) // Re-applying frame, 112, 69
                             
                             // Right channel meter
                             SingleMeterView(audioLevel: $levelService.rightChannel, channel: .right)
-                                .frame(width: 150, height: 90) // Reduced size by 25%
+                                .frame(width: 112, height: 69) // Re-applying frame, 112, 69
                         }
-                        .frame(width: 326) // Adjusted width for new meter size (150 + 26 + 150)
+                        .frame(width: 250) // Adjusted width for new meter size (112 + 26 + 112)
                         
                         // Increased right margin by 30%
                         Spacer()
-                            .frame(width: 26) // Increased from 20 to 26
+                            .frame(width: 20) // Align with divider padding
                             .layoutPriority(0)
                     }
                     .padding(.top, 8)
@@ -57,41 +57,24 @@ struct VUMeterView: View {
 
                         // Label centered within the same width as the meter container
                         Text(levelService.currentTrack)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.white)
-                            .padding(.vertical, 4)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(Color(white: 0.7)) // More subtle gray
+                            .padding(.vertical, 0)
                             .padding(.horizontal, 10)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(Color(red: 0.25, green: 0.25, blue: 0.25))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 6)
-                                            .strokeBorder(Color.gray.opacity(0.3), lineWidth: 1)
-                                    )
-                            )
-                            .frame(width: 326, alignment: .center) // Center text within the meter area width
+                            .frame(width: 250, alignment: .center) // Center text within the new meter area width
 
                         // Same fixed right margin as meters
                         Spacer()
-                            .frame(width: 26)
+                            .frame(width: 20) // Align with divider padding
                             .layoutPriority(0)
                     }
                     .padding(.bottom, 10)
                 }
-                
-                // Horizontal divider - Neve console style with padding on sides
-                HStack {
-                    Spacer()
-                        .frame(width: 20)
-                    
-                    NeveHorizontalDividerView()
-                        .frame(height: 4)
-                    
-                    Spacer()
-                        .frame(width: 20)
-                }
+                // Horizontal divider removed, will be managed by ContentView
             }
         }
+        .frame(height: 100) // Debug frame, width removed
+        // .background(Color.green) // Debug background removed
     }
 }
 

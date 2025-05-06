@@ -10,43 +10,21 @@ import SwiftUI
 /// of the console interface, mimicking the channel strip divisions on classic recording consoles.
 struct NeveHorizontalDividerView: View {
     var body: some View {
-        // Simplified metallic divider with strong visual presence
-        ZStack {
-            VStack(spacing: 0) {
-                // Top highlight
-                Rectangle()
-                    .fill(Color.white.opacity(0.4))
-                    .frame(height: 1)
-                
-                // Main metallic section - more visible with stronger metallic look
-                Rectangle()
-                    .fill(
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color.gray.opacity(0.7),
-                                Color.gray.opacity(0.9),
-                                Color.gray.opacity(0.7)
-                            ]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .frame(height: 3)
-                
-                // Bottom shadow
-                Rectangle()
-                    .fill(Color.black.opacity(0.4))
-                    .frame(height: 1)
-            }
-            // Fix the white pixelation with proper shape clipping
-            .clipShape(RoundedRectangle(cornerRadius: 0.1))
-            // Add a clean edge to prevent any edge artifacts
-            .overlay(
-                RoundedRectangle(cornerRadius: 0.1)
-                    .strokeBorder(Color.gray.opacity(0.6), lineWidth: 0.5)
-                    .blur(radius: 0.2)
+        // Single rectangle with a gradient to create a subtle metallic sheen
+        Rectangle()
+            .fill(
+                LinearGradient(
+                    gradient: Gradient(stops: [
+                        .init(color: Color(white: 0.40), location: 0.0),   // Top highlight edge
+                        .init(color: Color(white: 0.35), location: 0.25),  // End of highlight
+                        .init(color: Color(white: 0.28), location: 0.60),  // Main body color
+                        .init(color: Color(white: 0.22), location: 1.0)    // Bottom shadow edge
+                    ]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
             )
-        }
+        // The .frame(height: 4) is applied by the parent view (ContentView)
     }
 }
 
