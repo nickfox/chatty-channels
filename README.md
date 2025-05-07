@@ -8,7 +8,7 @@
 
 *What if every track in your session could talk back?*
 
-Chatty Channels transforms your DAW into a collaborative studio environment by placing a lightweight **AIplayer** plugin on each channel, turning instruments into responsive band members. The master bus hosts an **AIengineer** with years of mixing expertise, while the **Control Room** SwiftUI app hosts an **AIproducer** fueled by OpenAI o3, orchestrating your Logic Pro session through AppleScript and MIDI. 
+Chatty Channels transforms your DAW into a collaborative studio environment by placing a lightweight **AIplayer** plugin on each channel, turning instruments into responsive band members. The master bus hosts an **AIengineer** with years of mixing expertise, while the **Control Room** SwiftUI app hosts an **AIproducer** fueled by various AI models (OpenAI, Gemini, Claude, and Grok), orchestrating your Logic Pro session through AppleScript and MIDI. 
 
 *Simply tell the kick drum to "lower the volume by 3 dB," ask the bass to solo itself, or request the engineer to "add more reverb to the lead vocal"—all using natural language while your song continues playing.*
 
@@ -57,14 +57,14 @@ sequenceDiagram
 
 - **AIplayer**: Lightweight sensor on every channel that streams RMS/FFT data and responds to queries
 - **Control Room**: Orchestration UI and producer-AI that manipulates parameters via AppleScript/MIDI
-- **Remote LLM**: Currently using OpenAI o4-mini with model-agnostic architecture
+- **Remote LLM**: Supports multiple LLM providers (OpenAI, Gemini, Claude, and Grok) with model-agnostic architecture
 - **PID Feedback**: Closed-loop system that verifies changes through plugin confirmation
 
 ## Control Room Interface
 
 ![Control Room UI - First Draft](https://github.com/nickfox/chatty-channels/blob/main/logos/chatty-channels-1.png)
 
-The Control Room is where the AI Producer lives and where you interact with both the producer and your project. This first draft of the interface features a vintage-inspired design reminiscent of classic Neve 1073 console styling, complete with authentic VU meters for monitoring levels. The chat interface allows for natural language communication with the AI Producer, who can then orchestrate changes across your session.
+The Control Room is where the AI Producer (known as "soundsmith" or "smitty") lives and where you interact with both the producer and your project. The interface features vintage-inspired design reminiscent of classic Neve 1073 console styling, complete with authentic TEAC-style VU meters for monitoring levels. The chat interface allows for natural language communication with the AI Producer, who can then orchestrate changes across your session.
 
 ---
 
@@ -73,8 +73,8 @@ The Control Room is where the AI Producer lives and where you interact with both
 | Target                | Core risk retired                                       | Key deliverable                             | Status |
 | --------------------- | ------------------------------------------------------- | ------------------------------------------- | ------ |
 | **v0.5**              | H1 AppleScript round‑trip, H3 OSC latency, H4 PID maths | Kick‑track closed‑loop demo                 | ✅ Completed Apr 27, 2025 |
-| **v0.6 (🚧 current)** | H2 track‑UUID mapping, H5 telemetry scaling             | Auto‑follow VU meters, 64‑track stress test | In progress |
-| **v0.7**              | H3 UDP retry logic                                      | Loss‑tolerant OSC transport                 | Planned |
+| **v0.6**              | H2 track‑UUID mapping, UI functionality                 | VU meters, Multi-LLM provider support       | ✅ Completed May 7, 2025 |
+| **v0.7 (🚧 current)** | H3 UDP retry logic                                      | Real-time VU Meter Data & OSC Reliability   | In progress |
 | **v0.8**              | H5 lazy FFT, band‑energy payload                        | Telemetry v1.1                              | Planned |
 | **v0.9**              | H6 LLM JSON schema                                      | Strict validator + prompt templates         | Planned |
 | **v1.0 (ALPHA)**      | Full NVFE pass                                          | Public alpha release                        | Planned |
@@ -133,14 +133,22 @@ xcodebuild -project ChattyChannels.xcodeproj -scheme ControlRoom
    - In scheme settings, set the executable to Logic Pro.app
    - Run the scheme to launch Logic Pro with the plugin in debug mode
 
-### Features Implemented in v0.5
+### Features Implemented in Latest Versions
 
+#### v0.5 Features
 - Natural language control of Logic Pro parameters
 - Real-time adjustments with PID control for precision
 - Low-latency OSC communication (182ms round-trip time)
 - AppleScript integration with playback safety mechanisms
 - Direct AI command processing pipeline
 - Comprehensive documentation and test coverage
+
+#### v0.6 Features
+- Image-based stereo VU meters (TEAC style) with realistic needle ballistics
+- Peak indicator LED implementation
+- Multi-LLM provider support (OpenAI, Gemini, Claude, Grok)
+- "Soundsmith" producer persona (responds to "smitty")
+- Configuration system for provider selection
 
 ---
 
