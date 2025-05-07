@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>activeLLMProvider</key>
+	<string>openai</string> <!-- claude, gemini, grok or openai -->
+	<key>openaiApiKey</key>
+	<string>OPENAI_KEY_GOES_HERE</string>
+	<key>openaiModelName</key>
+	<string>o3</string>
+	<key>geminiApiKey</key>
+	<string>GEMINI_KEY_GOES_HERE</string>
+	<key>geminiModelName</key>
+	<string>gemini-2.5-pro-preview-05-06</string>
+	<key>claudeApiKey</key>
+	<string>ANTHROPIC_KEY_GOES_HERE</string>
+	<key>claudeModelName</key>
+	<string>claude-3-7-sonnet-20250219</string>
+	<key>grokApiKey</key>
+	<string>GROK_KEY_GOES_HERE</string>
+	<key>grokModelName</key>
+	<string>grok-3</string>
+	<key>ProjectDataDirectory</key>
+	<string>/Users/nickfox137/Documents/chatty-channel</string>
+</dict>
+</plist>

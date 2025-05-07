@@ -1,335 +1,334 @@
-//
-//  NetworkService.swift
-//  ChattyChannels
-//
-//  Created : 2024-03-14
-//  Revised : 2025-04-27 – switched backend from Google Gemini to OpenAI o3
-//
-//  ────────────────────────────────────────────────────────────────────────────
-//  Production-quality network layer for Chatty Channels.
-//
-//  ‣ Purpose
-//      Handles all communication with OpenAI's Chat Completion endpoint.
-//      • Securely loads the API key from Config.plist
-//      • Sends system + user messages to the o3 model
-//      • Performs exhaustive error handling and logging
-//      • Decodes the assistant's reply into a plain String
-//
-//  ‣ Usage
-//      let reply = try await networkService.sendMessage("Hello, world!")
-//
-//  ‣ Threading
-//      This type is an @MainActor ObservableObject so it is safe to inject
-//      into SwiftUI views. All network work happens off the main thread via
-//      URLSession; the public API returns to the caller on the main actor.
-//
+// ChattyChannels/ChattyChannels/NetworkService.swift
 
 import Foundation
 import Combine
 import os.log
 
-// MARK: - Error definition
-// ---------------------------------------------------------------------------
-
-/// Errors thrown by ``NetworkService``.
+/// Defines errors that can occur during network operations with LLM providers.
 ///
-/// These granular cases allow the UI to present actionable feedback.
+/// These errors provide specific details about failures, aiding in debugging and
+/// user feedback.
 ///
-/// ## Cases
-/// - `invalidURL`: The supplied API URL is malformed or invalid
-/// - `requestFailed`: General request preparation or execution failure
-/// - `invalidResponse`: Server responded with non-success status code
-/// - `decodingFailed`: Response data could not be decoded into expected format
-/// - `networkUnreachable`: Network connectivity issues prevented request completion
-///
-/// ## Example Usage
-/// ```swift
-/// do {
-///     let response = try await networkService.sendMessage("Hello")
-/// } catch let error as NetworkError {
-///     switch error {
-///     case .invalidResponse(let statusCode, let details):
-///         print("Server error \(statusCode): \(details)")
-///     case .networkUnreachable:
-///         print("Check your internet connection")
-///     default:
-///         print("Error: \(error.localizedDescription)")
-///     }
-/// }
-/// ```
+/// ## Topics
+/// ### Error Cases
+/// - ``NetworkError/invalidURL``
+/// - ``NetworkError/requestFailed(_:)``
+/// - ``NetworkError/invalidResponse(_:_:)``
+/// - ``NetworkError/decodingFailed(_:)``
+/// - ``NetworkError/networkUnreachable(_:)``
+/// ### Error Descriptions
+/// - ``LocalizedError/errorDescription``
 enum NetworkError: Error, LocalizedError {
-
-    /// The supplied URL is malformed.
+    /// Indicates that the API endpoint URL is malformed or invalid.
     case invalidURL
-
-    /// Something went wrong before we received an HTTP response.
+    /// A general failure occurred during request preparation or execution, before a response was received.
     case requestFailed(String)
-
-    /// The server answered, but with a non-2xx status code.
+    /// The server responded, but with a non-2xx HTTP status code, indicating an API error.
     case invalidResponse(Int, String)
-
-    /// We received data, but failed to decode it.
+    /// The server's response data could not be decoded into the expected format.
     case decodingFailed(String)
-
-    /// No Internet connection or TLS/transport failure.
+    /// A network connectivity issue (e.g., no internet, DNS failure, TLS error) prevented the request.
     case networkUnreachable(String)
 
-    // : LocalizedError -------------------------------------------------------
     var errorDescription: String? {
         switch self {
-        case .invalidURL:                                "Invalid API URL"
-        case .requestFailed(let message):                "Request failed: \(message)"
-        case .invalidResponse(let code, let details):    "Server error (HTTP \(code)): \(details)"
-        case .decodingFailed(let details):               "Failed to decode response: \(details)"
-        case .networkUnreachable(let message):           "Network error: \(message)"
+        case .invalidURL:                                "Invalid API URL."
+        case .requestFailed(let message):                "Request failed: \(message)."
+        case .invalidResponse(let code, let details):    "Server error (HTTP \(code)): \(details)."
+        case .decodingFailed(let details):               "Failed to decode response: \(details)."
+        case .networkUnreachable(let message):           "Network error: \(message)."
         }
     }
 }
 
-// MARK: - OpenAI DTOs
-// ---------------------------------------------------------------------------
-
-/// A single chat message in the OpenAI Chat API format.
+/// Manages communication with a configured Large Language Model (LLM) provider.
 ///
-/// Represents one message in a conversation, with a role (system, user, or assistant)
-/// and the message content.
-private struct OAChatMessage: Codable {
-    /// The role of the message sender (system, user, assistant)
-    let role: String
-    
-    /// The actual content of the message
-    let content: String
-}
-
-/// Request body for the OpenAI Chat Completion API.
+/// `NetworkService` acts as the primary interface for the application to send messages
+/// to an LLM and receive responses. It is designed to be an `@MainActor ObservableObject`,
+/// making it suitable for use in SwiftUI views.
 ///
-/// Contains the model identifier and an array of messages representing the conversation history.
-private struct OAChatRequest: Encodable {
-    /// The model identifier to use for completion (e.g., "o3")
-    let model: String
-    
-    /// An array of messages representing the conversation history
-    let messages: [OAChatMessage]
-}
-
-/// Decodable wrapper for the OpenAI Chat API response.
+/// ## Overview
+/// The service performs the following key functions:
+/// - **Configuration Loading:** On initialization, it reads `Config.plist` to determine
+///   the active LLM provider (e.g., OpenAI, Gemini) and its associated API key and
+///   model name.
+/// - **Provider Abstraction:** It uses an instance conforming to the ``LLMProvider``
+///   protocol to handle the specifics of API communication. This allows `NetworkService`
+///   to remain agnostic to the details of individual LLM provider APIs.
+/// - **Message Sending:** Provides a ``sendMessage(_:)`` method to send user input
+///   to the active LLM provider, along with a predefined system prompt.
+/// - **Error Handling:** Propagates errors (typically ``NetworkError``) from the
+///   underlying provider or its own operations.
+/// - **Logging:** Uses `os.log` for detailed diagnostic logging.
 ///
-/// This structure models the expected response format from the API, focusing
-/// on extracting the message content from the assistant.
-private struct OAChatResponse: Decodable {
-    /// A choice returned by the API, containing a message
-    struct Choice: Decodable {
-        /// The message part of a choice
-        struct ChoiceMessage: Decodable { 
-            /// The content of the message
-            let content: String 
-        }
-        /// The message from the assistant
-        let message: ChoiceMessage
-    }
-    /// Array of choices returned by the API
-    let choices: [Choice]
-}
-
-// MARK: - Network service
-// ---------------------------------------------------------------------------
-
-/// Service responsible for talking to OpenAI's **o3** model.
+/// ## Configuration (`Config.plist`)
+/// `NetworkService` relies on a `Config.plist` file in the main bundle for its setup.
+/// The following keys are expected:
+/// - `activeLLMProvider` (String): The name of the LLM provider to use (e.g., "OpenAI", "Gemini", "Claude", "Grok"). Defaults to "OpenAI" if missing or empty.
+/// - `[providerName]ApiKey` (String): The API key for the respective provider. For example, `openaiApiKey`, `geminiApiKey`.
+/// - `[providerName]ModelName` (String, Optional): The specific model to use for the provider. For example, `openaiModelName`, `geminiModelName`. If omitted, the provider will use its internal default model.
 ///
-/// The NetworkService class handles all communication with OpenAI's Chat Completion API endpoint.
-/// It provides a clean, robust interface for sending user messages to the AI model and receiving
-/// formatted responses for audio parameter control.
-///
-/// - Important: This service requires a valid API key stored in Config.plist under the key `openaiApiKey`.
-///
-/// ## Features
-/// - Securely loads API credentials from Config.plist
-/// - Formats requests according to the OpenAI API specifications
-/// - Handles parameter change requests like gain adjustments
-/// - Performs comprehensive error handling with detailed diagnostics
-/// - Thread-safe design with async/await support
-///
-/// ## Usage Example
+/// ## Usage
 /// ```swift
-/// // Create a service
-/// let networkService = NetworkService()
+/// @MainActor
+/// class MyViewModel: ObservableObject {
+///     private let networkService = NetworkService()
+///     @Published var aiResponse: String = ""
+///     @Published var errorMessage: String?
 ///
-/// // Use in an async context
-/// Task {
-///     do {
-///         let response = try await networkService.sendMessage("Set gain to -3dB")
-///         print("AI responded: \(response)")
-///     } catch {
-///         print("Error: \(error)")
+///     func askAI(prompt: String) async {
+///         do {
+///             self.aiResponse = try await networkService.sendMessage(prompt)
+///             self.errorMessage = nil
+///         } catch let error as NetworkError {
+///             self.errorMessage = error.localizedDescription
+///             // Handle specific NetworkError cases if needed
+///         } catch {
+///             self.errorMessage = "An unexpected error occurred: \(error.localizedDescription)"
+///         }
 ///     }
 /// }
 /// ```
 ///
-/// ## Threading
-/// This type is an `@MainActor ObservableObject` so it is safe to inject
-/// into SwiftUI views. All network operations happen off the main thread via
-/// URLSession; the public API returns to the caller on the main actor.
+/// ## Topics
+/// ### Initializers
+/// - ``init()``
+/// ### Sending Messages
+/// - ``sendMessage(_:)``
+/// ### Error Handling
+/// - ``NetworkError``
 @MainActor
 final class NetworkService: ObservableObject {
 
-    // MARK: Configuration ----------------------------------------------------
+    // MARK: Configuration
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "ChattyChannelsApp", // More specific subsystem
+                               category: "NetworkService")
 
-    /// Subsystem logger for diagnostics visible in Console.app.
-    ///
-    /// Uses the app's bundle identifier as the subsystem and "NetworkService" as the category
-    /// for efficient filtering in Console.app.
-    private let logger  = Logger(subsystem: Bundle.main.bundleIdentifier ?? "ChattyChannels",
-                                 category:  "NetworkService")
+    /// The currently active LLM provider instance.
+    /// This is determined during initialization based on `Config.plist`.
+    private var activeProvider: LLMProvider!
+    
+    /// The system instruction sent to the LLM with every user message.
+    /// This prompt guides the LLM's behavior, such as its persona or response format,
+    /// particularly for generating JSON commands for audio parameter control.
+    private let systemInstruction = """
+        you are soundsmith (always lowercase, also answers to smitty), a world-class music producer with decades of experience crafting multi-platinum records across genres. you're currently in a real-time studio session with the musician. your communication style should be confident, decisive, and efficient - like a top producer who values clarity and results.
 
-    /// Model to be used for all requests. Adjust here if you upgrade.
-    ///
-    /// Currently set to "o3", OpenAI's efficient language model optimized for
-    /// interaction tasks.
-    private let modelName = "o4-mini"
+        core capabilities:
+        1. parameter adjustments via json commands
+        2. musical analysis and creative direction
+        3. professional workflow management
+        4. genre expertise across the musical spectrum
 
-    /// Stable Chat Completion endpoint.
-    ///
-    /// This is the standard OpenAI chat completions endpoint that works with various models.
-    private let endpoint  = "https://api.openai.com/v1/chat/completions"
+        parameter control system:
+        when the musician requests parameter changes, respond ONLY with properly formatted json:
 
-    // MARK: Initialisation ---------------------------------------------------
+        1. for main gain/volume/level adjustments:
+           {"command": "set_parameter", "parameter_id": "GAIN", "value": <float_value>}
 
-    /// Initializes a new NetworkService instance.
-    ///
-    /// No parameters are required as the service loads its configuration from Config.plist.
-    init() {}
+        2. for other parameter adjustments (when id is known):
+           {"command": "set_parameter", "parameter_id": "<known_parameter_id>", "value": <float_value>}
 
-    /// Reads the OpenAI key from *Config.plist* (key: **openaiApiKey**).
+        parameter adjustment guidelines:
+        - for exact value requests (e.g., "set gain to -6db"): use the specified value
+        - for relative adjustments (e.g., "increase gain by 3db"): calculate from current value
+        - for qualitative requests (e.g., "make it louder"): use professional judgment to select appropriate increment (+3db for "louder", +6db for "much louder")
+        - if parameter id is unknown or request is unclear: ask for clarification on specific parameter
+
+        analysis responses:
+        when providing feedback on audio, structure your response:
+        1. initial impression (immediate reaction to what you're hearing)
+        2. technical assessment (mix balance, frequency issues, dynamics)
+        3. creative direction (specific suggestions for improvement)
+        4. next steps (clear actionable recommendations)
+
+        conversational guidelines:
+        - keep responses concise and actionable - studio time is valuable
+        - use technical terminology appropriate for professional musicians
+        - focus on solutions rather than problems
+        - reference relevant professional standards and techniques
+        - when appropriate, mention specific artists/productions as reference points
+        - always maintain focus on delivering a commercially competitive final product
+
+        memory:
+        - maintain awareness of the current project state
+        - remember previous adjustments and their impact
+        - track overall direction and musician's preferences
+        - adapt recommendations based on established project goals
+
+        if the musician asks a question unrelated to parameter control, respond conversationally but efficiently, maintaining your role as their collaborative producer focused on creating a hit record. Be fun, but not overbearing.
+        """
+
+    // MARK: Initialisation
+    /// Initializes a new `NetworkService` instance.
     ///
-    /// Securely retrieves the API key from the app's configuration file.
-    /// Fails if the key is missing or empty.
+    /// The initializer reads `Config.plist` to determine the active LLM provider
+    /// (specified by `activeLLMProvider` key, defaulting to "openai"). It then loads the
+    /// corresponding API key (e.g., `openaiApiKey`) and an optional model name
+    /// (e.g., `openaiModelName`).
     ///
-    /// - Returns: The secret key as a `String`.
-    /// - Throws: ``NetworkError.requestFailed(_:)`` when the key is missing or invalid.
-    private func loadApiKey() throws -> String {
-        guard
-            let path   = Bundle.main.path(forResource: "Config", ofType: "plist"),
-            let config = NSDictionary(contentsOfFile: path),
-            let key    = config["openaiApiKey"] as? String,
-            !key.isEmpty
-        else {
-            logger.error("Missing or invalid OpenAI API key in Config.plist")
-            throw NetworkError.requestFailed("Missing or invalid API key")
+    /// If `Config.plist` is missing, or if the API key for the active provider cannot be
+    /// loaded, `activeProvider` will remain `nil`, and subsequent calls to
+    /// ``sendMessage(_:)`` will fail with a ``NetworkError/requestFailed(_:)`` error.
+    /// It logs critical errors if initialization of the active provider fails.
+    init() {
+        guard let config = loadConfigPlist() else {
+            logger.critical("CRITICAL: Config.plist not found or unreadable. NetworkService will not function.")
+            return
+        }
+
+        let providerNameFromConfig = config["activeLLMProvider"] as? String
+        let providerNameToUse = (providerNameFromConfig?.isEmpty ?? true) ? "openai" : providerNameFromConfig!
+
+        if providerNameFromConfig == nil || providerNameFromConfig!.isEmpty {
+            logger.warning("'activeLLMProvider' in Config.plist is missing or empty. Defaulting to 'openai'.")
+        }
+        
+        logger.info("Attempting to initialize with LLM Provider: \(providerNameToUse)")
+
+        var providerInitialized = false
+
+        // Helper to load model name for the current provider's configuration key (e.g., "openai" -> "openaiModelName")
+        func loadModelName(forProviderPlistKey providerKey: String) -> String? {
+            let modelConfigKey = "\(providerKey.lowercased())ModelName" // e.g., "openaiModelName"
+            if let modelName = config[modelConfigKey] as? String, !modelName.isEmpty {
+                logger.info("Using model '\(modelName)' for \(providerKey) from Config.plist (key: \(modelConfigKey)).")
+                return modelName
+            } else {
+                logger.info("No specific model name found for \(providerKey) in Config.plist (key: \(modelConfigKey)). Provider will use its default model.")
+                return nil
+            }
+        }
+
+        switch providerNameToUse.lowercased() {
+            case "openai":
+                let apiKeyConfigKey = "openaiApiKey"
+                do {
+                    let apiKey = try loadApiKey(from: config, forProviderConfigKey: apiKeyConfigKey)
+                    let modelName = loadModelName(forProviderPlistKey: "openai")
+                    self.activeProvider = OpenAIProvider(apiKey: apiKey, modelName: modelName)
+                    logger.info("Successfully initialized with OpenAIProvider.")
+                    providerInitialized = true
+                } catch {
+                    logger.error("Failed to initialize OpenAIProvider: \(error.localizedDescription)")
+                }
+            case "gemini":
+                let apiKeyConfigKey = "geminiApiKey"
+                do {
+                    let apiKey = try loadApiKey(from: config, forProviderConfigKey: apiKeyConfigKey)
+                    let modelName = loadModelName(forProviderPlistKey: "gemini")
+                    // GeminiProvider's init has a default model if modelName is nil
+                    self.activeProvider = GeminiProvider(apiKey: apiKey, modelName: modelName)
+                    logger.info("Successfully initialized with GeminiProvider.")
+                    providerInitialized = true
+                } catch {
+                    logger.error("Failed to initialize GeminiProvider: \(error.localizedDescription)")
+                }
+            case "claude":
+                let apiKeyConfigKey = "claudeApiKey"
+                do {
+                    let apiKey = try loadApiKey(from: config, forProviderConfigKey: apiKeyConfigKey)
+                    let modelName = loadModelName(forProviderPlistKey: "claude")
+                    self.activeProvider = ClaudeProvider(apiKey: apiKey, modelName: modelName)
+                    logger.info("Successfully initialized with ClaudeProvider.")
+                    providerInitialized = true
+                } catch {
+                    logger.error("Failed to initialize ClaudeProvider: \(error.localizedDescription)")
+                }
+            case "grok":
+                let apiKeyConfigKey = "grokApiKey"
+                do {
+                    let apiKey = try loadApiKey(from: config, forProviderConfigKey: apiKeyConfigKey)
+                    let modelName = loadModelName(forProviderPlistKey: "grok")
+                    self.activeProvider = GrokProvider(apiKey: apiKey, modelName: modelName)
+                    logger.info("Successfully initialized with GrokProvider.")
+                    providerInitialized = true
+                } catch {
+                    logger.error("Failed to initialize GrokProvider: \(error.localizedDescription)")
+                }
+            default:
+                logger.error("Unsupported provider '\(providerNameToUse)' in Config.plist or default. NetworkService may not function.")
+        }
+
+        if !providerInitialized {
+            logger.critical("CRITICAL: Active LLM provider '\(providerNameToUse)' could not be initialized. Check API key ('\(providerNameToUse.lowercased())ApiKey') and model name ('\(providerNameToUse.lowercased())ModelName') in Config.plist. NetworkService will not function.")
+        }
+    }
+    
+    /// Internal initializer for testing purposes.
+    /// Allows injecting a specific `LLMProvider` instance, bypassing `Config.plist` loading.
+    /// - Parameter provider: The `LLMProvider` instance to use for this service.
+    internal init(provider: LLMProvider) {
+        self.activeProvider = provider
+        logger.info("NetworkService initialized with injected provider: \(String(describing: type(of: provider)))")
+    }
+
+    /// Loads the `Config.plist` file from the main bundle.
+    /// - Returns: An `NSDictionary` representing the plist content, or `nil` if not found.
+    private func loadConfigPlist() -> NSDictionary? {
+        guard let path = Bundle.main.path(forResource: "Config", ofType: "plist") else {
+            logger.error("Config.plist not found in the main bundle.")
+            return nil
+        }
+        return NSDictionary(contentsOfFile: path)
+    }
+
+    /// Loads an API key from the provided configuration dictionary.
+    /// - Parameters:
+    ///   - config: The `NSDictionary` loaded from `Config.plist`.
+    ///   - keyName: The key for the API key string in the plist (e.g., "openaiApiKey").
+    /// - Returns: The API key as a `String`.
+    /// - Throws: ``NetworkError/requestFailed(_:)`` if the key is missing or the value is empty.
+    private func loadApiKey(from config: NSDictionary, forProviderConfigKey keyName: String) throws -> String {
+        guard let key = config[keyName] as? String, !key.isEmpty else {
+            logger.error("Missing or invalid API key for '\(keyName)' in Config.plist.")
+            throw NetworkError.requestFailed("Missing or invalid API key for '\(keyName)' in Config.plist.")
         }
         return key
     }
 
-    // MARK: Public API -------------------------------------------------------
-
-    /// Sends a user message to **o3** and returns the assistant's reply.
+    // MARK: Public API
+    /// Sends a user message to the currently active LLM provider and returns the assistant's reply.
     ///
-    /// This method provides the primary interface for sending messages to the AI model.
-    /// It handles the entire request lifecycle:
-    /// 1. Validates input and prepares the request
-    /// 2. Performs the network request asynchronously
-    /// 3. Validates the HTTP response
-    /// 4. Decodes the JSON response
-    /// 5. Returns the extracted message content
+    /// This method first checks if an ``activeProvider`` has been successfully initialized.
+    /// It then ensures the input message is not empty before delegating the call to the
+    /// `sendMessage(_:systemPrompt:)` method of the ``activeProvider``.
+    /// The predefined ``systemInstruction`` is passed along with the user's input.
     ///
-    /// The system prompts the AI to respond with JSON parameter commands for audio controls,
-    /// particularly for gain/volume adjustments.
-    ///
-    /// - Parameter input: End-user text message to send to the AI.
-    /// - Returns: The assistant's text reply, which may be JSON for parameter changes or plain text.
-    /// - Throws: ``NetworkError`` for connectivity, HTTP or decoding failures.
+    /// - Parameter input: The end-user's text message to be sent to the LLM.
+    /// - Returns: The LLM assistant's text reply, typically trimmed of whitespace.
+    /// - Throws: A ``NetworkError`` if:
+    ///   - The `activeProvider` is not initialized (due to configuration issues).
+    ///   - The `input` string is empty after trimming whitespace.
+    ///   - The underlying call to the `activeProvider`'s `sendMessage` method fails.
+    /// - Note: The `@discardableResult` attribute indicates that the caller is not required
+    ///         to use the returned `String`.
     @discardableResult
     func sendMessage(_ input: String) async throws -> String {
-
-        //----------------------------------------------------------------------
-        // 1. Assemble request
-        //----------------------------------------------------------------------
-
-        // First, ensure input is not empty to prevent sending an empty command
-        guard !input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            logger.error("Attempted to send empty message")
-            throw NetworkError.requestFailed("Cannot send empty message")
+        guard let provider = activeProvider else {
+            logger.critical("CRITICAL: sendMessage called but activeProvider is not initialized. Check Config.plist, API keys, and model names.")
+            throw NetworkError.requestFailed("NetworkService not properly initialized. Active provider is missing. Review configuration.")
         }
 
-        let apiKey = try loadApiKey()
-        guard let url = URL(string: endpoint) else { throw NetworkError.invalidURL }
+        let trimmedInput = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedInput.isEmpty else {
+            logger.error("Attempted to send an empty message.")
+            throw NetworkError.requestFailed("Cannot send an empty message.")
+        }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(apiKey)",  forHTTPHeaderField: "Authorization")
-
-        // System instruction remains identical to the previous Gemini version.
-        let systemInstruction = """
-        You are an AI assistant integrated into a music production environment.
-        When the user asks you to change the main gain, volume, or level parameter, respond ONLY with a JSON object in the following format, ALWAYS using "GAIN" as the parameter_id:
-        {"command": "set_parameter", "parameter_id": "GAIN", "value": <float_value>}
-        Replace <float_value> with the numerical value requested.
-        For example, if the user says "Set gain to -6dB", respond with:
-        {"command": "set_parameter", "parameter_id": "GAIN", "value": -6.0}
-        If the user asks to reduce or decrease gain by a specific amount, subtract that amount from the current value.
-        If the user asks to increase gain by a specific amount, add that amount to the current value.
-        If the user asks to change a *different* specific parameter (that isn't gain/volume/level), use its correct ID if you know it.
-        If the user asks a general question or makes a request you cannot fulfil with a parameter change, respond normally in plain text.
-        """
-
-        // Encode request body using Codable for type safety.
-        let chatRequest = OAChatRequest(
-            model: modelName,
-            messages: [
-                .init(role: "system", content: systemInstruction),
-                .init(role: "user",   content: input)
-            ],
-        )
-        request.httpBody = try JSONEncoder().encode(chatRequest)
-
-        logger.info("🔼 Sending to \(self.modelName): \"\(input, privacy: .public)\"")
-
-
-        //----------------------------------------------------------------------
-        // 2. Perform request
-        //----------------------------------------------------------------------
+        let providerType = String(describing: type(of: provider))
+        logger.info("🔼 Sending to \(providerType): \"\(trimmedInput, privacy: .public)\"")
 
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-
-            //------------------------------------------------------------------
-            // 3. HTTP-level validation
-            //------------------------------------------------------------------
-
-            guard let http = response as? HTTPURLResponse else {
-                throw NetworkError.invalidResponse(0, "No HTTP response")
-            }
-            let raw = String(data: data, encoding: .utf8) ?? "«empty body»"
-
-            guard (200...299).contains(http.statusCode) else {
-                logger.error("OpenAI responded with \(http.statusCode): \(raw)")
-                throw NetworkError.invalidResponse(http.statusCode, raw)
-            }
-
-            //------------------------------------------------------------------
-            // 4. Decode JSON
-            //------------------------------------------------------------------
-
-            let chatResponse: OAChatResponse
-            do {
-                chatResponse = try JSONDecoder().decode(OAChatResponse.self, from: data)
-            } catch {
-                logger.error("Decoding failed: \(error.localizedDescription)")
-                throw NetworkError.decodingFailed(raw)
-            }
-
-            guard let reply = chatResponse.choices.first?.message.content else {
-                throw NetworkError.decodingFailed("No choices in response.")
-            }
-
-            logger.info("🔽 Received from \(self.modelName): \"\(reply, privacy: .public)\"")
-            return reply.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        // Network / transport errors -----------------------------------------
-        } catch let urlError as URLError {
-            throw NetworkError.networkUnreachable(
-                "\(urlError.localizedDescription) (code \(urlError.code.rawValue))"
-            )
+            let reply = try await provider.sendMessage(trimmedInput, systemPrompt: self.systemInstruction)
+            logger.info("🔽 Received from \(providerType): \"\(reply, privacy: .public)\"")
+            return reply
+        } catch let error as NetworkError {
+            logger.error("Error received from \(providerType): \(error.localizedDescription)")
+            throw error // Re-throw known NetworkError
+        } catch {
+            logger.error("An unknown error occurred while communicating with \(providerType): \(error.localizedDescription)")
+            throw NetworkError.requestFailed("An unknown error occurred with \(providerType): \(error.localizedDescription)")
         }
     }
 }

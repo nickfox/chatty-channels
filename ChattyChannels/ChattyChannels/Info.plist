@@ -4,5 +4,9 @@
 <dict>
 	<key>UIAccessibilityEnabled</key>
 	<true/>
+	<key>CFBundleDisplayName</key>
+	<string>Chatty Channels Control Room</string>
+	<key>CFBundleName</key>
+	<string>ChattyChannels</string>
 </dict>
 </plist>
