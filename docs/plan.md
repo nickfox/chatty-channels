@@ -60,11 +60,10 @@
 
 ---
 
-## 5 · Current sprint focus  (2024‑05‑12 → v0.6)
+## 5 · Current sprint focus  (2025‑05‑07 → v0.7)
 
-UI-VU-02 (TEAC VU meter) - image-based VU meter implementation with proper needle physics and peak indicator. See detailed plan in `/docs/vu-meter-implementation.md`.
-
-**Status Update**: TEAC VU meter image (teac_vu_meter.png, 728x426px) has been added to the Xcode project resources.
+**Focus:** Integrate real-time OSC audio level data from AIplayer plugin into the VU meters. Implement robust OSC message handling (retry logic, sequence checking).
+**Tasks:** T-05 (Retry/Order), VU-OSC-01 (VU Meter OSC Integration)
 
 ---
 
@@ -74,13 +73,13 @@ UI-VU-02 (TEAC VU meter) - image-based VU meter implementation with proper needl
 | Version | Headline goal | Key new items | Status |
 |---------|---------------|---------------|--------|
 | **v0.5** *(DEV)* | Kick‑track PID loop proven | T‑01…T‑07 | ✅ Completed Apr 27, 2025 |
-| **v0.6** | TEAC VU meter implementation (image-based) | UI-VU-02 | In progress |
-| **v0.7** | Multi‑track OSC stress‑test (64 ch), retry logic hardened | T‑05, T‑06, Net‑Bench‑02 | Planned |
+| **v0.6** | VU Meters & Multi-Provider Support | UI-VU-02, LLM-Providers | ✅ Completed May 7, 2025 |
+| **v0.7** | Real-time VU Meter Data & OSC Reliability | T‑05, VU-OSC-01 | Planned |
 | **v0.8** | Telemetry v1.1 (band‑energy) + Lazy FFT | T‑08, T‑09 | Planned |
 | **v0.9** | LLM JSON schema enforcement & prompt templates | T‑10, AI‑Prompt‑02 | Planned |
 | **v1.0** *(ALPHA)* | Full NVFE EQ/Compression cycle on demo project | Backlog T‑11…T‑18 | Planned |
 
-> **Note**  First milestone successfully completed. Planning v0.6 for May 12, 2025.
+> **Note**  v0.6 completed, adding VU meters and support for multiple LLM backends. Planning v0.7.
 
 ---
 
