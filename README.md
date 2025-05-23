@@ -98,7 +98,7 @@ The Control Room is where the AI Producer (known as "soundsmith" or "smitty") li
 ```bash
 git clone https://github.com/nickfox/chatty-channels.git
 cd chatty-channels
-Scripts/bootstrap.sh         # pulls JUCE, installs git‑hooks
+git submodule update --init --recursive # pulls JUCE
 ```
 
 ### Building the Control Room App
