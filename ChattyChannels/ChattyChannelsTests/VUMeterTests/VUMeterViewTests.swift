@@ -103,14 +103,14 @@ final class VUMeterViewTests: XCTestCase {
     }
     
     // Test level service initialization
+    @MainActor
     func testLevelServiceInitialization() {
-        let oscService = OSCService()
-        let levelService = LevelMeterService(oscService: oscService)
+        let levelService = LevelMeterService()
         
         // Verify default values
         XCTAssertEqual(levelService.leftChannel.channel, AudioLevel.AudioChannel.left, "Left channel should be initialized correctly")
         XCTAssertEqual(levelService.rightChannel.channel, AudioLevel.AudioChannel.right, "Right channel should be initialized correctly")
-        XCTAssertEqual(levelService.currentTrack, "No Track Selected", "Default track name should be set correctly")
+        XCTAssertEqual(levelService.currentTrack, "Master Bus", "Default track name should be set correctly")
     }
 }
 

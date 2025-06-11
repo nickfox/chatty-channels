@@ -20,8 +20,9 @@ struct ContentView: View {
     /// The service for communicating with the AI.
     @EnvironmentObject private var networkService: NetworkService
     
-    /// The service for the VU meter display.
-    @StateObject private var levelMeterService = LevelMeterService(oscService: OSCService())
+    // Services injected from ChattyChannelsApp
+    @EnvironmentObject private var levelMeterService: LevelMeterService
+    @EnvironmentObject private var calibrationService: CalibrationService
     
     /// The current text in the chat input field.
     @State private var chatInput = ""
@@ -32,7 +33,7 @@ struct ContentView: View {
     /// The view's body, defining the user interface layout and behavior.
     var body: some View {
         // Wrap everything in a ZStack to put the wooden strip above everything
-        ZStack(alignment: .top) { // Removed explicit return
+        ZStack(alignment: .top) {
             // Main content
             GeometryReader { geometry in
                 VStack(spacing: 0) {
@@ -64,7 +65,7 @@ struct ContentView: View {
                         .frame(maxWidth: .infinity) // Ensure VUMeterView takes full available width
                         // Removed fixed height to allow natural sizing
                     
-// Horizontal divider - Neve console style with padding on sides
+                    // Horizontal divider - Neve console style with padding on sides
                     HStack {
                         Spacer()
                             .frame(width: 20)
@@ -76,62 +77,62 @@ struct ContentView: View {
                             .frame(width: 20)
                     }
                     .padding(.vertical, 5) // Add some vertical spacing around the divider
+                    
+                    // Note: As per user request, we've removed the calibration status UI that appeared below the divider
+                    // Any calibration errors will now only be logged, not displayed in the UI
+
                     // Main chat interface
                     VStack(spacing: 0) {
-                    ScrollView {
-                        ScrollViewReader { scrollView in
-                            ZStack {
-                                // Background that fills entire scroll area
-                                Color(red: 40/255, green: 41/255, blue: 44/255) // Xcode dark background
-                                    .ignoresSafeArea()
-                                
-                                // Messages container
-                                VStack(alignment: .leading, spacing: 12) {
-                                    ForEach(chatModel.messages) { message in
-                                        MessageBubble(message: message)
-                                            .id(message.id)
-                                    }
+                        ScrollView {
+                            ScrollViewReader { scrollView in
+                                ZStack {
+                                    // Background that fills entire scroll area
+                                    Color(red: 40/255, green: 41/255, blue: 44/255) // Xcode dark background
+                                        .ignoresSafeArea()
                                     
-                                    // Spacer to push content to the top when there are few messages
-                                    if !chatModel.messages.isEmpty {
-                                        Spacer(minLength: 20)
+                                    // Messages container
+                                    VStack(alignment: .leading, spacing: 12) {
+                                        ForEach(chatModel.messages) { message in
+                                            MessageBubble(message: message)
+                                                .id(message.id)
+                                        }
+                                        
+                                        // Spacer to push content to the top when there are few messages
+                                        if !chatModel.messages.isEmpty {
+                                            Spacer(minLength: 20)
+                                        }
+                                    }
+                                    .padding(.vertical, 12)
+                                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .leading)
+                                }
+                                .onChange(of: chatModel.messages.count) { _, _ in
+                                    withAnimation {
+                                        scrollView.scrollTo(chatModel.messages.last?.id, anchor: .bottom)
                                     }
                                 }
-                                // .padding(.horizontal, 16) // Horizontal padding handled by ScrollView
-                                .padding(.vertical, 12)
-                                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .leading)
-                            }
-                            .onChange(of: chatModel.messages.count) { _, _ in
-                                withAnimation {
-                                    scrollView.scrollTo(chatModel.messages.last?.id, anchor: .bottom)
-                                }
                             }
                         }
-                    }
-                    .background(Color(red: 40/255, green: 41/255, blue: 44/255)) // Xcode dark background
-                    .padding(.horizontal, 20) // Consistent horizontal padding
-                    // .padding(.trailing, 8) // Extra padding for scrollbar - removed for now
-                    
-                    // Loading indicator
-                    if chatModel.isLoading {
-                        HStack {
-                            Spacer()
-                            ProgressView()
-                                .scaleEffect(0.7)
-                                .padding(.trailing)
-                        }
-                        .padding(.top, 4)
-                    }
-                    
-                    // Text input field
-                    GrowingTextInput(text: $chatInput, onSubmit: sendChat)
+                        .background(Color(red: 40/255, green: 41/255, blue: 44/255)) // Xcode dark background
                         .padding(.horizontal, 20) // Consistent horizontal padding
-                        .padding(.vertical)       // Keep default vertical padding
-} // <<< Closing brace for inner VStack (Chat Interface)
+                        
+                        // Loading indicator
+                        if chatModel.isLoading {
+                            HStack {
+                                Spacer()
+                                ProgressView()
+                                    .scaleEffect(0.7)
+                                    .padding(.trailing)
+                            }
+                            .padding(.top, 4)
+                        }
+                        
+                        // Text input field
+                        GrowingTextInput(text: $chatInput, onSubmit: sendChat)
+                            .padding(.horizontal, 20) // Consistent horizontal padding
+                            .padding(.vertical)       // Keep default vertical padding
+                    } // End of main chat interface VStack
                 }
             }
-            
-            // Removed the overlay Rectangle that was here
         }
         .frame(minWidth: 800, minHeight: 600)
         .background(Color(red: 40/255, green: 41/255, blue: 44/255)) // Xcode dark background
@@ -139,8 +140,20 @@ struct ContentView: View {
             logger.info("Control Room UI loaded")
             chatModel.loadChatHistory()
             
-            // Set a demo track name for v0.6
-            levelMeterService.setCurrentTrack("Master Bus")
+            // Log any calibration status changes instead of showing in UI
+            if calibrationService.lastCalibrationError != nil {
+                logger.error("Calibration error: \(calibrationService.lastCalibrationError ?? "Unknown error")")
+            } else if case .completed(let mappedCount, let totalTracks) = calibrationService.calibrationState {
+                logger.info("Calibration completed: Mapped \(mappedCount) of \(totalTracks) tracks")
+            }
+        }
+        .onChange(of: calibrationService.calibrationState) { _, newState in
+            // Log calibration state changes
+            logger.info("Calibration state changed: \(newState.description)")
+            
+            if case .failed(let error) = newState {
+                logger.error("Calibration failed: \(error)")
+            }
         }
     }
     

@@ -5,57 +5,53 @@ import XCTest
 import Combine
 @testable import ChattyChannels
 
+@MainActor
 final class VUMeterIntegrationTests: XCTestCase {
     
     var levelService: LevelMeterService!
     var oscService: OSCService!
     var cancellables = Set<AnyCancellable>()
     
-    override func setUp() {
-        super.setUp()
-        oscService = OSCService()
-        levelService = LevelMeterService(oscService: oscService)
+    override func setUp() async throws {
+        try await super.setUp()
+        levelService = LevelMeterService()
+        oscService = OSCService(levelMeterService: levelService)
     }
     
-    override func tearDown() {
+    override func tearDown() async throws {
         cancellables.removeAll()
         levelService = nil
         oscService = nil
-        super.tearDown()
+        try await super.tearDown()
     }
     
     // Test that the LevelMeterService properly responds to OSC data
-    // Since we're using simulated data for v0.6, this test is more of a placeholder
-    // for when real OSC integration is implemented
-    func testOSCIntegration() {
-        // Create an expectation that level values will change due to simulated data
-        let expectation = XCTestExpectation(description: "Level values should change")
+    func testOSCIntegration() async throws {
+        // Test that OSC service can update levels through processIdentifiedRMS
+        let testUUID = "TEST_TRACK_UUID"
+        let testRMS: Float = 0.75
         
-        // Store initial values
-        let initialLeftValue = levelService.leftChannel.value
-        let initialRightValue = levelService.rightChannel.value
+        // Process an identified RMS message
+        oscService.processIdentifiedRMS(logicTrackUUID: testUUID, rmsValue: testRMS)
         
-        // After a short time, the simulated values should have changed
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            // Check if either channel's value has changed
-            if self.levelService.leftChannel.value != initialLeftValue ||
-               self.levelService.rightChannel.value != initialRightValue {
-                expectation.fulfill()
-            }
+        // Give it a moment to update
+        try await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+        
+        // Check that the level was updated
+        XCTAssertNotNil(levelService.audioLevels[testUUID])
+        if let level = levelService.audioLevels[testUUID] {
+            XCTAssertEqual(level.rmsValue, testRMS, accuracy: 0.001)
         }
-        
-        // Wait for expectation to be fulfilled
-        wait(for: [expectation], timeout: 1.0)
     }
     
     // Test that level changes are properly reflected in published properties
-    func testLevelChangePublishing() {
+    func testLevelChangePublishing() async {
         // Create an expectation
         let expectation = XCTestExpectation(description: "Level changes should be published")
         
-        // Subscribe to left channel changes
+        // Subscribe to master bus level changes
         var received = false
-        levelService.$leftChannel
+        levelService.$audioLevels
             .dropFirst() // Skip the initial value
             .sink { _ in
                 received = true
@@ -63,72 +59,84 @@ final class VUMeterIntegrationTests: XCTestCase {
             }
             .store(in: &cancellables)
         
-        // Wait for the simulation to change the value and publish it
-        wait(for: [expectation], timeout: 1.0)
+        // Update a level
+        levelService.updateLevel(logicTrackUUID: "MASTER_BUS_UUID", rmsValue: 0.5)
+        
+        // Wait for the expectation
+        await fulfillment(of: [expectation], timeout: 1.0)
         
         // Verify we received an update
         XCTAssertTrue(received, "Should have received a published update")
     }
     
     // Test VU ballistics integration with level changes
-    func testVUBallistics() {
-        // This test is more conceptual and would normally be tested in UI tests
-        // or with a mocked animation system
+    func testVUBallistics() async throws {
+        // Test that rapid level changes are smoothed by the UI ballistics
+        let masterUUID = "MASTER_BUS_UUID"
         
-        // For now, we can test that the level service is connected and running
-        XCTAssertNotNil(levelService, "Level service should be initialized")
-        
-        // Wait a bit to ensure initialization is complete
-        let expectation = XCTestExpectation(description: "Wait for service")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            expectation.fulfill()
+        // Send rapid level changes
+        for i in 0..<10 {
+            let level = Float(i) / 10.0
+            levelService.updateLevel(logicTrackUUID: masterUUID, rmsValue: level)
+            try await Task.sleep(nanoseconds: 10_000_000) // 0.01 seconds
         }
-        wait(for: [expectation], timeout: 0.5)
+        
+        // The actual ballistics smoothing happens in the UI components
+        // Here we just verify the service is receiving and storing the values
+        XCTAssertNotNil(levelService.audioLevels[masterUUID])
     }
     
     // Test peak handling with simulated peak values
-    func testPeakHandling() {
-        // Create an expectation
-        let expectation = XCTestExpectation(description: "Peak values should be handled")
+    func testPeakHandling() async throws {
+        let testUUID = "PEAK_TEST_UUID"
         
-        // In our implementation, we need to explicitly set the peak value
-        // Force a peak value
-        levelService.leftChannel.value = 1.2 // Well above 0dB
-        levelService.leftChannel.peakValue = 1.2 // Explicitly set the peak value
+        // Set a high peak value
+        levelService.updateLevel(logicTrackUUID: testUUID, rmsValue: 0.5, peakRmsValueOverride: 1.0)
         
-        // Check peak state
-        XCTAssertTrue(levelService.leftChannel.isPeaking, "Left channel should be peaking")
-        XCTAssertGreaterThanOrEqual(levelService.leftChannel.peakValue, 1.0, "Peak value should be at least 1.0")
-        
-        // Peak values should decay over time
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            // Reset the value (simulate falling level)
-            self.levelService.leftChannel.value = 0.1
-            
-            // Peak should still be high immediately after
-            XCTAssertGreaterThan(self.levelService.leftChannel.peakValue, 0.1, "Peak value should be higher than current value")
-            
-            // After more time, peak should decay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                // Since we have peak decay in the simulator (0.99 per update), 
-                // the peak should have decayed significantly after 1 second
-                XCTAssertLessThan(self.levelService.leftChannel.peakValue, 1.0, "Peak value should have decayed")
-                expectation.fulfill()
-            }
+        // Check initial peak state
+        if let level = levelService.audioLevels[testUUID] {
+            XCTAssertEqual(level.peakRmsValue, 1.0, accuracy: 0.001)
+            XCTAssertGreaterThan(level.peakRmsValue, level.rmsValue)
         }
         
-        // Wait for the expectation
-        wait(for: [expectation], timeout: 2.0)
+        // Wait for peak decay
+        try await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+        
+        // Peak should have decayed
+        if let level = levelService.audioLevels[testUUID] {
+            XCTAssertLessThan(level.peakRmsValue, 1.0, "Peak value should have decayed")
+        }
     }
     
     // Test track name integration
-    func testTrackNameIntegration() {
+    func testTrackNameIntegration() async {
         // Set a track name
         levelService.setCurrentTrack("Test Track")
         
         // Check that it's reflected in the service
         XCTAssertEqual(levelService.currentTrack, "Test Track", "Track name should be updated")
         
-        // In a real integration test, we would check that this appears in the UI
+        // Check that compatibility channels are updated
+        XCTAssertEqual(levelService.leftChannel.trackName, "Test Track")
+        XCTAssertEqual(levelService.rightChannel.trackName, "Test Track")
+    }
+    
+    // Test OSC unidentified RMS caching
+    func testUnidentifiedRMSCaching() async {
+        let tempID = "temp-plugin-123"
+        let rmsValue: Float = 0.8
+        
+        // Process unidentified RMS
+        oscService.processUnidentifiedRMS(
+            tempID: tempID,
+            rmsValue: rmsValue,
+            senderIP: "127.0.0.1",
+            senderPort: 9000
+        )
+        
+        // Check cache
+        let cachedData = oscService.getUnidentifiedRMSData()
+        XCTAssertNotNil(cachedData[tempID])
+        XCTAssertEqual((cachedData[tempID]?.rms) ?? 0.0, rmsValue, accuracy: 0.001)
     }
 }

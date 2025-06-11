@@ -98,22 +98,25 @@ struct ParameterCommand: Decodable {
 @main
 struct ChattyChannelsApp: App {
     /// The OSC service responsible for communication with Logic Pro plugins.
-    ///
-    /// This service handles both receiving commands from Logic Pro and
-    /// sending parameter changes and responses back.
-    @StateObject private var oscService = OSCService()
+    @StateObject private var oscService: OSCService
     
     /// The network service for communicating with AI APIs.
-    ///
-    /// This service handles sending user messages to the AI and receiving
-    /// structured responses for parameter control.
     @StateObject private var networkService = NetworkService()
     
     /// The Logic parameter service for controlling Logic Pro via AppleScript.
-    ///
-    /// This service handles parameter changes in Logic Pro using AppleScript
-    /// and provides PID control for precise parameter convergence.
     @StateObject private var logicParameterService = LogicParameterService()
+
+    // Services for VU Meter and Calibration
+    @StateObject private var levelMeterService = LevelMeterService()
+    @StateObject private var trackMappingService = TrackMappingService()
+    @StateObject private var appleScriptService = AppleScriptService() // Assuming default ProcessRunner
+    @StateObject private var calibrationService: CalibrationService
+    
+    // OSC Listener for receiving RMS data from plugins
+    @StateObject private var oscListener: OSCListener
+    
+    // Simulation Service for testing
+    @StateObject private var simulationService: SimulationService
 
     /// System logger for application-level events.
     ///
@@ -134,10 +137,94 @@ struct ChattyChannelsApp: App {
         WindowGroup {
             ContentView() // Back to original ContentView with ZStack wooden strip
                 .environmentObject(networkService)
+                .environmentObject(oscService)
+                .environmentObject(levelMeterService)
+                .environmentObject(calibrationService)
+                .environmentObject(trackMappingService)
+                .environmentObject(oscListener)
                 .task { // Use .task for async setup tied to the Scene lifecycle
                     setupServiceSubscription()
+                    
+                    // Start OSC Listener to receive RMS data from AIPlayer plugins
+                    do {
+                        try await oscListener.startListening()
+                        logger.info("OSC Listener started successfully on port \(oscListener.listenPort)")
+                    } catch {
+                        logger.error("Failed to start OSC Listener: \(error.localizedDescription)")
+                    }
+                    
+                    // Auto-start simulation for testing - DISABLED for v0.7 OSC integration
+                    // Real RMS data should come from AIPlayer plugin via OSC
+                    #if DEBUG && false  // Disabled for v0.7
+                    do {
+                        try await Task.sleep(nanoseconds: 1_000_000_000) // Wait 1 second
+                        simulationService.startSimulation(direct: true)
+                    } catch {
+                        logger.error("Error starting simulation: \(error.localizedDescription)")
+                    }
+                    #endif
                 }
         }
+        .commands {
+            CommandMenu("Tools") {
+                Button("Test Input Gain Movement") {
+                    Task {
+                        await calibrationService.testInputGainMovement()
+                    }
+                }
+                .keyboardShortcut("T", modifiers: [.command, .shift])
+                
+                Button("Calibrate VU Meters") {
+                    Task {
+                        await calibrationService.startOscillatorBasedCalibration()
+                    }
+                }
+                .keyboardShortcut("R", modifiers: [.command, .shift])
+                
+                Divider()
+                
+                Button(simulationService.isSimulating ? "Stop Simulation" : "Start Simulation") {
+                    if simulationService.isSimulating {
+                        simulationService.stopSimulation()
+                    } else {
+                        simulationService.startSimulation()
+                    }
+                }
+                .keyboardShortcut("S", modifiers: [.command, .shift])
+            }
+        }
+    }
+
+    init() {
+        // Initialize services that depend on each other
+        let lmService = LevelMeterService()
+        let oscSvc = OSCService(levelMeterService: lmService) // OSCService now takes LevelMeterService
+        let tms = TrackMappingService()
+        let asService = AppleScriptService() // Assuming default ProcessRunner
+
+        _levelMeterService = StateObject(wrappedValue: lmService)
+        _oscService = StateObject(wrappedValue: oscSvc)
+        _trackMappingService = StateObject(wrappedValue: tms)
+        _appleScriptService = StateObject(wrappedValue: asService)
+        
+        // CalibrationService depends on other services
+        _calibrationService = StateObject(wrappedValue: CalibrationService(
+            trackMappingService: tms,
+            appleScriptService: asService,
+            oscService: oscSvc
+        ))
+        
+        // Initialize OSC Listener
+        _oscListener = StateObject(wrappedValue: OSCListener(oscService: oscSvc, port: 8999))
+        
+        // Initialize simulation service
+        _simulationService = StateObject(wrappedValue: SimulationService(
+            levelMeterService: lmService,
+            oscService: oscSvc
+        ))
+        
+        // Ensure OSCService has the LevelMeterService instance
+        oscSvc.setLevelMeterService(lmService)
     }
     
     /// Handles a parameter change request for Logic Pro.

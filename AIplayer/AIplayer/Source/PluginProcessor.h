@@ -1,3 +1,4 @@
+// /Users/nickfox137/Documents/chatty-channel/AIplayer/AIplayer/Source/PluginProcessor.h
 /*
   ==============================================================================
 
@@ -8,9 +9,7 @@
 
 #pragma once
 
-#include <JuceHeader.h>
-#include <juce_osc/juce_osc.h> // Include the JUCE OSC module header
-#include <juce_audio_processors/juce_audio_processors.h> // Include APVTS header
+#include "../JuceLibraryCode/JuceHeader.h" // Should be first for JUCE projects
 
 //==============================================================================
 /**
@@ -41,7 +40,7 @@ public:
      *
      * Cleans up resources and properly shuts down OSC communication.
      */
-    ~AIplayerAudioProcessor() override;
+    ~AIplayerAudioProcessor() noexcept override; // Added noexcept
 
     //==============================================================================
     /**
@@ -202,6 +201,45 @@ public:
      */
     juce::AudioProcessorValueTreeState apvts;
 
+    // Moved LogLevel and logMessage declaration to be before private section
+    enum class LogLevel
+    {
+        Info,
+        Warning,
+        Error,
+        Debug // For messages that are usually only relevant during development
+    };
+    /**
+     * @brief Logs a message to the log file with a specified level
+     *
+     * @param level The severity level of the log message
+     * @param message The message to log
+     */
+    void logMessage (LogLevel level, const juce::String& message);
+
+    //==============================================================================
+    /// Oscillator Control Methods
+    
+    /**
+     * @brief Starts the calibration tone generation
+     *
+     * @param frequency The frequency of the tone in Hz
+     * @param amplitudeDb The amplitude of the tone in dB
+     */
+    void startCalibrationTone(float frequency, float amplitudeDb);
+    
+    /**
+     * @brief Stops the calibration tone generation
+     */
+    void stopCalibrationTone();
+    
+    /**
+     * @brief Gets the current status of the calibration tone
+     *
+     * @return true if tone is currently enabled, false otherwise
+     */
+    bool isToneEnabled() const;
+
 private:
     /**
      * @brief Creates the parameter layout for the AudioProcessorValueTreeState
@@ -261,13 +299,49 @@ private:
      * Used to log messages and errors to a file for debugging.
      */
     std::unique_ptr<juce::FileOutputStream> logStream;
+
+    juce::String tempInstanceID;    // Unique ID for this plugin instance before official Logic UUID is known
+    juce::String logicTrackUUID;    // Official Logic Pro Track UUID, assigned by Control Room app
+    int oscReceiverPort = 0;        // The port number our OSC receiver is bound to
+    
+    // Track OSC connection state since juce::OSCSender doesn't have isConnected()
+    bool senderConnected = false;
+    
+    //==============================================================================
+    // Port Assignment Protocol
+    enum class PortState
+    {
+        Unassigned,      // No port assigned yet
+        Requesting,      // Sent request, waiting for response
+        Assigned,        // Port assigned by ChattyChannels
+        Bound,          // Successfully bound to assigned port
+        Failed          // Failed to bind or get assignment
+    };
+    
+    PortState portState = PortState::Unassigned;
+    int assignedPort = -1;
+    int portRequestRetries = 0;
+    const int maxPortRequestRetries = 5;
+    juce::Time lastPortRequestTime;
     
     /**
-     * @brief Logs a message to the log file
-     *
-     * @param message The message to log
+     * @brief Requests a port assignment from ChattyChannels
      */
-    void logMessage (const juce::String& message);
+    void requestPortAssignment();
+    
+    /**
+     * @brief Attempts to bind the OSC receiver to the assigned port
+     * @param port The port number to bind to
+     * @return true if successfully bound, false otherwise
+     */
+    bool bindToAssignedPort(int port);
+    
+    /**
+     * @brief Verifies that we actually have the port (works around JUCE bug)
+     * @param port The port number to verify
+     * @return true if port is actually bound, false otherwise
+     */
+    bool verifyPortBinding(int port);
     
     //==============================================================================
     /**
@@ -306,6 +380,25 @@ private:
      * Prevents concurrent access to the buffer from multiple threads.
      */
     juce::CriticalSection bufferLock;
+
+    //==============================================================================
+    /// Calibration oscillator for track identification using JUCE DSP
+    juce::dsp::Oscillator<float> calibrationOscillator;
+    juce::dsp::ProcessSpec oscProcessSpec;
+    
+
+    
+    /// Whether the calibration tone is currently enabled
+    std::atomic<bool> toneEnabled{false};
+    
+    /// Frequency of the calibration tone in Hz
+    float toneFrequency = 440.0f;
+    
+    /// Amplitude of the calibration tone (linear gain, not dB)
+    float toneAmplitude = 0.1f;
+    
+    /// Current sample rate for oscillator phase calculation
+    double currentSampleRate = 44100.0;
 
     //==============================================================================
     JUCE_DECLARE_WEAK_REFERENCEABLE (AIplayerAudioProcessor)

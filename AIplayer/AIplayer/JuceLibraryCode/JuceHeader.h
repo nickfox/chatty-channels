@@ -1,5 +1,4 @@
 /*
-#include "JucePluginCharacteristics.h"
 
     IMPORTANT! This file is auto-generated each time you save your
     project - if you alter its contents, your changes may be overwritten!
@@ -22,6 +21,7 @@
 #include <juce_audio_utils/juce_audio_utils.h>
 #include <juce_core/juce_core.h>
 #include <juce_data_structures/juce_data_structures.h>
+#include <juce_dsp/juce_dsp.h>
 #include <juce_events/juce_events.h>
 #include <juce_graphics/juce_graphics.h>
 #include <juce_gui_basics/juce_gui_basics.h>

@@ -33,22 +33,9 @@
 		CEED32542D9C359F00AE3FE5 /* ChattyChannelsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChattyChannelsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		CE1BE4702DBFAD100083F2AC /* Exceptions for "ChattyChannels" folder in "ChattyChannels" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = CEED323B2D9C359E00AE3FE5 /* ChattyChannels */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		CEED323E2D9C359E00AE3FE5 /* ChattyChannels */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				CE1BE4702DBFAD100083F2AC /* Exceptions for "ChattyChannels" folder in "ChattyChannels" target */,
-			);
 			path = ChattyChannels;
 			sourceTree = "<group>";
 		};
@@ -431,9 +418,7 @@
 				DEVELOPMENT_TEAM = 664X7G9P7V;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ChattyChannels/Info.plist;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -459,9 +444,7 @@
 				DEVELOPMENT_TEAM = 664X7G9P7V;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ChattyChannels/Info.plist;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -482,7 +465,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 664X7G9P7V;
-				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.3;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.ChattyChannelsTests;
@@ -500,7 +482,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 664X7G9P7V;
-				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.3;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.ChattyChannelsTests;
@@ -517,7 +498,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 664X7G9P7V;
-				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.ChattyChannelsUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -533,7 +513,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 664X7G9P7V;
-				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.websmithing.ChattyChannelsUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -20,7 +20,7 @@
  * @param p Reference to the audio processor that created this editor
  */
 AIplayerAudioProcessorEditor::AIplayerAudioProcessorEditor (AIplayerAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+    : AudioProcessorEditor (p), audioProcessor (p)
 {
     // Chat Display
     addAndMakeVisible(chatDisplay);

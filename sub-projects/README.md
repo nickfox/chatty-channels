@@ -1,0 +1,1 @@
+These projects were built to test specific aspects of the parent project before incorporating into the Chatty Channels. They are left here as a reference.

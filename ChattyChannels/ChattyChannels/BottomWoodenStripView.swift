@@ -15,7 +15,8 @@ struct BottomWoodenStripView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Normal VU meter content at top (leave intact)
-            VUMeterView(levelService: LevelMeterService(oscService: OSCService()))
+            // LevelMeterService init takes no arguments. OSCService is not directly passed to LevelMeterService init.
+            VUMeterView(levelService: LevelMeterService())
                 .frame(height: 200)
             
             // Main chat content (leave intact)

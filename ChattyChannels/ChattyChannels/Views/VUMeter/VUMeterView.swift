@@ -14,6 +14,51 @@ struct VUMeterView: View {
     /// The service that provides audio level data
     @ObservedObject var levelService: LevelMeterService
     
+    // Get the most recently active track (for v0.7 OSC integration)
+    // This allows VU meters to automatically follow whichever track is sending RMS data
+    private var activeTrackUUID: String {
+        // Find the track with the most recent update time
+        let sortedTracks = levelService.audioLevels.sorted { lhs, rhs in
+            let lhsTime = lhs.value.lastUpdateTime
+            let rhsTime = rhs.value.lastUpdateTime
+            return lhsTime > rhsTime
+        }
+        
+        // Return the most recently updated track UUID, or a default
+        return sortedTracks.first?.key ?? "NO_ACTIVE_TRACK"
+    }
+    
+    // Computed properties for compatibility with v0.7 data model
+    private var leftChannelBinding: Binding<AudioLevel> {
+        Binding<AudioLevel>(
+            get: {
+                // Get the AudioLevel for the most active track or create a default one
+                let activeLevel = levelService.audioLevels[activeTrackUUID] ?? 
+                    AudioLevel(id: activeTrackUUID, rmsValue: 0.0, peakRmsValue: 0.0, trackName: "No Active Track")
+                
+                // For demo and backward compatibility - we'll treat the same level as both L and R channels
+                return activeLevel
+            },
+            set: { newLevel in
+                // We don't actually modify the level here as it's managed by LevelMeterService
+            }
+        )
+    }
+    
+    private var rightChannelBinding: Binding<AudioLevel> {
+        // We're using the same binding for both channels for now
+        // In a future version, we could map to different tracks for L/R channels
+        return leftChannelBinding
+    }
+    
+    // Current track name - defaults to "No Active Track" if not available
+    private var currentTrackName: String {
+        if let track = levelService.audioLevels[activeTrackUUID]?.trackName {
+            return track
+        }
+        return "No Active Track"
+    }
+    
     var body: some View {
         ZStack(alignment: .top) {
             // Base background
@@ -31,11 +76,11 @@ struct VUMeterView: View {
                         // Meters with spacing between them matching the right padding
                         HStack(spacing: 26) { // Increased spacing to match right padding
                             // Left channel meter
-                            SingleMeterView(audioLevel: $levelService.leftChannel, channel: .left)
+                            SingleMeterView(audioLevel: leftChannelBinding)
                                 .frame(width: 112, height: 69) // Re-applying frame, 112, 69
                             
                             // Right channel meter
-                            SingleMeterView(audioLevel: $levelService.rightChannel, channel: .right)
+                            SingleMeterView(audioLevel: rightChannelBinding)
                                 .frame(width: 112, height: 69) // Re-applying frame, 112, 69
                         }
                         .frame(width: 250) // Adjusted width for new meter size (112 + 26 + 112)
@@ -56,7 +101,7 @@ struct VUMeterView: View {
                             .layoutPriority(1)
 
                         // Label centered within the same width as the meter container
-                        Text(levelService.currentTrack)
+                        Text(currentTrackName)
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(Color(white: 0.7)) // More subtle gray
                             .padding(.vertical, 0)
@@ -78,10 +123,25 @@ struct VUMeterView: View {
     }
 }
 
-#Preview("VU Meter View", traits: .sizeThatFitsLayout) {
-    // Preview wrapper
-    VUMeterView(levelService: LevelMeterService(oscService: OSCService()))
-        .frame(height: 250)
+// Helper struct for preview setup
+struct VUMeterPreviewWrapper: View {
+    @StateObject var levelServiceInstance = LevelMeterService()
+    
+    init(populateData: Bool = true) {
+        if populateData {
+            let kickTrackUUID = "KICK_TRACK_UUID"
+            levelServiceInstance.audioLevels[kickTrackUUID] = AudioLevel(id: kickTrackUUID, rmsValue: 0.6, peakRmsValue: 0.9, trackName: "Kick")
+        }
+    }
+
+    var body: some View {
+        VUMeterView(levelService: levelServiceInstance)
+    }
+}
+
+#Preview("VU Meter View - Kick Track", traits: .sizeThatFitsLayout) {
+    VUMeterPreviewWrapper(populateData: true)
+        .frame(width: 300, height: 150)
         .padding()
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(Color.gray.opacity(0.2))
 }

@@ -10,12 +10,12 @@ import XCTest
 final class LogicParameterServiceTests: XCTestCase {
     
     // Mock objects
-    private var mockAppleScriptService: MockAppleScriptService!
+    private var mockAppleScriptService: MockAppleScriptServiceForLogicTests!
     private var logicParameterService: LogicParameterService!
     
     override func setUp() {
         super.setUp()
-        mockAppleScriptService = MockAppleScriptService()
+        mockAppleScriptService = MockAppleScriptServiceForLogicTests()
         logicParameterService = LogicParameterService(appleScriptService: mockAppleScriptService)
     }
     
@@ -169,7 +169,7 @@ final class LogicParameterServiceTests: XCTestCase {
 ///
 /// This mock allows tests to simulate the behavior of Logic Pro without
 /// actually launching or interacting with the real application.
-class MockAppleScriptService: AppleScriptServiceProtocol {
+class MockAppleScriptServiceForLogicTests: AppleScriptServiceProtocol {
     /// Values to return from getVolume in sequence.
     var volumeValues: [Float] = []
     
@@ -227,6 +227,16 @@ class MockAppleScriptService: AppleScriptServiceProtocol {
         
         // Increment the index for the next value after setting
         valueIndex += 1
+    }
+    
+    /// Mock implementation of probeTrack - not used in these tests
+    func probeTrack(logicTrackUUID: String, frequency: Double, probeLevel: Float, duration: Double) async throws {
+        // Not used in LogicParameterServiceTests
+        // If there's an error to throw, throw it
+        if let error = errorToThrow {
+            errorToThrow = nil
+            throw error
+        }
     }
     
     /// Reset all counters and state.

@@ -12,9 +12,6 @@ struct SingleMeterView: View {
     /// The audio level data to display
     @Binding var audioLevel: AudioLevel
     
-    /// The channel this meter represents
-    var channel: AudioLevel.AudioChannel
-    
     // MARK: - Animation Properties
     
     /// Current rotation angle of the needle
@@ -32,11 +29,11 @@ struct SingleMeterView: View {
     /// How long to hold the peak indicator lit (in seconds)
     let peakHoldDuration: TimeInterval = 1.5
     
-    /// Timer for smooth animation updates
-    let timer = Timer.publish(every: 1.0/60.0, on: .main, in: .common).autoconnect()
+    /// Timer for smooth animation updates at 24 Hz to match AIplayer plugin timing
+    let timer = Timer.publish(every: 1.0/24.0, on: .main, in: .common).autoconnect()
     
     var body: some View {
-        GeometryReader { geometry in // Re-introduce GeometryReader
+        GeometryReader { geometry in
             ZStack {
                 // Meter background image
                 Image("vu_meter")
@@ -79,15 +76,16 @@ struct SingleMeterView: View {
     /// It implements proper VU meter ballistics for realistic needle movement.
     private func updateMeter() {
         // Get dB value and constrain to VU meter range
-        let dbValue = audioLevel.dbValue
-        let constrainedDb = min(max(dbValue, -20), 3)
+        // Use the dbfsValue from v0.7 AudioLevel model
+        let dbValue = audioLevel.dbfsValue
+        let constrainedDb = min(max(dbValue, -20), 3) // Standard VU range -20dB to +3dB
         
         // Map dB to rotation angle
         needleTarget = mapDbToRotation(db: constrainedDb)
         
         // Apply VU meter ballistics (300ms integration time)
-        // This coefficient determines how quickly the needle responds to changes
-        needleRotation += (needleTarget - needleRotation) * 0.15
+        // This coefficient adjusted for 24 Hz timing (was 0.15 for 60 Hz)
+        needleRotation += (needleTarget - needleRotation) * 0.35
         
         // Handle peak LED
         if audioLevel.isPeaking {
@@ -121,30 +119,47 @@ struct SingleMeterView: View {
 #Preview {
     // Create a state object for the preview
     struct PreviewWrapper: View {
-        @State private var level = AudioLevel(value: 0.2, channel: .left)
+        // Use the updated AudioLevel initializer from v0.7
+        @State private var level = AudioLevel(id: "preview-track-1", rmsValue: 0.2, peakRmsValue: 0.3, trackName: "Preview Track")
         
         var body: some View {
             VStack {
-                SingleMeterView(audioLevel: $level, channel: .left)
+                SingleMeterView(audioLevel: $level)
                     .frame(width: 300, height: 180)
                     .padding()
                 
                 // Controls for the preview
                 VStack {
-                    Text("Level: \(Int(level.value * 100))%")
-                    Slider(value: $level.value, in: 0...1)
-                    
-                    Button("Peak") {
-                        level.value = 1.0
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            level.value = 0.2
+                    Text("Track: \(level.trackName ?? "N/A")")
+                    Text("RMS: \(String(format: "%.2f", level.rmsValue)) (\(String(format: "%.1f", level.dbfsValue)) dBFS)")
+                    Text("Peak RMS: \(String(format: "%.2f", level.peakRmsValue))")
+                    Slider(value: $level.rmsValue, in: 0...1, step: 0.01) {
+                        Text("RMS Level")
+                    }
+                    .onChange(of: level.rmsValue) { _, newValue in
+                        // Update peak value if current RMS exceeds it
+                        if newValue > level.peakRmsValue {
+                            level.peakRmsValue = newValue
                         }
+                    }
+                    
+                    Button("Simulate Peak") {
+                        let originalRms = level.rmsValue
+                        level.rmsValue = 1.0
+                        level.peakRmsValue = 1.0
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            level.rmsValue = originalRms // Return to original after a short peak
+                            // Peak will decay naturally or via reset
+                        }
+                    }
+                    Button("Reset Peak") {
+                        level.peakRmsValue = level.rmsValue // Reset peak to current RMS
                     }
                 }
                 .padding()
             }
             .padding()
-            .frame(height: 400)
+            .frame(height: 500) // Adjusted height for more controls
         }
     }
     

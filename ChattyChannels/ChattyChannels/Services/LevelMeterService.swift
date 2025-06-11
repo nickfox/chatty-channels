@@ -7,122 +7,176 @@ import Combine
 import SwiftUI
 import os.log
 
-/// Service that processes OSC audio level data for display in VU meters.
-///
-/// This service subscribes to the OSC service's level updates, processes them,
-/// and publishes the processed data for consumption by VU meter components.
-class LevelMeterService: ObservableObject {
-    /// Published left channel audio level
-    @Published var leftChannel = AudioLevel(channel: .left)
+/// Service that processes and provides audio level data for multiple tracks,
+/// keyed by their Logic Pro Track UUID.
+@MainActor
+public class LevelMeterService: ObservableObject {
+    /// Published dictionary of audio levels, keyed by `logicTrackUUID`.
+    @Published public var audioLevels: [String: AudioLevel] = [:]
     
-    /// Published right channel audio level
-    @Published var rightChannel = AudioLevel(channel: .right)
+    /// Published current track name for compatibility with v0.6 UI
+    @Published public var currentTrack: String = "Master Bus"
     
-    /// Name of the currently monitored track
-    @Published var currentTrack: String = "No Track Selected"
+    /// Compatibility properties for v0.6 UI - mapping between old channel-based and new track-based system
+    @Published public var leftChannel = AudioLevel(id: "LEFT", rmsValue: 0.0, peakRmsValue: 0.0, trackName: "Master Bus")
+    @Published public var rightChannel = AudioLevel(id: "RIGHT", rmsValue: 0.0, peakRmsValue: 0.0, trackName: "Master Bus")
     
-    /// System logger for level meter events
-    private let logger = Logger(subsystem: "com.nickfox.ChattyChannels", category: "LevelMeter")
-    
-    /// Reference to the OSC service
-    private var oscService: OSCService
-    
-    /// Subscription to OSC level updates
-    private var oscSubscription: AnyCancellable?
-    
-    /// Initializes the service with a reference to the OSC service.
-    ///
-    /// - Parameter oscService: The OSC service to subscribe to for level updates.
-    init(oscService: OSCService) {
-        self.oscService = oscService
+    /// System logger for level meter events.
+    private let logger = Logger(subsystem: "com.websmithing.ChattyChannels", category: "LevelMeterService")
+        
+    /// Peak decay rate (e.g., 0.99 means 1% decay per update cycle if not refreshed).
+    private let peakDecayRate: Float = 0.995
+    private var peakDecayTimer: Timer?
+
+    // Master bus UUID - would come from configuration normally
+    private let masterBusUUID = "MASTER_BUS_UUID"
+
+    /// Initializes the service.
+    public init() {
         logger.info("LevelMeterService initialized")
-        setupOSCSubscription()
+        // Set up default master bus audio level
+        audioLevels[masterBusUUID] = AudioLevel(id: masterBusUUID, rmsValue: 0.0, peakRmsValue: 0.0, trackName: "Master Bus")
+        startPeakDecayTimer()
+        
+        // Start a timer to update the v0.6 compatibility properties from the master bus data
+        startCompatibilityTimer()
     }
     
-    /// Sets up the subscription to OSC level updates.
-    private func setupOSCSubscription() {
-        // For v0.6, we'll use a simulated level data source
-        // In a future version, this will connect to the actual OSC data
+    /// Updates the audio level for a specific track.
+    /// This method is intended to be called by `OSCService` when identified RMS data is received.
+    /// - Parameters:
+    ///   - logicTrackUUID: The unique identifier of the track.
+    ///   - rmsValue: The new RMS value (0.0 to 1.0).
+    ///   - peakRmsValueOverride: Optional peak value if provided directly by the source.
+    public func updateLevel(logicTrackUUID: String, rmsValue: Float, peakRmsValueOverride: Float? = nil) {
+        var level = audioLevels[logicTrackUUID] ?? AudioLevel(id: logicTrackUUID)
         
-        // Create a timer publisher that simulates level data at 30fps
-        let timer = Timer.publish(every: 1.0/30.0, on: .main, in: .common).autoconnect()
+        level.rmsValue = max(0.0, min(1.0, rmsValue)) // Clamp value
         
-        oscSubscription = timer.sink { [weak self] _ in
-            self?.simulateAudioLevels()
-        }
-        
-        logger.info("Set up simulated audio level subscription")
-    }
-    
-    /// Simulates audio level data for development and testing.
-    ///
-    /// This is a temporary function that generates realistic-looking level data
-    /// until the actual OSC integration is implemented.
-    private func simulateAudioLevels() {
-        // Create a slow-moving baseline with some randomness
-        let time = Date().timeIntervalSince1970
-        let baselineLeft = (sin(time * 0.5) * 0.3) + 0.5
-        let baselineRight = (sin(time * 0.4 + 0.3) * 0.3) + 0.5
-        
-        // Add some random fluctuation
-        let fluctuationLeft = Double.random(in: -0.1...0.1)
-        let fluctuationRight = Double.random(in: -0.1...0.1)
-        
-        // Ensure values stay in valid range
-        let newLeftValue = Float(max(0.0, min(1.0, baselineLeft + fluctuationLeft)))
-        let newRightValue = Float(max(0.0, min(1.0, baselineRight + fluctuationRight)))
-        
-        // Occasional peaks
-        if Int(time * 10) % 50 == 0 {
-            // Create an occasional peak
-            leftChannel.value = Float.random(in: 0.8...1.0)
+        if let peakOverride = peakRmsValueOverride {
+            level.peakRmsValue = max(level.peakRmsValue, max(0.0, min(1.0, peakOverride)))
         } else {
-            leftChannel.value = newLeftValue
+            level.peakRmsValue = max(level.peakRmsValue, level.rmsValue)
+        }
+        level.lastUpdateTime = Date()
+        
+        audioLevels[logicTrackUUID] = level
+        
+        // If this is the master bus, update the current track name for UI compatibility
+        if logicTrackUUID == masterBusUUID {
+            if let trackName = level.trackName {
+                currentTrack = trackName
+            }
+            
+            // Update v0.6 compatibility properties immediately for the master bus
+            updateCompatibilityChannels(from: level)
         }
         
-        if Int(time * 10) % 73 == 0 {
-            // Create an occasional peak on right channel (different rhythm)
-            rightChannel.value = Float.random(in: 0.8...1.0)
-        } else {
-            rightChannel.value = newRightValue
+        // Removed excessive debug logging - this was generating thousands of log entries per second
+        // logger.debug("Updated level for \(logicTrackUUID, privacy: .public): RMS \(level.rmsValue, privacy: .public), Peak \(level.peakRmsValue, privacy: .public)")
+    }
+    
+    /// Updates the v0.6 compatibility channel properties from the master bus data
+    private func updateCompatibilityChannels(from masterLevel: AudioLevel) {
+        leftChannel = AudioLevel(id: "LEFT", rmsValue: masterLevel.rmsValue, peakRmsValue: masterLevel.peakRmsValue, trackName: masterLevel.trackName)
+        rightChannel = AudioLevel(id: "RIGHT", rmsValue: masterLevel.rmsValue, peakRmsValue: masterLevel.peakRmsValue, trackName: masterLevel.trackName)
+    }
+    
+    /// Starts a timer to update the v0.6 compatibility properties from the master bus data
+    private func startCompatibilityTimer() {
+        Timer.scheduledTimer(withTimeInterval: 1.0/30.0, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            Task { @MainActor in
+                if let masterLevel = self.audioLevels[self.masterBusUUID] {
+                    self.updateCompatibilityChannels(from: masterLevel)
+                }
+            }
         }
-        
-        // Update peak values
-        leftChannel.peakValue = max(leftChannel.peakValue, leftChannel.value)
-        rightChannel.peakValue = max(rightChannel.peakValue, rightChannel.value)
-        
-        // Decay peak values over time
-        leftChannel.peakValue *= 0.99
-        rightChannel.peakValue *= 0.99
     }
     
-    /// Processes actual OSC data and updates the audio levels.
-    ///
-    /// This method will be implemented in a future version to process real OSC data.
-    /// - Parameter data: The OSC data to process.
-    private func processOSCData(_ data: Any) {
-        // This will be implemented with actual OSC data in a future version
-        // For now, we're using the simulated data above
-    }
-    
-    /// Sets the current track name.
-    ///
-    /// - Parameter name: The name of the track to display.
-    func setCurrentTrack(_ name: String) {
+    /// Sets the current track name - for compatibility with v0.6 UI
+    public func setCurrentTrack(_ name: String) {
         currentTrack = name
+        
+        // Also update the track name in the master bus AudioLevel
+        if var masterLevel = audioLevels[masterBusUUID] {
+            masterLevel.trackName = name
+            audioLevels[masterBusUUID] = masterLevel
+            
+            // Also update compatibility channels
+            leftChannel.trackName = name
+            rightChannel.trackName = name
+        } else {
+            // Create a new master bus level if it doesn't exist
+            audioLevels[masterBusUUID] = AudioLevel(id: masterBusUUID, rmsValue: 0.0, peakRmsValue: 0.0, trackName: name)
+        }
+        
         logger.info("Track set to: \(name)")
     }
     
-    /// Resets the peak values for both channels.
-    func resetPeaks() {
-        leftChannel.peakValue = 0.0
-        rightChannel.peakValue = 0.0
-        logger.info("Peak values reset")
+    /// Resets the peak value for a specific track.
+    /// - Parameter logicTrackUUID: The identifier of the track whose peak should be reset.
+    public func resetPeak(for logicTrackUUID: String) {
+        if audioLevels[logicTrackUUID] != nil {
+            audioLevels[logicTrackUUID]?.peakRmsValue = audioLevels[logicTrackUUID]?.rmsValue ?? 0.0
+            logger.info("Peak value reset for track: \(logicTrackUUID, privacy: .public)")
+            
+            // If this is the master bus, also update the compatibility channels
+            if logicTrackUUID == masterBusUUID {
+                leftChannel.peakValue = leftChannel.value
+                rightChannel.peakValue = rightChannel.value
+            }
+        }
+    }
+
+    /// Resets peak values for all known tracks.
+    public func resetAllPeaks() {
+        for uuid in audioLevels.keys {
+            resetPeak(for: uuid)
+        }
+        logger.info("All peak values reset.")
+    }
+
+    /// Starts a timer to handle peak value decay.
+    private func startPeakDecayTimer() {
+        peakDecayTimer?.invalidate() // Invalidate existing timer if any
+        peakDecayTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
+            guard let strongSelf = self else { return }
+            
+            Task { @MainActor in
+                let now = Date()
+                for uuid in strongSelf.audioLevels.keys {
+                    if var level = strongSelf.audioLevels[uuid] {
+                        // Only decay if not recently updated
+                        if now.timeIntervalSince(level.lastUpdateTime) > 0.1 { // e.g., if no update in last 100ms
+                            level.peakRmsValue *= strongSelf.peakDecayRate
+                            if level.peakRmsValue < 0.001 { // Prevent denormals or tiny values
+                                level.peakRmsValue = 0.0
+                            }
+                            strongSelf.audioLevels[uuid] = level
+                            
+                            // If this is the master bus, also update compatibility channels
+                            if uuid == strongSelf.masterBusUUID {
+                                strongSelf.leftChannel.peakValue *= strongSelf.peakDecayRate
+                                strongSelf.rightChannel.peakValue *= strongSelf.peakDecayRate
+                                if strongSelf.leftChannel.peakValue < 0.001 {
+                                    strongSelf.leftChannel.peakValue = 0.0
+                                }
+                                if strongSelf.rightChannel.peakValue < 0.001 {
+                                    strongSelf.rightChannel.peakValue = 0.0
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        logger.info("Peak decay timer started.")
     }
     
     /// Cleans up resources when the service is deallocated.
     deinit {
-        oscSubscription?.cancel()
-        logger.info("LevelMeterService deallocated")
+        peakDecayTimer?.invalidate()
+        logger.info("LevelMeterService deallocated and peak decay timer stopped.")
     }
 }
