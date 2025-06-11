@@ -74,15 +74,30 @@ jobs:
           
       - name: Clone JUCE
         run: |
-          # Clone JUCE to a consistent location
-          git clone --depth 1 https://github.com/juce-framework/JUCE.git /tmp/JUCE
+          # Clone JUCE 8.0.8 to match local development environment
+          git clone --depth 1 --branch 8.0.8 https://github.com/juce-framework/JUCE.git /tmp/JUCE-8.0.8
+          echo "JUCE cloned. Structure:"
+          ls -la /tmp/JUCE-8.0.8
+          
+      - name: Debug project before fixing
+        run: |
+          find AIplayer -name "project.pbxproj" | while read PROJECT_FILE; do
+            echo "=== Checking $PROJECT_FILE ==="
+            grep -n "nickfox137.*JUCE" "$PROJECT_FILE" || echo "No nickfox137 JUCE paths found"
+            grep -n "JUCE" "$PROJECT_FILE" | head -5
+          done
           
       - name: Replace hardcoded paths in project file
         run: |
           # Find and fix the Xcode project file
           find AIplayer -name "*.xcodeproj" -type d -exec find {} -name "project.pbxproj" \; | while read PROJECT_FILE; do
             echo "Fixing paths in $PROJECT_FILE"
-            sed -i '' 's|/Users/nickfox137/Downloads/JUCE|/tmp/JUCE|g' "$PROJECT_FILE"
+            echo "Before replacement:"
+            grep -n "nickfox137.*JUCE" "$PROJECT_FILE" || echo "No hardcoded paths found"
+            # Replace the new JUCE path with CI path
+            sed -i '' 's|/Users/nickfox137/Documents/JUCE-8.0.8|/tmp/JUCE-8.0.8|g' "$PROJECT_FILE"
+            echo "After replacement:"
+            grep -n "/tmp/JUCE" "$PROJECT_FILE" || echo "No /tmp/JUCE paths found"
           done
           
       - name: Build AIplayer (AU only)
