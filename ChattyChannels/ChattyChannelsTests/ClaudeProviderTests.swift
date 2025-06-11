@@ -38,7 +38,6 @@ final class ClaudeProviderTests: XCTestCase {
     // Helper to create mock response data
     private func createMockResponseData(content: String) throws -> Data {
         let response = ClaudeMessagesResponse(role: "assistant", content: [.init(type: "text", text: content)])
-        let decoder = JSONDecoder()
         // If ClaudeProvider uses snake_case decoding, match it here:
         // decoder.keyDecodingStrategy = .convertFromSnakeCase
         return try JSONEncoder().encode(response) // Use Encoder here, Decoder was incorrect

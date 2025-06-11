@@ -64,11 +64,7 @@ final class CalibrationServiceTests: XCTestCase {
         
         // Start calibration
         let calibrationTask = Task {
-            await calibrationService.startCalibration(
-                probeFrequency: 440.0,
-                probeLevel: -12.0,
-                probeDuration: 0.1
-            )
+            await calibrationService.startOscillatorBasedCalibration()
         }
         
         // Let it run briefly
@@ -114,11 +110,7 @@ final class CalibrationServiceTests: XCTestCase {
         }
         
         // Start calibration
-        await calibrationService.startCalibration(
-            probeFrequency: 440.0,
-            probeLevel: -12.0,
-            probeDuration: 0.1
-        )
+        await calibrationService.startOscillatorBasedCalibration()
         
         // Verify mapping was created
         XCTAssertEqual(calibrationService.identifiedMappings.count, 1)
@@ -142,11 +134,7 @@ final class CalibrationServiceTests: XCTestCase {
         // Don't simulate any RMS data - track has no plugin
         
         // Start calibration
-        await calibrationService.startCalibration(
-            probeFrequency: 440.0,
-            probeLevel: -12.0,
-            probeDuration: 0.1
-        )
+        await calibrationService.startOscillatorBasedCalibration()
         
         // Verify no mapping was created
         XCTAssertEqual(calibrationService.identifiedMappings.count, 0)
@@ -195,11 +183,7 @@ final class CalibrationServiceTests: XCTestCase {
         }
         
         // Start calibration
-        await calibrationService.startCalibration(
-            probeFrequency: 440.0,
-            probeLevel: -12.0,
-            probeDuration: 0.1
-        )
+        await calibrationService.startOscillatorBasedCalibration()
         
         // Verify mappings
         XCTAssertEqual(calibrationService.identifiedMappings.count, 2)
@@ -223,7 +207,7 @@ final class CalibrationServiceTests: XCTestCase {
         (trackMappingService as! MockTrackMappingService).errorToThrow = AppleScriptError.executionFailed("Mock error")
         
         // Start calibration
-        await calibrationService.startCalibration()
+        await calibrationService.startOscillatorBasedCalibration()
         
         // Verify error state
         if case let .failed(error) = calibrationService.calibrationState {
@@ -246,7 +230,7 @@ final class CalibrationServiceTests: XCTestCase {
         mockAppleScriptService.errorToThrow = AppleScriptError.executionFailed("Probe failed")
         
         // Start calibration
-        await calibrationService.startCalibration()
+        await calibrationService.startOscillatorBasedCalibration()
         
         // Verify error state
         if case let .failed(error) = calibrationService.calibrationState {
@@ -277,7 +261,7 @@ final class CalibrationServiceTests: XCTestCase {
             .store(in: &cancellables)
         
         // Start calibration
-        await calibrationService.startCalibration(probeDuration: 0.05)
+        await calibrationService.startOscillatorBasedCalibration()
         
         // Verify progress increments
         XCTAssertFalse(progressValues.isEmpty)
@@ -316,6 +300,13 @@ class MockAppleScriptService: AppleScriptServiceProtocol {
     func getVolume(trackName: String) throws -> Float {
         // Not used in calibration tests
         return 0.0
+    }
+    
+    func testInputGainMovementChannel1(oscService: OSCService) async throws {
+        // Mock implementation - not used in calibration tests
+        if let error = errorToThrow {
+            throw error
+        }
     }
 }
 

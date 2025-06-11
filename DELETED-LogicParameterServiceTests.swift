@@ -239,6 +239,15 @@ class MockAppleScriptServiceForLogicTests: AppleScriptServiceProtocol {
         }
     }
     
+    /// Mock implementation of testInputGainMovementChannel1 - not used in these tests
+    func testInputGainMovementChannel1(oscService: OSCService) async throws {
+        // Not used in LogicParameterServiceTests
+        if let error = errorToThrow {
+            errorToThrow = nil
+            throw error
+        }
+    }
+    
     /// Reset all counters and state.
     func reset() {
         getVolumeCallCount = 0
