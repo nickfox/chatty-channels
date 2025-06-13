@@ -202,6 +202,9 @@ public class OSCListener: ObservableObject, @unchecked Sendable {
             return
         }
         
+        // Commented out to reduce console spam at 24 Hz
+        // logger.info("Received identified RMS: \(logicTrackUUID) = \(rmsValue)")
+        
         oscService.processIdentifiedRMS(logicTrackUUID: logicTrackUUID, rmsValue: rmsValue)
     }
     

@@ -802,6 +802,13 @@ void AIplayerAudioProcessor::oscMessageReceived (const juce::OSCMessage& message
                {
                    logMessage(LogLevel::Info, "Sent UUID assignment confirmation for track " + this->logicTrackUUID);
                }
+               
+               // Start RMS telemetry timer if we have a port and it's not already running
+               if (portState == PortState::Bound && !isTimerRunning())
+               {
+                   logMessage(LogLevel::Info, "Starting RMS telemetry timer after UUID assignment");
+                   startTimerHz(24); // 24 Hz for smooth VU meter updates
+               }
            }
            else if (!matched)
            {
@@ -1258,7 +1265,8 @@ void AIplayerAudioProcessor::sendRMSTelemetry()
         {
             // Ensure connected flag is set
             senderConnected = true;
-            // Don't log successful sends - they happen 24 times per second!
+            // Log RMS sends for debugging (now only 1 Hz)
+            logMessage(LogLevel::Info, "Sent RMS: " + addressPatternString + " [" + idToSend + "] = " + juce::String(rmsValue));
         }
     }
     catch (const std::bad_alloc& e)
@@ -1474,6 +1482,7 @@ bool AIplayerAudioProcessor::bindToAssignedPort(int port)
                 }
                 
                 // Now we can start sending RMS telemetry
+                logMessage(LogLevel::Info, "Starting RMS telemetry timer at 24 Hz");
                 startTimerHz(24); // 24 Hz for smooth VU meter updates
                 
                 return true;

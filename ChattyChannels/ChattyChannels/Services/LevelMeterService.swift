@@ -17,6 +17,9 @@ public class LevelMeterService: ObservableObject {
     /// Published current track name for compatibility with v0.6 UI
     @Published public var currentTrack: String = "Master Bus"
     
+    /// Dedicated published property for TR1 (kick drum) to ensure VU meter updates
+    @Published public var tr1Level = AudioLevel(id: "TR1", rmsValue: 0.0, peakRmsValue: 0.0, trackName: "Kick")
+    
     /// Compatibility properties for v0.6 UI - mapping between old channel-based and new track-based system
     @Published public var leftChannel = AudioLevel(id: "LEFT", rmsValue: 0.0, peakRmsValue: 0.0, trackName: "Master Bus")
     @Published public var rightChannel = AudioLevel(id: "RIGHT", rmsValue: 0.0, peakRmsValue: 0.0, trackName: "Master Bus")
@@ -36,6 +39,7 @@ public class LevelMeterService: ObservableObject {
         logger.info("LevelMeterService initialized")
         // Set up default master bus audio level
         audioLevels[masterBusUUID] = AudioLevel(id: masterBusUUID, rmsValue: 0.0, peakRmsValue: 0.0, trackName: "Master Bus")
+        audioLevels["TR1"] = tr1Level // Initialize TR1 in the dictionary
         startPeakDecayTimer()
         
         // Start a timer to update the v0.6 compatibility properties from the master bus data
@@ -49,7 +53,7 @@ public class LevelMeterService: ObservableObject {
     ///   - rmsValue: The new RMS value (0.0 to 1.0).
     ///   - peakRmsValueOverride: Optional peak value if provided directly by the source.
     public func updateLevel(logicTrackUUID: String, rmsValue: Float, peakRmsValueOverride: Float? = nil) {
-        var level = audioLevels[logicTrackUUID] ?? AudioLevel(id: logicTrackUUID)
+        var level = audioLevels[logicTrackUUID] ?? AudioLevel(id: logicTrackUUID, rmsValue: 0.0, peakRmsValue: 0.0, trackName: logicTrackUUID)
         
         level.rmsValue = max(0.0, min(1.0, rmsValue)) // Clamp value
         
@@ -62,6 +66,22 @@ public class LevelMeterService: ObservableObject {
         
         audioLevels[logicTrackUUID] = level
         
+        // CRITICAL FIX: Update the dedicated TR1 property when TR1 data arrives
+        if logicTrackUUID == "TR1" {
+            tr1Level = level
+            // Commented out to reduce console spam at 24 Hz
+            // logger.info("Updated TR1 dedicated property: RMS \(level.rmsValue, privacy: .public), Peak \(level.peakRmsValue, privacy: .public)")
+        }
+        
+        // Force SwiftUI to detect the change by replacing the entire dictionary
+        let newDict = audioLevels
+        audioLevels = newDict
+        
+        // Force objectWillChange to fire to ensure SwiftUI updates
+        DispatchQueue.main.async {
+            self.objectWillChange.send()
+        }
+        
         // If this is the master bus, update the current track name for UI compatibility
         if logicTrackUUID == masterBusUUID {
             if let trackName = level.trackName {
@@ -72,8 +92,9 @@ public class LevelMeterService: ObservableObject {
             updateCompatibilityChannels(from: level)
         }
         
-        // Removed excessive debug logging - this was generating thousands of log entries per second
-        // logger.debug("Updated level for \(logicTrackUUID, privacy: .public): RMS \(level.rmsValue, privacy: .public), Peak \(level.peakRmsValue, privacy: .public)")
+        // Commented out verbose logging to reduce console spam at 24 Hz
+        // logger.info("Updated level for \(logicTrackUUID, privacy: .public): RMS \(level.rmsValue, privacy: .public), Peak \(level.peakRmsValue, privacy: .public)")
+        
     }
     
     /// Updates the v0.6 compatibility channel properties from the master bus data
@@ -82,9 +103,44 @@ public class LevelMeterService: ObservableObject {
         rightChannel = AudioLevel(id: "RIGHT", rmsValue: masterLevel.rmsValue, peakRmsValue: masterLevel.peakRmsValue, trackName: masterLevel.trackName)
     }
     
+    /// Updates the master bus level with the sum of all track levels
+    private func updateMasterBusLevel() {
+        // Calculate RMS sum of all tracks (excluding master bus itself)
+        var sumOfSquares: Float = 0.0
+        var peakValue: Float = 0.0
+        var trackCount = 0
+        
+        for (uuid, level) in audioLevels {
+            if uuid != masterBusUUID {
+                // RMS values are summed as power (squared values)
+                sumOfSquares += level.rmsValue * level.rmsValue
+                peakValue = max(peakValue, level.peakRmsValue)
+                trackCount += 1
+            }
+        }
+        
+        // Calculate combined RMS (square root of sum of squares)
+        let combinedRMS = trackCount > 0 ? sqrt(sumOfSquares) : 0.0
+        
+        // Apply 10x amplification and clamp to valid range
+        let amplifiedRMS = min(1.0, combinedRMS * 10.0)
+        let amplifiedPeak = min(1.0, peakValue * 10.0)
+        
+        // Update master bus level
+        var masterLevel = audioLevels[masterBusUUID] ?? AudioLevel(id: masterBusUUID, rmsValue: 0.0, peakRmsValue: 0.0, trackName: "Master Bus")
+        masterLevel.rmsValue = amplifiedRMS
+        masterLevel.peakRmsValue = max(masterLevel.peakRmsValue, amplifiedPeak)
+        masterLevel.lastUpdateTime = Date()
+        
+        audioLevels[masterBusUUID] = masterLevel
+        
+        // Update compatibility channels
+        updateCompatibilityChannels(from: masterLevel)
+    }
+    
     /// Starts a timer to update the v0.6 compatibility properties from the master bus data
     private func startCompatibilityTimer() {
-        Timer.scheduledTimer(withTimeInterval: 1.0/30.0, repeats: true) { [weak self] _ in
+        Timer.scheduledTimer(withTimeInterval: 1.0/24.0, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             Task { @MainActor in
                 if let masterLevel = self.audioLevels[self.masterBusUUID] {
@@ -121,6 +177,11 @@ public class LevelMeterService: ObservableObject {
             audioLevels[logicTrackUUID]?.peakRmsValue = audioLevels[logicTrackUUID]?.rmsValue ?? 0.0
             logger.info("Peak value reset for track: \(logicTrackUUID, privacy: .public)")
             
+            // If this is TR1, also update the dedicated property
+            if logicTrackUUID == "TR1", let level = audioLevels[logicTrackUUID] {
+                tr1Level = level
+            }
+            
             // If this is the master bus, also update the compatibility channels
             if logicTrackUUID == masterBusUUID {
                 leftChannel.peakValue = leftChannel.value
@@ -140,7 +201,7 @@ public class LevelMeterService: ObservableObject {
     /// Starts a timer to handle peak value decay.
     private func startPeakDecayTimer() {
         peakDecayTimer?.invalidate() // Invalidate existing timer if any
-        peakDecayTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
+        peakDecayTimer = Timer.scheduledTimer(withTimeInterval: 1.0/24.0, repeats: true) { [weak self] _ in
             guard let strongSelf = self else { return }
             
             Task { @MainActor in
@@ -155,16 +216,14 @@ public class LevelMeterService: ObservableObject {
                             }
                             strongSelf.audioLevels[uuid] = level
                             
-                            // If this is the master bus, also update compatibility channels
-                            if uuid == strongSelf.masterBusUUID {
-                                strongSelf.leftChannel.peakValue *= strongSelf.peakDecayRate
-                                strongSelf.rightChannel.peakValue *= strongSelf.peakDecayRate
-                                if strongSelf.leftChannel.peakValue < 0.001 {
-                                    strongSelf.leftChannel.peakValue = 0.0
-                                }
-                                if strongSelf.rightChannel.peakValue < 0.001 {
-                                    strongSelf.rightChannel.peakValue = 0.0
-                                }
+                            // Update TR1 dedicated property if needed
+                            if uuid == "TR1" {
+                                strongSelf.tr1Level = level
+                            }
+                            
+                            // Update master bus level after individual track decay
+                            if uuid != strongSelf.masterBusUUID {
+                                strongSelf.updateMasterBusLevel()
                             }
                         }
                     }

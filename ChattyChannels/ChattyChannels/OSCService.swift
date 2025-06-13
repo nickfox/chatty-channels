@@ -417,11 +417,27 @@ public final class OSCService: ObservableObject {
             return
         }
         
+        // Apply 10x amplification to the RMS value
+        let amplifiedRMS = amplifyRMS(rmsValue, amplificationFactor: 10.0)
+        
+        // Commented out verbose logging to reduce console spam at 24 Hz
+        // print("[OSCService] Processing identified RMS: \(logicTrackUUID) = \(rmsValue) (amplified to \(amplifiedRMS))")
+        
         // Dispatch to MainActor as LevelMeterService.updateLevel is @MainActor isolated
         Task { @MainActor in
-            levelMeterService.updateLevel(logicTrackUUID: logicTrackUUID, rmsValue: rmsValue)
-            // Removed verbose logging - these messages come in continuously
+            levelMeterService.updateLevel(logicTrackUUID: logicTrackUUID, rmsValue: amplifiedRMS)
+            // print("[OSCService] Updated LevelMeterService for \(logicTrackUUID)")
         }
+    }
+    
+    /// Amplifies an RMS value by a given factor and clamps to 0.0-1.0 range
+    /// - Parameters:
+    ///   - rmsValue: The original RMS value
+    ///   - amplificationFactor: The factor to multiply the RMS value by
+    /// - Returns: The amplified and clamped RMS value
+    private func amplifyRMS(_ rmsValue: Float, amplificationFactor: Float) -> Float {
+        let amplified = rmsValue * amplificationFactor
+        return min(1.0, max(0.0, amplified))
     }
     
     /// Processes an incoming port-based RMS message.

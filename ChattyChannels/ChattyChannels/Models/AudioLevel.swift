@@ -75,8 +75,10 @@ public struct AudioLevel: Identifiable {
     
     /// Convert current RMS value to dBFS.
     public var dbfsValue: Float {
-        guard rmsValue > 0 else { return -Float.infinity } // or a very low dB value like -120.0
-        return 20 * log10(rmsValue)
+        guard rmsValue > 0 else { return -120.0 } // Return -120 dB for silence instead of -infinity
+        let db = 20 * log10(rmsValue)
+        // Clamp to reasonable range to avoid extreme values
+        return max(-120.0, min(6.0, db))
     }
     
     /// Convert raw value to dB (v0.6 compatibility)

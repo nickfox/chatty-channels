@@ -60,11 +60,21 @@ struct SingleMeterView: View {
                     activeColor: .red,
                     inactiveColor: .red.opacity(0.15)
                 )
-                .position(x: geometry.size.width * 0.77, // Use geometry
-                          y: geometry.size.height * 0.3) // Use geometry
+                .position(x: geometry.size.width * 0.88, // Moved slightly left
+                          y: geometry.size.height * 0.55) // Moved down considerably
             }
             // Removed .clipped()
             .onReceive(timer) { _ in
+                updateMeter()
+            }
+            .onChange(of: audioLevel.rmsValue) { _, newValue in
+                // Force update when RMS value changes
+                // Commented out to reduce console spam at 24 Hz
+                // print("[VU Meter] RMS value changed to: \(newValue) for \(audioLevel.id)")
+                updateMeter()
+            }
+            .onAppear {
+                // Initialize needle position on appear
                 updateMeter()
             }
         }
@@ -80,8 +90,18 @@ struct SingleMeterView: View {
         let dbValue = audioLevel.dbfsValue
         let constrainedDb = min(max(dbValue, -20), 3) // Standard VU range -20dB to +3dB
         
+        // Debug logging - commented out to reduce console spam at 24 Hz
+        // if audioLevel.id == "TR1" {
+        //     print("[VU Meter TR1] RMS: \(audioLevel.rmsValue), dB: \(dbValue), constrained: \(constrainedDb)")
+        // }
+        
         // Map dB to rotation angle
         needleTarget = mapDbToRotation(db: constrainedDb)
+        
+        // Debug needle position - commented out to reduce console spam at 24 Hz
+        // if audioLevel.id == "TR1" {
+        //     print("[VU Meter TR1] Needle target: \(needleTarget)°, current: \(needleRotation)°")
+        // }
         
         // Apply VU meter ballistics (300ms integration time)
         // This coefficient adjusted for 24 Hz timing (was 0.15 for 60 Hz)
