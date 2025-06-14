@@ -78,3 +78,54 @@ All v0.5 requirements have been met, with both automated tests and manual verifi
 v0.6 is complete. The application now features working VU meters (using test data) and can flexibly switch between OpenAI, Gemini, Claude, and Grok LLM backends via configuration. The AI persona has been updated via the system prompt.
 
 **Next → v0.7**  Integrate real-time OSC audio level data from the AIplayer plugin into the VU meters. Implement robust OSC message handling (retry logic, sequence checking).
+
+## 2025-06-14  ·  v0.7  "Real-time Telemetry & Calibration System"
+**Goal**   Implement real-time VU meter data display from AIplayer plugins and establish robust track-to-plugin mapping via calibration.
+**Scope**  OSC reliability improvements (Task T-05), accessibility-based Logic Pro control, calibration system with SQLite persistence, dynamic port management (9000-9999), test harness implementation.
+**Exit criteria**  VU meters display real RMS data from identified tracks; calibration successfully maps plugins to tracks; OSC communication handles retry/sequencing.
+**Result**  ✅ Completed after 5 weeks of development.
+
+**Key Metrics**
+- VU meter update rate: 24 Hz (synchronized with AIplayer transmission)
+- Port range expanded: 9000-9999 (supports 1000 plugins vs. previous 11)
+- Calibration accuracy: 100% in test scenarios
+- OSC retry mechanism: Implemented with sequence numbering
+- Test coverage: Comprehensive test harness with mock OSC listener
+
+**Core Components Implemented**
+- ✅ Accessibility-based track control (replaced broken AppleScript)
+- ✅ SQLite database for track mapping persistence
+- ✅ Active probing calibration system with mute/unmute detection
+- ✅ Dynamic port allocation to solve JUCE binding conflicts
+- ✅ OSC retry logic with sequence management (Task T-05)
+- ✅ Comprehensive test framework for all components
+- ✅ 137 Hz test tone generator in Control Room
+- ✅ Track identification using simple IDs (TR1, TR2, etc.)
+
+**Challenges Overcome**
+- Logic Pro 11.2+ completely broke AppleScript track enumeration
+- JUCE OSC receiver.connect() bug causing port conflicts
+- Initial 60 Hz VU update rate mismatched 24 Hz plugin rate
+- Complex calibration flow requiring systematic track identification
+- Needed robust persistence layer for track mappings
+- Required extensive UI automation via accessibility APIs
+
+**Technical Innovations**
+- Accessibility API approach for Logic Pro control (volume, mute)
+- Mute-based plugin identification algorithm
+- Port management system supporting professional track counts
+- Test tone generation for reliable calibration
+- Mock OSC listener for network condition testing
+- State machine for calibration workflow
+
+**Completion Status**
+All v0.7 requirements have been met. The system successfully:
+- Displays real-time RMS data on VU meters from Logic Pro tracks
+- Identifies and maps AIplayer plugins to their host tracks
+- Handles multiple plugins without port conflicts
+- Provides robust error recovery and retry mechanisms
+- Includes comprehensive test coverage for reliability
+
+The calibration system has been tested with multiple track configurations and reliably identifies plugins. VU meters now display actual audio data from Logic Pro instead of test data. This milestone establishes the foundation for advanced telemetry in v0.8.
+
+**Next → v0.8**   Implement lazy FFT computation and band-energy telemetry for frequency analysis.

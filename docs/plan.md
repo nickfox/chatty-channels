@@ -23,7 +23,7 @@
 |------|-----------|-----------------------------|--------------------|--------|
 | H1 | AppleScript mix control | Underdocumented; may fail during playback or on internationalised Logic installs | T‑01, T‑02 | ✅ Resolved |
 | H2 | Track UUID ↔ track‑name mapping | If wrong, every command acts on the wrong fader | T‑03 | ✅ Basic mapping implemented |
-| H3 | OSC latency / loss | PID loop stability & UI responsiveness | T‑04 … T‑06 | ✅ Optimized (182ms RTT) |
+| H3 | OSC latency / loss | PID loop stability & UI responsiveness | T‑04 … T‑06 | ✅ Resolved |
 | H4 | PID convergence maths | Needs <3 steps, <±0.3 dB | T‑07 | ✅ Converges in 2 steps, ±0.12 dB |
 | H5 | Telemetry scaling (FFT) | 100 tracks × FFT could starve CPU/UDP | T‑08, T‑09 | Planned for v0.8 |
 | H6 | LLM structured replies | JSON schema violations break automation | T‑10 | Planned for v0.9 |
@@ -40,7 +40,7 @@
 | T‑02 | Playback‑safe AS executor | T‑01 | H1 | Executes while Logic is playing; RTT logged <250 ms. | ✅ Complete |
 | T‑03 | Handshake + mapping UI | T‑02 | H2 | Plugins send UUID; Swift fetches track names; user confirm list; stored plist. | ✅ Basic mapping done |
 | T‑04 | OSCService low‑latency path | – | H3 | End‑to‑end RTT <200 ms with 60 mock senders. | ✅ Complete (182ms) |
-| T‑05 | UDP retry & order guarantees | T‑04 | H3 | Duplicate suppression, sequence ID, resend after 1 lost packet. | Planned for v0.7 |
+| T‑05 | UDP retry & order guarantees | T‑04 | H3 | Duplicate suppression, sequence ID, resend after 1 lost packet. | ✅ Complete |
 | T‑06 | Telemetry ring‑buffer | T‑04 | H3 | Stores last 80 packets per track with ≤0.5 MB RAM. | ✅ Complete |
 | T‑07 | Simple P‑controller | T‑03,T‑04 | H4 | Converges on –3 dB target in max 3 steps in unit test. | ✅ Complete (2 steps) |
 | T‑08 | Lazy FFT compute thread | T‑04 | H5 | Average CPU <1 % per plugin at 44.1 kHz, 128 buffer. | Planned for v0.8 |
@@ -60,10 +60,10 @@
 
 ---
 
-## 5 · Current sprint focus  (2025‑05‑07 → v0.7)
+## 5 · Current sprint focus  (2025‑06‑14 → v0.8)
 
-**Focus:** Integrate real-time OSC audio level data from AIplayer plugin into the VU meters. Implement robust OSC message handling (retry logic, sequence checking).
-**Tasks:** T-05 (Retry/Order), VU-OSC-01 (VU Meter OSC Integration)
+**Focus:** Implement lazy FFT computation and band-energy telemetry for frequency-domain analysis. Optimize for minimal CPU impact while providing rich spectral data.
+**Tasks:** T-08 (Lazy FFT compute thread), T-09 (Band-energy telemetry v1.1)
 
 ---
 
@@ -74,12 +74,12 @@
 |---------|---------------|---------------|--------|
 | **v0.5** *(DEV)* | Kick‑track PID loop proven | T‑01…T‑07 | ✅ Completed Apr 27, 2025 |
 | **v0.6** | VU Meters & Multi-Provider Support | UI-VU-02, LLM-Providers | ✅ Completed May 7, 2025 |
-| **v0.7** | Real-time VU Meter Data & OSC Reliability | T‑05, VU-OSC-01 | Planned |
+| **v0.7** | Real-time VU Meter Data & OSC Reliability | T‑05, VU-OSC-01 | ✅ Completed Jun 14, 2025 |
 | **v0.8** | Telemetry v1.1 (band‑energy) + Lazy FFT | T‑08, T‑09 | Planned |
 | **v0.9** | LLM JSON schema enforcement & prompt templates | T‑10, AI‑Prompt‑02 | Planned |
 | **v1.0** *(ALPHA)* | Full NVFE EQ/Compression cycle on demo project | Backlog T‑11…T‑18 | Planned |
 
-> **Note**  v0.6 completed, adding VU meters and support for multiple LLM backends. Planning v0.7.
+> **Note**  v0.7 completed with calibration system and real-time telemetry. Starting v0.8 for FFT implementation.
 
 ---
 

@@ -74,8 +74,8 @@ The Control Room is where the AI Producer (known as "soundsmith" or "smitty") li
 | --------------------- | ------------------------------------------------------- | ------------------------------------------- | ------ |
 | **v0.5**              | H1 AppleScript round‑trip, H3 OSC latency, H4 PID maths | Kick‑track closed‑loop demo                 | ✅ Completed Apr 27, 2025 |
 | **v0.6**              | H2 track‑UUID mapping, UI functionality                 | VU meters, Multi-LLM provider support       | ✅ Completed May 7, 2025 |
-| **v0.7 (🚧 current)** | H3 UDP retry logic                                      | Real-time VU Meter Data & OSC Reliability   | In progress |
-| **v0.8**              | H5 lazy FFT, band‑energy payload                        | Telemetry v1.1                              | Planned |
+| **v0.7**              | H3 UDP retry logic                                      | Real-time VU Meter Data & OSC Reliability   | ✅ Completed Jun 14, 2025 |
+| **v0.8 (🚧 current)** | H5 lazy FFT, band‑energy payload                        | Telemetry v1.1                              | In progress |
 | **v0.9**              | H6 LLM JSON schema                                      | Strict validator + prompt templates         | Planned |
 | **v1.0 (ALPHA)**      | Full NVFE pass                                          | Public alpha release                        | Planned |
 
@@ -149,6 +149,17 @@ xcodebuild -project ChattyChannels.xcodeproj -scheme ControlRoom
 - Multi-LLM provider support (OpenAI, Gemini, Claude, Grok)
 - "Soundsmith" producer persona (responds to "smitty")
 - Configuration system for provider selection
+
+#### v0.7 Features
+- Real-time RMS telemetry from AIplayer plugins at 24 Hz
+- Sophisticated calibration system for track-to-plugin mapping
+- Accessibility-based Logic Pro control (volume, mute)
+- Dynamic port management (9000-9999) supporting 1000+ plugins
+- SQLite persistence for track mappings
+- OSC retry mechanism with sequence numbering
+- 137 Hz test tone generator for calibration
+- Comprehensive test harness with mock OSC listener
+- Simple track IDs (TR1, TR2) for efficient communication
 
 ---
 
