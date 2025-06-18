@@ -155,6 +155,9 @@ public class OSCListener: ObservableObject, @unchecked Sendable {
             case "/aiplayer/uuid_assignment_confirmed":
                 await handleUUIDAssignmentConfirmation(message)
                 
+            case "/aiplayer/telemetry":
+                await handleTelemetryMessage(message)
+                
             case "/aiplayer/start_tone", "/aiplayer/stop_tone", "/aiplayer/query_rms":
                 // These are outgoing messages TO plugins, not incoming FROM plugins
                 logger.debug("Received echo of outgoing message: \(message.address)")
@@ -373,6 +376,30 @@ public class OSCListener: ObservableObject, @unchecked Sendable {
         }
         
         logger.debug("Plugin \(tempID) confirmed tone stopped")
+    }
+    
+    private func handleTelemetryMessage(_ message: OSCMessage) async {
+        // Expected format: [trackID, rmsValue, band1, band2, band3, band4]
+        guard message.arguments.count >= 6,
+              let trackID = message.arguments[0] as? String,
+              let rmsValue = message.arguments[1] as? Float,
+              let band1 = message.arguments[2] as? Float,
+              let band2 = message.arguments[3] as? Float,
+              let band3 = message.arguments[4] as? Float,
+              let band4 = message.arguments[5] as? Float else {
+            logger.error("Invalid telemetry message format: expected 6 args, got \(message.arguments.count)")
+            return
+        }
+        
+        // Commented out to reduce console spam at 24 Hz
+        // logger.info("FFT Telemetry - Track: \(trackID), RMS: \(String(format: "%.3f", rmsValue)), Bands: [\(String(format: "%.1f", band1)), \(String(format: "%.1f", band2)), \(String(format: "%.1f", band3)), \(String(format: "%.1f", band4))] dB")
+        
+        // Process telemetry with band energies
+        oscService.processTelemetryWithBands(
+            trackID: trackID,
+            rmsValue: rmsValue,
+            bandEnergies: [band1, band2, band3, band4]
+        )
     }
     
     // Helper functions to extract connection info

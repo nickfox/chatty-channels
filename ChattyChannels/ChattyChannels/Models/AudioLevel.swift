@@ -21,6 +21,14 @@ public struct AudioLevel: Identifiable {
     /// Timestamp of the last update. Useful for UI or decay logic.
     public var lastUpdateTime: Date = Date()
     
+    /// Band energies from FFT analysis in dB (Low, Low-Mid, High-Mid, High)
+    /// Band definitions:
+    /// - Band 0 (Low): 20 Hz - 250 Hz (bass, kick)
+    /// - Band 1 (Low-Mid): 250 Hz - 2 kHz (vocals, snare, keys)
+    /// - Band 2 (High-Mid): 2 kHz - 8 kHz (presence, clarity)
+    /// - Band 3 (High): 8 kHz - 20 kHz (air, cymbals)
+    public var bandEnergies: [Float] = [-100.0, -100.0, -100.0, -100.0]
+    
     // MARK: - V0.6 Compatibility Properties and Types
     
     /// Audio channel options for v0.6 compatibility (left or right)

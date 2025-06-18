@@ -129,3 +129,66 @@ All v0.7 requirements have been met. The system successfully:
 The calibration system has been tested with multiple track configurations and reliably identifies plugins. VU meters now display actual audio data from Logic Pro instead of test data. This milestone establishes the foundation for advanced telemetry in v0.8.
 
 **Next → v0.8**   Implement lazy FFT computation and band-energy telemetry for frequency analysis.
+
+## 2025-06-19  ·  v0.8  "FFT & Band-Energy Telemetry"
+**Goal**   Extend telemetry system to include frequency-domain analysis via FFT computation and 4-band energy extraction.
+**Scope**  FFT processor implementation (AIplayer), band energy analyzer, extended OSC protocol, ChattyChannels backend updates (NO UI changes).
+**Exit criteria**  FFT telemetry messages received and stored; band energies computed accurately; backward compatibility maintained; UI remains untouched.
+**Result**  ✅ Completed successfully.
+
+**Key Metrics**
+- FFT size: 1024 samples (10th order)
+- Update rate: 10 Hz (lazy computation)
+- Frequency bands: 4 (Low: 20-250Hz, Low-Mid: 250-2kHz, High-Mid: 2k-8kHz, High: 8k-20kHz)
+- OSC message format: `/aiplayer/telemetry [trackID, rms, band1, band2, band3, band4]`
+- Telemetry payload: 24 bytes + OSC overhead
+- CPU impact: Minimal (<1% design target)
+
+**Core Components Implemented**
+- ✅ FFTProcessor class with circular buffer and Hann windowing
+- ✅ BandEnergyAnalyzer for 4-band frequency extraction
+- ✅ FrequencyAnalyzer coordinator with lazy computation
+- ✅ Extended TelemetryData model with band energies
+- ✅ Updated OSC protocol maintaining backward compatibility
+- ✅ ChattyChannels OSCListener handling new telemetry format
+- ✅ LevelMeterService storing band data (no UI display)
+- ✅ Comprehensive unit tests for FFT accuracy
+
+**Technical Architecture**
+- **AIplayer (C++/JUCE)**:
+  - FFTProcessor: Manages FFT computation with configurable size
+  - BandEnergyAnalyzer: Extracts energy from frequency bins
+  - FrequencyAnalyzer: High-level coordinator with lazy updates
+  - Circular buffer for continuous audio processing
+  - A-weighting option for perceptual accuracy
+- **ChattyChannels (Swift)**:
+  - OSCListener: Routes `/aiplayer/telemetry` messages
+  - OSCService: Processes telemetry with band energies
+  - AudioLevel model: Extended with bandEnergies array
+  - LevelMeterService: Stores band data for future use
+
+**Challenges Overcome**
+- C++ compilation issues with default member initializers
+- Missing namespace closing braces in FFTProcessor
+- Heavy logging causing 5000+ lines of console output
+- Ensuring NO UI modifications per critical v0.8 requirement
+- Maintaining backward compatibility with legacy RMS messages
+
+**Data Validation**
+- Silent tracks correctly show -100 dB across all bands
+- Active tracks show realistic frequency distribution
+- Example: TR3 showed Low: -75.7dB, Low-Mid: -90.6dB, High-Mid: -84.6dB, High: -95.4dB
+- FFT computation completes efficiently without audio glitches
+
+**Completion Status**
+All v0.8 requirements have been met:
+- FFT implementation is working correctly in AIplayer
+- Band energy data flows via OSC to ChattyChannels
+- Data is received, logged, and stored (not displayed)
+- Backward compatibility maintained with legacy RMS
+- NO UI MODIFICATIONS made - ChattyChannels UI untouched
+- Comprehensive test suite implemented and passing
+
+The FFT telemetry system is fully operational and ready for UI integration in v0.9+. The implementation provides the foundation for frequency-aware mixing decisions by the AI producer.
+
+**Next → v0.9**   Design and implement frequency visualization UI components for band energy display.

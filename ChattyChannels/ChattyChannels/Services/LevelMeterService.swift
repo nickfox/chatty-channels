@@ -97,6 +97,38 @@ public class LevelMeterService: ObservableObject {
         
     }
     
+    /// Updates the band energies for a specific track (FFT data).
+    /// This method stores the band energy data without updating the UI.
+    /// - Parameters:
+    ///   - logicTrackUUID: The unique identifier of the track.
+    ///   - bandEnergies: Array of 4 band energy values in dB.
+    public func updateBandEnergies(logicTrackUUID: String, bandEnergies: [Float]) {
+        guard bandEnergies.count == 4 else {
+            logger.error("Invalid band energies array: expected 4 values, got \(bandEnergies.count)")
+            return
+        }
+        
+        // Get or create the audio level for this track
+        var level = audioLevels[logicTrackUUID] ?? AudioLevel(id: logicTrackUUID, rmsValue: 0.0, peakRmsValue: 0.0, trackName: logicTrackUUID)
+        
+        // Update band energies
+        level.bandEnergies = bandEnergies
+        
+        // Store back in dictionary
+        audioLevels[logicTrackUUID] = level
+        
+        // Update TR1 dedicated property if needed
+        if logicTrackUUID == "TR1" {
+            tr1Level.bandEnergies = bandEnergies
+        }
+        
+        // Commented out to reduce console spam at 24 Hz
+        // logger.info("Band energies for \(logicTrackUUID): Low=\(bandEnergies[0])dB, Low-Mid=\(bandEnergies[1])dB, High-Mid=\(bandEnergies[2])dB, High=\(bandEnergies[3])dB")
+        
+        // Note: We're not triggering objectWillChange here because we don't want
+        // to update the UI yet. Band energies are stored for future use in v0.9+
+    }
+    
     /// Updates the v0.6 compatibility channel properties from the master bus data
     private func updateCompatibilityChannels(from masterLevel: AudioLevel) {
         leftChannel = AudioLevel(id: "LEFT", rmsValue: masterLevel.rmsValue, peakRmsValue: masterLevel.peakRmsValue, trackName: masterLevel.trackName)

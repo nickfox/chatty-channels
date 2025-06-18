@@ -46,11 +46,11 @@ sequenceDiagram
     participant LLM as Remote LLM (o3)
 
     Note over AP: per‑track RMS / FFT
-    AP-->>CR: OSC /telemetry {rms:-18dB}
+    AP-->>CR: OSC /telemetry {rms:-18dB, bands:[-6,-12,-18,-24]}
     CR-->>LP: AppleScript set fader "Kick" -3.0
     LP--)CR: ok
     CR-)AP: OSC /query rms?
-    AP-->>CR: OSC /telemetry {rms:-21dB}
+    AP-->>CR: OSC /telemetry {rms:-21dB, bands:[-9,-15,-21,-27]}
     CR-->>LLM: producer‑prompt JSON
     LLM-->CR: reply
 ```
@@ -75,7 +75,7 @@ The Control Room is where the AI Producer (known as "soundsmith" or "smitty") li
 | **v0.5**              | H1 AppleScript round‑trip, H3 OSC latency, H4 PID maths | Kick‑track closed‑loop demo                 | ✅ Completed Apr 27, 2025 |
 | **v0.6**              | H2 track‑UUID mapping, UI functionality                 | VU meters, Multi-LLM provider support       | ✅ Completed May 7, 2025 |
 | **v0.7**              | H3 UDP retry logic                                      | Real-time VU Meter Data & OSC Reliability   | ✅ Completed Jun 14, 2025 |
-| **v0.8 (🚧 current)** | H5 lazy FFT, band‑energy payload                        | Telemetry v1.1                              | In progress |
+| **v0.8**              | H5 lazy FFT, band‑energy payload                        | Telemetry v1.1                              | ✅ Completed Jun 19, 2025 |
 | **v0.9**              | H6 LLM JSON schema                                      | Strict validator + prompt templates         | Planned |
 | **v1.0 (ALPHA)**      | Full NVFE pass                                          | Public alpha release                        | Planned |
 

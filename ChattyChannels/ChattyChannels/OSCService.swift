@@ -440,6 +440,33 @@ public final class OSCService: ObservableObject {
         return min(1.0, max(0.0, amplified))
     }
     
+    /// Processes an incoming telemetry message with band energies (FFT data).
+    /// - Parameters:
+    ///   - trackID: The Logic Pro Track UUID (e.g., "TR1")
+    ///   - rmsValue: The RMS value
+    ///   - bandEnergies: Array of 4 band energy values in dB
+    public func processTelemetryWithBands(trackID: String, rmsValue: Float, bandEnergies: [Float]) {
+        guard let levelMeterService = self.levelMeterService else {
+            print("[OSCService] Error: LevelMeterService not set. Cannot process telemetry for \(trackID).")
+            return
+        }
+        
+        // Apply 10x amplification to the RMS value
+        let amplifiedRMS = amplifyRMS(rmsValue, amplificationFactor: 10.0)
+        
+        // Commented out to reduce console spam at 24 Hz
+        // print("[OSCService] FFT Telemetry received - Track: \(trackID), RMS: \(String(format: "%.3f", rmsValue)) (amplified: \(String(format: "%.3f", amplifiedRMS))), Bands: \(bandEnergies.map { String(format: "%.1f", $0) }.joined(separator: ", ")) dB")
+        
+        // Dispatch to MainActor as LevelMeterService.updateLevel is @MainActor isolated
+        Task { @MainActor in
+            // Update RMS level (existing functionality)
+            levelMeterService.updateLevel(logicTrackUUID: trackID, rmsValue: amplifiedRMS)
+            
+            // Store band energies for future use (not displayed in UI yet)
+            levelMeterService.updateBandEnergies(logicTrackUUID: trackID, bandEnergies: bandEnergies)
+        }
+    }
+    
     /// Processes an incoming port-based RMS message.
     /// - Parameters:
     ///   - tempID: The temporary instance ID from the plugin.
