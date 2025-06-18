@@ -1,0 +1,173 @@
+18 Jun 2025 21:37:55 | INFO | === Logger initialized ===
+18 Jun 2025 21:37:55 | INFO | Log file: /Users/nickfox137/Documents/chatty-channel/logs/AIplayer.log
+18 Jun 2025 21:37:55 | INFO | ==================================================================
+18 Jun 2025 21:37:55 | INFO | AIplayer PLUGIN WITH REFACTORED ARCHITECTURE STARTING!
+18 Jun 2025 21:37:55 | INFO | Plugin Instance tempInstanceID: 1ca6a212144a4f87991c564aa2defb96
+18 Jun 2025 21:37:55 | INFO | ==================================================================
+18 Jun 2025 21:37:55 | INFO | OSCManager initialized
+18 Jun 2025 21:37:55 | INFO | PortManager initialized
+18 Jun 2025 21:37:55 | INFO | TelemetryService initialized
+18 Jun 2025 21:37:55 | INFO | Gain parameter pointer acquired.
+18 Jun 2025 21:37:55 | INFO | OSC Sender connected to 127.0.0.1:8999 on attempt 1
+18 Jun 2025 21:37:55 | INFO | Successfully connected to ChattyChannels
+18 Jun 2025 21:37:55 | INFO | OSC Receiver bound to port 50000
+18 Jun 2025 21:37:55 | INFO | Bound to ephemeral port 50000
+18 Jun 2025 21:37:55 | INFO | Requesting port assignment from ChattyChannels (attempt 1/5)
+18 Jun 2025 21:37:55 | INFO | Sent port request: tempID=1ca6a212144a4f87991c564aa2defb96, preferred=-1, responsePort=50000
+18 Jun 2025 21:37:55 | INFO | prepareToPlay called. Sample Rate: 44100, Samples Per Block: 1024
+18 Jun 2025 21:37:55 | INFO | Audio components prepared for playback
+18 Jun 2025 21:37:55 | INFO | Received OSC message: /aiplayer/port_assignment with 3 arguments
+18 Jun 2025 21:37:55 | INFO | Received port assignment: tempID=1ca6a212144a4f87991c564aa2defb96, port=9000, status=assigned
+18 Jun 2025 21:37:55 | INFO | Received port assignment: port=9000, status=assigned
+18 Jun 2025 21:37:55 | INFO | Port 9000 assigned to instance 1ca6a212144a4f87991c564aa2defb96
+18 Jun 2025 21:37:55 | INFO | Attempting to bind OSC receiver to assigned port 9000
+18 Jun 2025 21:37:55 | INFO | OSC Receiver bound to port 9000
+18 Jun 2025 21:37:55 | INFO | Successfully bound to port 9000
+18 Jun 2025 21:37:55 | INFO | Plugin state restored.
+18 Jun 2025 21:38:24 | INFO | releaseResources called.
+18 Jun 2025 21:38:24 | INFO | --- AIplayer Plugin Shutting Down ---
+18 Jun 2025 21:38:24 | INFO | TelemetryService shutdown
+18 Jun 2025 21:38:24 | INFO | OSC Receiver disconnected
+18 Jun 2025 21:38:24 | INFO | OSCManager shutdown
+18 Jun 2025 21:38:24 | INFO | === Logger shutting down ===
+37:55 | INFO | OSC Receiver bound to port 50100
+18 Jun 2025 21:37:55 | INFO | Bound to ephemeral port 50100
+18 Jun 2025 21:37:55 | INFO | Requesting port assignment from ChattyChannels (attempt 1/5)
+18 Jun 2025 21:37:55 | INFO | Sent port request: tempID=25546541a9414fb3a0e63b39b39316b0, preferred=-1, responsePort=50100
+18 Jun 2025 21:37:55 | INFO | prepareToPlay called. Sample Rate: 44100, Samples Per Block: 1024
+18 Jun 2025 21:37:55 | INFO | Audio components prepared for playback
+18 Jun 2025 21:37:55 | INFO | Received OSC message: /aiplayer/port_assignment with 3 arguments
+18 Jun 2025 21:37:55 | INFO | Received port assignment: tempID=25546541a9414fb3a0e63b39b39316b0, port=9001, status=assigned
+18 Jun 2025 21:37:55 | INFO | Received port assignment: port=9001, status=assigned
+18 Jun 2025 21:37:55 | INFO | Port 9001 assigned to instance 25546541a9414fb3a0e63b39b39316b0
+18 Jun 2025 21:37:55 | INFO | Attempting to bind OSC receiver to assigned port 9001
+18 Jun 2025 21:37:55 | INFO | OSC Receiver bound to port 9001
+18 Jun 2025 21:37:55 | INFO | Successfully bound to port 9001
+18 Jun 2025 21:37:55 | INFO | Plugin state restored.
+18 Jun 2025 21:38:21 | INFO | releaseResources called.
+18 Jun 2025 21:38:21 | INFO | --- AIplayer Plugin Shutting Down ---
+18 Jun 2025 21:38:21 | INFO | TelemetryService shutdown
+18 Jun 2025 21:38:21 | INFO | OSC Receiver disconnected
+18 Jun 2025 21:38:21 | INFO | OSCManager shutdown
+18 Jun 2025 21:38:21 | INFO | === Logger shutting down ===
+: a9be6da881934c6ba9c554a2f16757ad
+18 Jun 2025 21:37:55 | INFO | ==================================================================
+18 Jun 2025 21:37:55 | INFO | OSCManager initialized
+18 Jun 2025 21:37:55 | INFO | PortManager initialized
+18 Jun 2025 21:37:55 | INFO | TelemetryService initialized
+18 Jun 2025 21:37:55 | INFO | Gain parameter pointer acquired.
+18 Jun 2025 21:37:55 | INFO | OSC Sender connected to 127.0.0.1:8999 on attempt 1
+18 Jun 2025 21:37:55 | INFO | Successfully connected to ChattyChannels
+18 Jun 2025 21:37:55 | INFO | OSC Receiver bound to port 50000
+18 Jun 2025 21:37:55 | INFO | Bound to ephemeral port 50000
+18 Jun 2025 21:37:55 | INFO | Requesting port assignment from ChattyChannels (attempt 1/5)
+18 Jun 2025 21:37:55 | INFO | Sent port request: tempID=a9be6da881934c6ba9c554a2f16757ad, preferred=-1, responsePort=50000
+18 Jun 2025 21:37:55 | INFO | Received OSC message: /aiplayer/port_assignment with 3 arguments
+18 Jun 2025 21:37:55 | INFO | Received port assignment: tempID=a9be6da881934c6ba9c554a2f16757ad, port=9002, status=assigned
+18 Jun 2025 21:37:55 | INFO | Received port assignment: port=9002, status=assigned
+18 Jun 2025 21:37:55 | INFO | Port 9002 assigned to instance a9be6da881934c6ba9c554a2f16757ad
+18 Jun 2025 21:37:55 | INFO | Attempting to bind OSC receiver to assigned port 9002
+18 Jun 2025 21:37:55 | INFO | prepareToPlay called. Sample Rate: 44100, Samples Per Block: 1024
+18 Jun 2025 21:37:55 | INFO | Audio components prepared for playback
+18 Jun 2025 21:37:55 | INFO | OSC Receiver bound to port 9002
+18 Jun 2025 21:37:55 | INFO | Successfully bound to port 9002
+18 Jun 2025 21:37:55 | INFO | Plugin state restored.
+18 Jun 2025 21:38:19 | INFO | releaseResources called.
+18 Jun 2025 21:38:19 | INFO | --- AIplayer Plugin Shutting Down ---
+18 Jun 2025 21:38:19 | INFO | TelemetryService shutdown
+18 Jun 2025 21:38:19 | INFO | OSC Receiver disconnected
+18 Jun 2025 21:38:19 | INFO | OSCManager shutdown
+18 Jun 2025 21:38:19 | INFO | === Logger shutting down ===
+18 Jun 2025 21:38:30 | INFO | === Logger initialized ===
+18 Jun 2025 21:38:30 | INFO | Log file: /Users/nickfox137/Documents/chatty-channel/logs/AIplayer.log
+18 Jun 2025 21:38:30 | INFO | ==================================================================
+18 Jun 2025 21:38:30 | INFO | AIplayer PLUGIN WITH REFACTORED ARCHITECTURE STARTING!
+18 Jun 2025 21:38:30 | INFO | Plugin Instance tempInstanceID: 7431b5515f474821a434ed2ffde3641b
+18 Jun 2025 21:38:30 | INFO | ==================================================================
+18 Jun 2025 21:38:30 | INFO | OSCManager initialized
+18 Jun 2025 21:38:30 | INFO | PortManager initialized
+18 Jun 2025 21:38:30 | INFO | TelemetryService initialized
+18 Jun 2025 21:38:30 | INFO | Gain parameter pointer acquired.
+18 Jun 2025 21:38:30 | INFO | OSC Sender connected to 127.0.0.1:8999 on attempt 1
+18 Jun 2025 21:38:30 | INFO | Successfully connected to ChattyChannels
+18 Jun 2025 21:38:30 | INFO | OSC Receiver bound to port 50000
+18 Jun 2025 21:38:30 | INFO | Bound to ephemeral port 50000
+18 Jun 2025 21:38:30 | INFO | Requesting port assignment from ChattyChannels (attempt 1/5)
+18 Jun 2025 21:38:30 | INFO | Sent port request: tempID=7431b5515f474821a434ed2ffde3641b, preferred=-1, responsePort=50000
+18 Jun 2025 21:38:30 | INFO | prepareToPlay called. Sample Rate: 44100, Samples Per Block: 1024
+18 Jun 2025 21:38:30 | INFO | Audio components prepared for playback
+18 Jun 2025 21:38:30 | INFO | Received OSC message: /aiplayer/port_assignment with 3 arguments
+18 Jun 2025 21:38:30 | INFO | Received port assignment: tempID=7431b5515f474821a434ed2ffde3641b, port=9003, status=assigned
+18 Jun 2025 21:38:30 | INFO | Received port assignment: port=9003, status=assigned
+18 Jun 2025 21:38:30 | INFO | Port 9003 assigned to instance 7431b5515f474821a434ed2ffde3641b
+18 Jun 2025 21:38:30 | INFO | Attempting to bind OSC receiver to assigned port 9003
+18 Jun 2025 21:38:30 | INFO | OSC Receiver bound to port 9003
+18 Jun 2025 21:38:30 | INFO | Successfully bound to port 9003
+18 Jun 2025 21:38:30 | INFO | Plugin state saved.
+18 Jun 2025 21:38:30 | INFO | Plugin state saved.
+18 Jun 2025 21:38:50 | INFO | Plugin state saved.
+18 Jun 2025 21:39:13 | INFO | Received OSC message: /aiplayer/start_tone with 2 arguments
+18 Jun 2025 21:39:13 | INFO | Received start_tone command: freq=137Hz, amp=-10dB
+18 Jun 2025 21:39:20 | INFO | Received OSC message: /aiplayer/stop_tone with 0 arguments
+18 Jun 2025 21:39:20 | INFO | Received stop_tone command
+18 Jun 2025 21:39:20 | INFO | Received OSC message: /aiplayer/track_uuid_assignment with 3 arguments
+18 Jun 2025 21:39:20 | INFO | Plugin 7431b5515f474821a434ed2ffde3641b successfully assigned LogicTrackUUID: TR2
+18 Jun 2025 21:39:20 | INFO | TelemetryService track ID set to: TR2
+18 Jun 2025 21:39:20 | INFO | TelemetryService instance ID set to: 7431b5515f474821a434ed2ffde3641b
+18 Jun 2025 21:39:20 | INFO | Starting telemetry at 24 Hz
+18 Jun 2025 21:39:47 | INFO | Plugin state saved.
+1:38:36 | INFO | Successfully connected to ChattyChannels
+18 Jun 2025 21:38:36 | INFO | OSC Receiver bound to port 50000
+18 Jun 2025 21:38:36 | INFO | Bound to ephemeral port 50000
+18 Jun 2025 21:38:36 | INFO | Requesting port assignment from ChattyChannels (attempt 1/5)
+18 Jun 2025 21:38:36 | INFO | Sent port request: tempID=8802bd3becae4081803b287a524da3ad, preferred=-1, responsePort=50000
+18 Jun 2025 21:38:36 | INFO | Received OSC message: /aiplayer/port_assignment with 3 arguments
+18 Jun 2025 21:38:36 | INFO | Received port assignment: tempID=8802bd3becae4081803b287a524da3ad, port=9004, status=assigned
+18 Jun 2025 21:38:36 | INFO | Received port assignment: port=9004, status=assigned
+18 Jun 2025 21:38:36 | INFO | Port 9004 assigned to instance 8802bd3becae4081803b287a524da3ad
+18 Jun 2025 21:38:36 | INFO | Attempting to bind OSC receiver to assigned port 9004
+18 Jun 2025 21:38:36 | INFO | prepareToPlay called. Sample Rate: 44100, Samples Per Block: 1024
+18 Jun 2025 21:38:36 | INFO | Audio components prepared for playback
+18 Jun 2025 21:38:36 | INFO | OSC Receiver bound to port 9004
+18 Jun 2025 21:38:36 | INFO | Successfully bound to port 9004
+18 Jun 2025 21:38:36 | INFO | Plugin state saved.
+18 Jun 2025 21:38:36 | INFO | Plugin state saved.
+18 Jun 2025 21:38:50 | INFO | Plugin state saved.
+18 Jun 2025 21:39:13 | INFO | Received OSC message: /aiplayer/start_tone with 2 arguments
+18 Jun 2025 21:39:13 | INFO | Received start_tone command: freq=137Hz, amp=-10dB
+18 Jun 2025 21:39:20 | INFO | Received OSC message: /aiplayer/stop_tone with 0 arguments
+18 Jun 2025 21:39:20 | INFO | Received stop_tone command
+18 Jun 2025 21:39:20 | INFO | Received OSC message: /aiplayer/track_uuid_assignment with 3 arguments
+18 Jun 2025 21:39:20 | INFO | Plugin 8802bd3becae4081803b287a524da3ad successfully assigned LogicTrackUUID: TR1
+18 Jun 2025 21:39:20 | INFO | TelemetryService track ID set to: TR1
+18 Jun 2025 21:39:20 | INFO | TelemetryService instance ID set to: 8802bd3becae4081803b287a524da3ad
+18 Jun 2025 21:39:20 | INFO | Starting telemetry at 24 Hz
+18 Jun 2025 21:39:47 | INFO | Plugin state saved.
+18 Jun 2025 21:39:53 | INFO | releaseResources called.
+18 Jun 2025 21:39:53 | INFO | Telemetry stopped
+18 Jun 2025 21:39:53 | INFO | --- AIplayer Plugin Shutting Down ---
+18 Jun 2025 21:39:53 | INFO | TelemetryService shutdown
+ssignment from ChattyChannels (attempt 1/5)
+18 Jun 2025 21:38:42 | INFO | Sent port request: tempID=e4d89f8493b24c9bb586c467f291cdcd, preferred=-1, responsePort=50000
+18 Jun 2025 21:38:42 | INFO | prepareToPlay called. Sample Rate: 44100, Samples Per Block: 1024
+18 Jun 2025 21:38:42 | INFO | Audio components prepared for playback
+18 Jun 2025 21:38:42 | INFO | Received OSC message: /aiplayer/port_assignment with 3 arguments
+18 Jun 2025 21:38:42 | INFO | Received port assignment: tempID=e4d89f8493b24c9bb586c467f291cdcd, port=9005, status=assigned
+18 Jun 2025 21:38:42 | INFO | Received port assignment: port=9005, status=assigned
+18 Jun 2025 21:38:42 | INFO | Port 9005 assigned to instance e4d89f8493b24c9bb586c467f291cdcd
+18 Jun 2025 21:38:42 | INFO | Attempting to bind OSC receiver to assigned port 9005
+18 Jun 2025 21:38:42 | INFO | OSC Receiver bound to port 9005
+18 Jun 2025 21:38:42 | INFO | Successfully bound to port 9005
+18 Jun 2025 21:38:42 | INFO | Plugin state saved.
+18 Jun 2025 21:38:42 | INFO | Plugin state saved.
+18 Jun 2025 21:38:50 | INFO | Plugin state saved.
+18 Jun 2025 21:39:13 | INFO | Received OSC message: /aiplayer/start_tone with 2 arguments
+18 Jun 2025 21:39:13 | INFO | Received start_tone command: freq=137Hz, amp=-10dB
+18 Jun 2025 21:39:20 | INFO | Received OSC message: /aiplayer/stop_tone with 0 arguments
+18 Jun 2025 21:39:20 | INFO | Received stop_tone command
+18 Jun 2025 21:39:20 | INFO | Received OSC message: /aiplayer/track_uuid_assignment with 3 arguments
+18 Jun 2025 21:39:20 | INFO | Plugin e4d89f8493b24c9bb586c467f291cdcd successfully assigned LogicTrackUUID: TR3
+18 Jun 2025 21:39:20 | INFO | TelemetryService track ID set to: TR3
+18 Jun 2025 21:39:20 | INFO | TelemetryService instance ID set to: e4d89f8493b24c9bb586c467f291cdcd
+18 Jun 2025 21:39:20 | INFO | Starting telemetry at 24 Hz
+18 Jun 2025 21:39:47 | INFO | Plugin state saved.

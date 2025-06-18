@@ -7,6 +7,8 @@
 #include <cstddef>
 #include <stdexcept>
 
+namespace AIplayer {
+
 /**
  * @class RMSCircularBuffer
  * @brief Circular buffer for storing float RMS telemetry values
@@ -100,5 +102,7 @@ private:
      */
     std::size_t cap;
 };
+
+} // namespace AIplayer
 
 #endif // RMS_CIRCULAR_BUFFER_H

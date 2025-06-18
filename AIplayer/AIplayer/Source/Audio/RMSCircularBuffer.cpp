@@ -3,6 +3,8 @@
 #include "RMSCircularBuffer.h"
 #include <stdexcept>
 
+namespace AIplayer {
+
 /**
  * @brief Constructs a circular buffer with the specified capacity
  *
@@ -108,3 +110,5 @@ std::vector<float> RMSCircularBuffer::toVector() const {
     }
     return vec;
 }
+
+} // namespace AIplayer

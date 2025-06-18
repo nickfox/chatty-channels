@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="Dm4QWd" name="AIplayer" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" companyWebsite="www.websmithing.com">
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" companyWebsite="www.websmithing.com"
+              pluginFormats="buildAU">
   <MAINGROUP id="erOBPU" name="AIplayer">
     <GROUP id="{B9B8A107-1282-D29A-7E47-68F99BDD2680}" name="Source">
       <FILE id="oIYqAp" name="PluginProcessor.cpp" compile="1" resource="0"
@@ -11,6 +12,43 @@
       <FILE id="SijhNY" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
       <FILE id="JzV3X0" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+      <GROUP id="{A1B2C3D4-5678-90AB-CDEF-123456789012}" name="Core">
+        <FILE id="CoreLog1" name="Logger.cpp" compile="1" resource="0" file="Source/Core/Logger.cpp"/>
+        <FILE id="CoreLog2" name="Logger.h" compile="0" resource="0" file="Source/Core/Logger.h"/>
+        <FILE id="CoreCon1" name="Constants.h" compile="0" resource="0" file="Source/Core/Constants.h"/>
+      </GROUP>
+      <GROUP id="{B2C3D4E5-6789-01BC-DEF0-234567890123}" name="Audio">
+        <FILE id="AudioMet1" name="AudioMetrics.cpp" compile="1" resource="0"
+              file="Source/Audio/AudioMetrics.cpp"/>
+        <FILE id="AudioMet2" name="AudioMetrics.h" compile="0" resource="0"
+              file="Source/Audio/AudioMetrics.h"/>
+        <FILE id="AudioCal1" name="CalibrationToneGenerator.cpp" compile="1"
+              resource="0" file="Source/Audio/CalibrationToneGenerator.cpp"/>
+        <FILE id="AudioCal2" name="CalibrationToneGenerator.h" compile="0"
+              resource="0" file="Source/Audio/CalibrationToneGenerator.h"/>
+        <FILE id="RMSBuf1" name="RMSCircularBuffer.cpp" compile="1" resource="0"
+              file="Source/Audio/RMSCircularBuffer.cpp"/>
+        <FILE id="RMSBuf2" name="RMSCircularBuffer.h" compile="0" resource="0"
+              file="Source/Audio/RMSCircularBuffer.h"/>
+      </GROUP>
+      <GROUP id="{C3D4E5F6-7890-12CD-EF01-345678901234}" name="Communication">
+        <FILE id="CommOSC1" name="OSCManager.cpp" compile="1" resource="0"
+              file="Source/Communication/OSCManager.cpp"/>
+        <FILE id="CommOSC2" name="OSCManager.h" compile="0" resource="0" file="Source/Communication/OSCManager.h"/>
+        <FILE id="CommPort1" name="PortManager.cpp" compile="1" resource="0"
+              file="Source/Communication/PortManager.cpp"/>
+        <FILE id="CommPort2" name="PortManager.h" compile="0" resource="0"
+              file="Source/Communication/PortManager.h"/>
+        <FILE id="CommTel1" name="TelemetryService.cpp" compile="1" resource="0"
+              file="Source/Communication/TelemetryService.cpp"/>
+        <FILE id="CommTel2" name="TelemetryService.h" compile="0" resource="0"
+              file="Source/Communication/TelemetryService.h"/>
+      </GROUP>
+      <GROUP id="{D4E5F6A7-8901-23DE-F012-456789012345}" name="Models">
+        <FILE id="ModelTel1" name="TelemetryData.h" compile="0" resource="0"
+              file="Source/Models/TelemetryData.h"/>
+        <FILE id="ModelTrk1" name="TrackInfo.h" compile="0" resource="0" file="Source/Models/TrackInfo.h"/>
+      </GROUP>
     </GROUP>
   </MAINGROUP>
   <MODULES>

@@ -11,6 +11,8 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 
+namespace AIplayer {
+
 //==============================================================================
 /**
  * @class AIplayerAudioProcessorEditor
@@ -162,3 +164,8 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AIplayerAudioProcessorEditor)
 };
+
+} // namespace AIplayer
+
+// Make the editor available without namespace for JUCE plugin factory
+using AIplayerAudioProcessorEditor = AIplayer::AIplayerAudioProcessorEditor;

@@ -9,6 +9,8 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+namespace AIplayer {
+
 //==============================================================================
 /**
  * @brief Constructor for the AIplayerAudioProcessorEditor
@@ -228,3 +230,5 @@ void AIplayerAudioProcessorEditor::sendMessage()
         // DBG("Message sent to processor: " + message); // Keep DBG for OSC sending in processor
     }
 }
+
+} // namespace AIplayer
