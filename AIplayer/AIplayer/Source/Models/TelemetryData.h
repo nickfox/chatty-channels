@@ -34,6 +34,9 @@ struct TelemetryData
     /// Current peak level (linear, not dB)
     float peakLevel{0.0f};
     
+    /// Band energy levels in dB (4 bands)
+    float bandEnergies[4]{-100.0f, -100.0f, -100.0f, -100.0f};
+    
     /// Plugin instance ID (UUID)
     juce::String instanceID;
     
@@ -60,10 +63,13 @@ struct TelemetryData
      */
     juce::String toString() const
     {
-        return juce::String::formatted("TelemetryData[track=%s, rms=%.4f, peak=%.4f, instance=%s]",
+        return juce::String::formatted("TelemetryData[track=%s, rms=%.4f, peak=%.4f, "
+                                      "bands=[%.1f, %.1f, %.1f, %.1f]dB, instance=%s]",
                                       trackID.toRawUTF8(),
                                       rmsLevel,
                                       peakLevel,
+                                      bandEnergies[0], bandEnergies[1], 
+                                      bandEnergies[2], bandEnergies[3],
                                       instanceID.toRawUTF8());
     }
 };

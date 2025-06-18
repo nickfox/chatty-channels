@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="Dm4QWd" name="AIplayer" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" companyWebsite="www.websmithing.com"
-              pluginFormats="buildAU">
+              pluginFormats="buildAU" version="1.0.0">
   <MAINGROUP id="erOBPU" name="AIplayer">
     <GROUP id="{B9B8A107-1282-D29A-7E47-68F99BDD2680}" name="Source">
       <FILE id="oIYqAp" name="PluginProcessor.cpp" compile="1" resource="0"
@@ -30,6 +30,18 @@
               file="Source/Audio/RMSCircularBuffer.cpp"/>
         <FILE id="RMSBuf2" name="RMSCircularBuffer.h" compile="0" resource="0"
               file="Source/Audio/RMSCircularBuffer.h"/>
+        <FILE id="FFTProc1" name="FFTProcessor.cpp" compile="1" resource="0"
+              file="Source/Audio/FFTProcessor.cpp"/>
+        <FILE id="FFTProc2" name="FFTProcessor.h" compile="0" resource="0"
+              file="Source/Audio/FFTProcessor.h"/>
+        <FILE id="BandAn1" name="BandEnergyAnalyzer.cpp" compile="1" resource="0"
+              file="Source/Audio/BandEnergyAnalyzer.cpp"/>
+        <FILE id="BandAn2" name="BandEnergyAnalyzer.h" compile="0" resource="0"
+              file="Source/Audio/BandEnergyAnalyzer.h"/>
+        <FILE id="FreqAn1" name="FrequencyAnalyzer.cpp" compile="1" resource="0"
+              file="Source/Audio/FrequencyAnalyzer.cpp"/>
+        <FILE id="FreqAn2" name="FrequencyAnalyzer.h" compile="0" resource="0"
+              file="Source/Audio/FrequencyAnalyzer.h"/>
       </GROUP>
       <GROUP id="{C3D4E5F6-7890-12CD-EF01-345678901234}" name="Communication">
         <FILE id="CommOSC1" name="OSCManager.cpp" compile="1" resource="0"
@@ -48,6 +60,14 @@
         <FILE id="ModelTel1" name="TelemetryData.h" compile="0" resource="0"
               file="Source/Models/TelemetryData.h"/>
         <FILE id="ModelTrk1" name="TrackInfo.h" compile="0" resource="0" file="Source/Models/TrackInfo.h"/>
+      </GROUP>
+      <GROUP id="{E5F6A7B8-9012-34EF-A123-567890123456}" name="Tests">
+        <FILE id="TestFFT1" name="FFTProcessorTests.cpp" compile="1" resource="0"
+              file="Source/Tests/FFTProcessorTests.cpp"/>
+        <FILE id="TestTel1" name="TelemetryIntegrationTests.cpp" compile="1" resource="0"
+              file="Source/Tests/TelemetryIntegrationTests.cpp"/>
+        <FILE id="TestRun1" name="TestRunner.cpp" compile="1" resource="0"
+              file="Source/Tests/TestRunner.cpp"/>
       </GROUP>
     </GROUP>
   </MAINGROUP>

@@ -22,6 +22,7 @@ namespace AIplayer {
 
 // Forward declarations
 class AudioMetrics;
+class FrequencyAnalyzer;
 class OSCManager;
 
 /**
@@ -38,10 +39,12 @@ public:
      * @brief Constructor
      * 
      * @param metrics Reference to audio metrics component
+     * @param freqAnalyzer Reference to frequency analyzer component
      * @param oscManager Reference to OSC manager for sending data
      * @param logger Reference to logger for debugging
      */
-    TelemetryService(AudioMetrics& metrics, 
+    TelemetryService(AudioMetrics& metrics,
+                     FrequencyAnalyzer& freqAnalyzer,
                      OSCManager& oscManager,
                      Logger& logger);
     
@@ -107,6 +110,9 @@ public:
 private:
     /// Reference to audio metrics
     AudioMetrics& audioMetrics;
+    
+    /// Reference to frequency analyzer
+    FrequencyAnalyzer& frequencyAnalyzer;
     
     /// Reference to OSC manager
     OSCManager& oscManager;

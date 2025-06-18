@@ -101,10 +101,18 @@ void AIplayerAudioProcessor::initializeComponents()
     audioMetrics = std::make_unique<AudioMetrics>();
     toneGenerator = std::make_unique<CalibrationToneGenerator>();
     
+    // Initialize frequency analyzer with configuration
+    FrequencyAnalyzer::Config fftConfig;
+    fftConfig.fftOrder = 10;          // 1024 samples
+    fftConfig.updateRateHz = 10;      // 10 Hz update rate for efficiency
+    fftConfig.enableAWeighting = false;
+    fftConfig.autoStart = true;
+    frequencyAnalyzer = std::make_unique<FrequencyAnalyzer>(*logger, fftConfig);
+    
     // Initialize communication components
     oscManager = std::make_unique<OSCManager>(*logger);
     portManager = std::make_unique<PortManager>(*oscManager, *logger);
-    telemetryService = std::make_unique<TelemetryService>(*audioMetrics, *oscManager, *logger);
+    telemetryService = std::make_unique<TelemetryService>(*audioMetrics, *frequencyAnalyzer, *oscManager, *logger);
     
     componentsInitialized = true;
 }
@@ -236,6 +244,9 @@ void AIplayerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     
     // Update audio metrics with the processed buffer
     audioMetrics->updateMetrics(buffer);
+    
+    // Feed audio to frequency analyzer
+    frequencyAnalyzer->processBlock(buffer, getSampleRate());
 }
 
 //==============================================================================

@@ -12,14 +12,17 @@
 
 #include "TelemetryService.h"
 #include "../Audio/AudioMetrics.h"
+#include "../Audio/FrequencyAnalyzer.h"
 #include "OSCManager.h"
 
 namespace AIplayer {
 
-TelemetryService::TelemetryService(AudioMetrics& metrics, 
+TelemetryService::TelemetryService(AudioMetrics& metrics,
+                                   FrequencyAnalyzer& freqAnalyzer,
                                    OSCManager& oscManager,
                                    Logger& logger)
     : audioMetrics(metrics)
+    , frequencyAnalyzer(freqAnalyzer)
     , oscManager(oscManager)
     , logger(logger)
 {
@@ -129,6 +132,13 @@ TelemetryData TelemetryService::collectTelemetryData()
     // Get current audio metrics
     data.rmsLevel = audioMetrics.getCurrentRMS();
     data.peakLevel = audioMetrics.getPeakLevel();
+    
+    // Get band energies from frequency analyzer
+    auto bandEnergies = frequencyAnalyzer.getBandEnergies();
+    for (int i = 0; i < 4; ++i)
+    {
+        data.bandEnergies[i] = bandEnergies[i];
+    }
     
     // Timestamp is set automatically in constructor
     

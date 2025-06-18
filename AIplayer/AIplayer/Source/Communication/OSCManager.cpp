@@ -109,25 +109,29 @@ bool OSCManager::sendTelemetry(const TelemetryData& data)
         return false;
     }
     
-    juce::String addressPattern;
-    if (!data.trackID.isEmpty())
-    {
-        addressPattern = Constants::OSCAddresses::RMS_TELEMETRY;
-    }
-    else
-    {
-        addressPattern = Constants::OSCAddresses::RMS_TELEMETRY_UNIDENTIFIED;
-    }
-    
-    juce::OSCMessage message(addressPattern);
+    // Use new telemetry format that includes band energies
+    juce::OSCMessage message(Constants::OSCAddresses::TELEMETRY);
     message.addString(data.trackID.isEmpty() ? data.instanceID : data.trackID);
     message.addFloat32(data.rmsLevel);
+    message.addFloat32(data.bandEnergies[0]); // Low
+    message.addFloat32(data.bandEnergies[1]); // Low-Mid
+    message.addFloat32(data.bandEnergies[2]); // High-Mid
+    message.addFloat32(data.bandEnergies[3]); // High
     
     if (!sender.send(message))
     {
         senderConnected.store(false);
         logger.log(Logger::Level::Error, "Failed to send telemetry");
         return false;
+    }
+    
+    // Also send legacy RMS-only message for backward compatibility
+    if (!data.trackID.isEmpty())
+    {
+        juce::OSCMessage legacyMessage(Constants::OSCAddresses::RMS_TELEMETRY);
+        legacyMessage.addString(data.trackID);
+        legacyMessage.addFloat32(data.rmsLevel);
+        sender.send(legacyMessage); // Don't check return value for legacy
     }
     
     return true;

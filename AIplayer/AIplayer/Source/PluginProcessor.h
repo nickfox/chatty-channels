@@ -12,6 +12,7 @@
 #include "Core/Logger.h"
 #include "Audio/AudioMetrics.h"
 #include "Audio/CalibrationToneGenerator.h"
+#include "Audio/FrequencyAnalyzer.h"
 #include "Communication/OSCManager.h"
 #include "Communication/PortManager.h"
 #include "Communication/TelemetryService.h"
@@ -76,6 +77,7 @@ public:
     // Component access for editor
     AudioMetrics& getAudioMetrics() { return *audioMetrics; }
     CalibrationToneGenerator& getToneGenerator() { return *toneGenerator; }
+    FrequencyAnalyzer& getFrequencyAnalyzer() { return *frequencyAnalyzer; }
     
     // Plugin state
     juce::AudioProcessorValueTreeState apvts;
@@ -112,6 +114,7 @@ private:
     std::unique_ptr<Logger> logger;
     std::unique_ptr<AudioMetrics> audioMetrics;
     std::unique_ptr<CalibrationToneGenerator> toneGenerator;
+    std::unique_ptr<FrequencyAnalyzer> frequencyAnalyzer;
     
     // Communication components
     std::unique_ptr<OSCManager> oscManager;

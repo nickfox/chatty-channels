@@ -52,6 +52,7 @@ namespace Constants {
         constexpr const char* PORT_CONFIRMED = "/aiplayer/port_confirmed";
         constexpr const char* RMS_TELEMETRY = "/aiplayer/rms";
         constexpr const char* RMS_TELEMETRY_UNIDENTIFIED = "/aiplayer/rms_unidentified";
+        constexpr const char* TELEMETRY = "/aiplayer/telemetry";
         constexpr const char* UUID_CONFIRMED = "/aiplayer/uuid_assignment_confirmed";
         constexpr const char* TONE_STARTED = "/aiplayer/tone_started";
         constexpr const char* TONE_STOPPED = "/aiplayer/tone_stopped";
