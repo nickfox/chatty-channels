@@ -1,6 +1,6 @@
 # Multi-Agent Orchestrator Architecture - Implementation Plan
 
-**Version**: 1.0
+**Version**: 1.1
 **Date**: 2025-11-12
 **Status**: Planning Phase
 
@@ -49,24 +49,20 @@ This document outlines the implementation plan for transforming Chatty Channels 
          │   • User intent parsing       │
          └──────────────┬───────────────┘
                         │
-        ┌───────────────┼───────────────┐
-        │               │               │
-        ▼               ▼               ▼
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-│ Chat Agent   │ │AppleScript   │ │ OSC Agent    │
-│ (Claude 4.5) │ │Agent (Grok4) │ │ (Grok4 NR)   │
-└──────────────┘ └──────────────┘ └───────┬──────┘
-                                           │
-                                           │ peer-to-peer
-                                           ▼
-                                  ┌──────────────┐
-                                  │Calculations  │
-                                  │Agent (Grok4R)│
-                                  └──────────────┘
+        ┌───────────────┼───────────────┬───────────────┐
+        │               │               │               │
+        ▼               ▼               ▼               ▼
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│ Chat Agent   │ │AppleScript   │ │ OSC Agent    │ │Calculations  │
+│ (Claude 4.5) │ │Agent (Grok4) │ │ (Grok4 NR)   │ │Agent (Grok4R)│
+└──────────────┘ └──────────────┘ └───────┬──────┘ └──────┬───────┘
+                                           │                │
+                                           └────peer────────┘
+                                              to-peer
 
 Legend:
 ─── : Orchestrator → Sub-agent communication
-··· : Peer-to-peer agent communication
+     Peer-to-peer: OSC ↔ Calculations
 ```
 
 ### 1.2 Design Principles
@@ -90,10 +86,16 @@ Legend:
 **Responsibilities**:
 - Parse and understand user intent from natural language
 - Decompose complex requests into agent tasks
-- Coordinate multi-agent workflows
+- Coordinate multi-agent workflows (Chat, AppleScript, OSC, Calculations)
 - Maintain conversation context and history
 - Handle error recovery and retry logic
 - Make high-level musical/mixing decisions
+
+**Sub-Agents Under Orchestrator**:
+1. **Chat Agent** - User communication
+2. **AppleScript Agent** - Logic Pro control
+3. **OSC Agent** - Telemetry and OSC protocol
+4. **Calculations Agent** - Audio analysis and DSP
 
 **Tools Available**:
 - `invokeAgent(agentName, task, context)`
@@ -1949,6 +1951,7 @@ Be technical but explain WHY, not just WHAT.
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2025-11-12 | AI Assistant | Initial planning document |
+| 1.1 | 2025-11-12 | AI Assistant | Corrected architecture: Calculations Agent is now a direct sub-agent of Orchestrator (peer to Chat, AppleScript, OSC) with peer-to-peer capability with OSC Agent |
 
 ---
 
