@@ -35,10 +35,39 @@ OSCManager::~OSCManager()
     logger.log(Logger::Level::Info, "OSCManager shutdown");
 }
 
+/**
+ * @brief Establishes OSC sender connection to remote host with retry logic
+ * 
+ * @details This method implements a robust connection strategy:
+ * 1. Attempts connection up to maxRetries times (3 attempts)
+ * 2. Uses exponential backoff with OSC_RECONNECT_DELAY_MS between retries
+ * 3. Updates atomic connection state for thread-safe access
+ * 4. Provides detailed logging for each attempt and final result
+ * 
+ * The retry mechanism handles temporary network issues, port conflicts,
+ * and other transient connection problems commonly encountered in
+ * inter-application communication.
+ * 
+ * @param remoteHost Target hostname or IP address (typically "127.0.0.1")
+ * @param remotePort Target port number (typically Constants::OSC_CHATTY_CHANNELS_PORT)
+ * 
+ * @return true if connection successful, false if all retries failed
+ * 
+ * @note Connection state is stored atomically in senderConnected for thread-safe
+ *       access from other components. Each retry includes a delay to prevent
+ *       overwhelming the target service.
+ * 
+ * @warning This method blocks the calling thread during retry delays.
+ *          Should not be called from the audio thread.
+ * 
+ * @see Constants::OSC_RECONNECT_DELAY_MS for retry timing
+ * @see disconnectSender() for cleanup
+ */
 bool OSCManager::connect(const juce::String& remoteHost, int remotePort)
 {
-    int maxRetries = 3;
+    const int maxRetries = 3;
     
+    // Attempt connection with retry logic
     for (int retry = 0; retry < maxRetries; retry++)
     {
         if (sender.connect(remoteHost, remotePort))
@@ -56,10 +85,11 @@ bool OSCManager::connect(const juce::String& remoteHost, int remotePort)
                   juce::String(remotePort) + " on attempt " + 
                   juce::String(retry + 1) + " of " + juce::String(maxRetries));
         
-        // Small delay before retrying
+        // Delay before retry to prevent overwhelming the target
         juce::Thread::sleep(Constants::OSC_RECONNECT_DELAY_MS);
     }
     
+    // All retry attempts failed
     logger.log(Logger::Level::Error, 
               "Could not connect OSC sender after " + 
               juce::String(maxRetries) + " attempts");

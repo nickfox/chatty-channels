@@ -78,9 +78,30 @@ AIplayerAudioProcessor::~AIplayerAudioProcessor()
 }
 
 //==============================================================================
+/**
+ * @brief Initializes all plugin components in proper dependency order
+ * 
+ * @details This method performs a multi-stage initialization sequence:
+ * 1. Creates log directory and initializes logging system
+ * 2. Initializes audio processing components (AudioMetrics, ToneGenerator, FrequencyAnalyzer)
+ * 3. Initializes communication components (OSCManager, PortManager, TelemetryService)
+ * 
+ * The initialization order is critical due to component dependencies:
+ * - Logger must be initialized first as all other components depend on it
+ * - Audio components are independent and can be initialized in parallel
+ * - Communication components depend on audio components for data sources
+ * 
+ * @note This method creates the log directory if it doesn't exist and handles
+ *       file system errors gracefully. The FrequencyAnalyzer is configured with
+ *       optimized settings (1024 FFT samples, 10Hz update rate) for real-time performance.
+ * 
+ * @warning This method must be called before any audio processing begins.
+ *          Failure to initialize properly will result in componentsInitialized
+ *          remaining false, causing processBlock to return early.
+ */
 void AIplayerAudioProcessor::initializeComponents()
 {
-    // Initialize logger first
+    // Initialize logger first - all other components depend on it
     juce::File logDirectory = juce::File::getSpecialLocation(juce::File::userHomeDirectory)
                                 .getChildFile("Documents")
                                 .getChildFile("chatty-channel")
@@ -97,19 +118,19 @@ void AIplayerAudioProcessor::initializeComponents()
     logger->log(Logger::Level::Info, "Plugin Instance tempInstanceID: " + tempInstanceID);
     logger->log(Logger::Level::Info, "==================================================================");
     
-    // Initialize audio components
+    // Initialize audio processing components - order independent
     audioMetrics = std::make_unique<AudioMetrics>();
     toneGenerator = std::make_unique<CalibrationToneGenerator>();
     
-    // Initialize frequency analyzer with configuration
+    // Initialize frequency analyzer with optimized real-time configuration
     FrequencyAnalyzer::Config fftConfig;
-    fftConfig.fftOrder = 10;          // 1024 samples
-    fftConfig.updateRateHz = 10;      // 10 Hz update rate for efficiency
-    fftConfig.enableAWeighting = false;
-    fftConfig.autoStart = true;
+    fftConfig.fftOrder = 10;          // 1024 samples for good frequency resolution
+    fftConfig.updateRateHz = 10;      // 10 Hz update rate balances accuracy vs CPU usage
+    fftConfig.enableAWeighting = false; // Disabled for raw frequency analysis
+    fftConfig.autoStart = true;       // Start analysis immediately
     frequencyAnalyzer = std::make_unique<FrequencyAnalyzer>(*logger, fftConfig);
     
-    // Initialize communication components
+    // Initialize communication components - depend on audio components for data
     oscManager = std::make_unique<OSCManager>(*logger);
     portManager = std::make_unique<PortManager>(*oscManager, *logger);
     telemetryService = std::make_unique<TelemetryService>(*audioMetrics, *frequencyAnalyzer, *oscManager, *logger);
@@ -212,40 +233,69 @@ bool AIplayerAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts)
 }
 #endif
 
+/**
+ * @brief Core audio processing method called by the host for each audio block
+ * 
+ * @details This method implements the main audio processing pipeline:
+ * 1. Validates component initialization and clears unused output channels
+ * 2. Applies gain parameter to input audio (with dB to linear conversion)
+ * 3. Processes calibration tone generation (mixes tone into audio if active)
+ * 4. Updates audio metrics (RMS, peak levels) for telemetry
+ * 5. Feeds processed audio to frequency analyzer for FFT and band analysis
+ * 
+ * The processing order ensures that all components receive the final processed
+ * audio signal including gain adjustment and calibration tones.
+ * 
+ * @param buffer Audio buffer containing input samples, modified in-place
+ * @param midiMessages MIDI buffer (ignored as this is an audio effect)
+ * 
+ * @note This method is called from the audio thread and must be real-time safe.
+ *       No allocations, file I/O, or blocking operations are permitted.
+ *       ScopedNoDenormals prevents performance degradation from denormal numbers.
+ * 
+ * @warning If componentsInitialized is false, processing is skipped entirely
+ *          to prevent crashes from uninitialized components.
+ * 
+ * @see initializeComponents() for initialization requirements
+ * @see AudioMetrics::updateMetrics() for RMS calculation details
+ * @see FrequencyAnalyzer::processBlock() for FFT processing
+ */
 void AIplayerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
+    // Skip processing if components not properly initialized
     if (!componentsInitialized)
         return;
         
     juce::ignoreUnused (midiMessages);
-    juce::ScopedNoDenormals noDenormals;
+    juce::ScopedNoDenormals noDenormals; // Prevent denormal performance issues
     
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // Clear extra output channels
+    // Clear extra output channels that don't have corresponding inputs
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // Apply gain parameter
+    // Apply gain parameter with thread-safe atomic access
     if (gainParameter)
     {
         float currentGainDb = gainParameter->load();
         float gainFactor = juce::Decibels::decibelsToGain(currentGainDb);
 
+        // Apply gain to all input channels
         for (int channel = 0; channel < totalNumInputChannels; ++channel)
         {
             buffer.applyGain(channel, 0, buffer.getNumSamples(), gainFactor);
         }
     }
     
-    // Process calibration tone if enabled
+    // Process calibration tone if enabled (mixes tone into existing audio)
     toneGenerator->processBlock(buffer);
     
-    // Update audio metrics with the processed buffer
+    // Update audio metrics with the final processed signal
     audioMetrics->updateMetrics(buffer);
     
-    // Feed audio to frequency analyzer
+    // Feed processed audio to frequency analyzer for spectral analysis
     frequencyAnalyzer->processBlock(buffer, getSampleRate());
 }
 

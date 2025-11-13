@@ -1,0 +1,210 @@
+26 Jul 2025 23:17:26 | INFO | === Logger initialized ===
+26 Jul 2025 23:17:26 | INFO | Log file: /Users/nickfox137/Documents/chatty-channel/logs/AIplayer.log
+26 Jul 2025 23:17:26 | INFO | ==================================================================
+26 Jul 2025 23:17:26 | INFO | AIplayer PLUGIN WITH REFACTORED ARCHITECTURE STARTING!
+26 Jul 2025 23:17:26 | INFO | Plugin Instance tempInstanceID: 43440ecde2c040a193edbfc32b76dde4
+26 Jul 2025 23:17:26 | INFO | ==================================================================
+26 Jul 2025 23:17:26 | INFO | FrequencyAnalyzer initialized with FFT order 10 (size: 1024)
+26 Jul 2025 23:17:26 | INFO | Starting frequency analysis at 10 Hz
+26 Jul 2025 23:17:26 | INFO | OSCManager initialized
+26 Jul 2025 23:17:26 | INFO | PortManager initialized
+26 Jul 2025 23:17:26 | INFO | TelemetryService initialized
+26 Jul 2025 23:17:26 | INFO | Gain parameter pointer acquired.
+26 Jul 2025 23:17:26 | INFO | OSC Sender connected to 127.0.0.1:8999 on attempt 1
+26 Jul 2025 23:17:26 | INFO | Successfully connected to ChattyChannels
+26 Jul 2025 23:17:26 | INFO | OSC Receiver bound to port 50000
+26 Jul 2025 23:17:26 | INFO | Bound to ephemeral port 50000
+26 Jul 2025 23:17:26 | INFO | Requesting port assignment from ChattyChannels (attempt 1/5)
+26 Jul 2025 23:17:26 | INFO | Sent port request: tempID=43440ecde2c040a193edbfc32b76dde4, preferred=-1, responsePort=50000
+26 Jul 2025 23:17:26 | INFO | prepareToPlay called. Sample Rate: 44100, Samples Per Block: 1024
+26 Jul 2025 23:17:26 | INFO | Audio components prepared for playback
+26 Jul 2025 23:17:27 | INFO | Plugin state restored.
+27 Jul 2025 0:10:08 | INFO | releaseResources called.
+27 Jul 2025 0:10:08 | INFO | --- AIplayer Plugin Shutting Down ---
+27 Jul 2025 0:10:08 | INFO | TelemetryService shutdown
+27 Jul 2025 0:10:08 | INFO | OSC Receiver disconnected
+27 Jul 2025 0:10:08 | INFO | OSCManager shutdown
+27 Jul 2025 0:10:08 | INFO | Frequency analysis stopped
+27 Jul 2025 0:10:08 | INFO | FrequencyAnalyzer shutdown
+27 Jul 2025 0:10:08 | INFO | === Logger shutting down ===
+========================
+26 Jul 2025 23:17:26 | INFO | FrequencyAnalyzer initialized with FFT order 10 (size: 1024)
+26 Jul 2025 23:17:26 | INFO | Starting frequency analysis at 10 Hz
+26 Jul 2025 23:17:26 | INFO | OSCManager initialized
+26 Jul 2025 23:17:26 | INFO | PortManager initialized
+26 Jul 2025 23:17:26 | INFO | TelemetryService initialized
+26 Jul 2025 23:17:26 | INFO | Gain parameter pointer acquired.
+26 Jul 2025 23:17:26 | INFO | OSC Sender connected to 127.0.0.1:8999 on attempt 1
+26 Jul 2025 23:17:26 | INFO | Successfully connected to ChattyChannels
+26 Jul 2025 23:17:26 | ERROR | Failed to bind OSC receiver to port 50000
+26 Jul 2025 23:17:26 | INFO | OSC Receiver bound to port 50100
+26 Jul 2025 23:17:26 | INFO | Bound to ephemeral port 50100
+26 Jul 2025 23:17:26 | INFO | Requesting port assignment from ChattyChannels (attempt 1/5)
+26 Jul 2025 23:17:26 | INFO | Sent port request: tempID=fdda8bfa71b04b2794728fc47fe6cecd, preferred=-1, responsePort=50100
+26 Jul 2025 23:17:26 | INFO | prepareToPlay called. Sample Rate: 44100, Samples Per Block: 1024
+26 Jul 2025 23:17:26 | INFO | Audio components prepared for playback
+26 Jul 2025 23:17:27 | INFO | Plugin state restored.
+27 Jul 2025 0:10:08 | INFO | releaseResources called.
+27 Jul 2025 0:10:08 | INFO | --- AIplayer Plugin Shutting Down ---
+27 Jul 2025 0:10:08 | INFO | TelemetryService shutdown
+27 Jul 2025 0:10:08 | INFO | OSC Receiver disconnected
+27 Jul 2025 0:10:08 | INFO | OSCManager shutdown
+27 Jul 2025 0:10:08 | INFO | Frequency analysis stopped
+27 Jul 2025 0:10:08 | INFO | FrequencyAnalyzer shutdown
+27 Jul 2025 0:10:08 | INFO | === Logger shutting down ===
+========================
+26 Jul 2025 23:17:26 | INFO | FrequencyAnalyzer initialized with FFT order 10 (size: 1024)
+26 Jul 2025 23:17:26 | INFO | Starting frequency analysis at 10 Hz
+26 Jul 2025 23:17:26 | INFO | OSCManager initialized
+26 Jul 2025 23:17:26 | INFO | PortManager initialized
+26 Jul 2025 23:17:26 | INFO | TelemetryService initialized
+26 Jul 2025 23:17:26 | INFO | Gain parameter pointer acquired.
+26 Jul 2025 23:17:26 | INFO | OSC Sender connected to 127.0.0.1:8999 on attempt 1
+26 Jul 2025 23:17:26 | INFO | Successfully connected to ChattyChannels
+26 Jul 2025 23:17:26 | ERROR | Failed to bind OSC receiver to port 50000
+26 Jul 2025 23:17:26 | ERROR | Failed to bind OSC receiver to port 50100
+26 Jul 2025 23:17:26 | INFO | OSC Receiver bound to port 50200
+26 Jul 2025 23:17:26 | INFO | Bound to ephemeral port 50200
+26 Jul 2025 23:17:26 | INFO | Requesting port assignment from ChattyChannels (attempt 1/5)
+26 Jul 2025 23:17:26 | INFO | Sent port request: tempID=755f7d69f93547e489909c25a094826c, preferred=-1, responsePort=50200
+26 Jul 2025 23:17:26 | INFO | prepareToPlay called. Sample Rate: 44100, Samples Per Block: 1024
+26 Jul 2025 23:17:26 | INFO | Audio components prepared for playback
+26 Jul 2025 23:17:27 | INFO | Plugin state restored.
+27 Jul 2025 0:10:08 | INFO | releaseResources called.
+27 Jul 2025 0:10:08 | INFO | --- AIplayer Plugin Shutting Down ---
+27 Jul 2025 0:10:08 | INFO | TelemetryService shutdown
+27 Jul 2025 0:10:08 | INFO | OSC Receiver disconnected
+27 Jul 2025 0:10:08 | INFO | OSCManager shutdown
+27 Jul 2025 0:10:08 | INFO | Frequency analysis stopped
+27 Jul 2025 0:10:08 | INFO | FrequencyAnalyzer shutdown
+27 Jul 2025 0:10:08 | INFO | === Logger shutting down ===
+3 Aug 2025 18:21:30 | INFO | === Logger initialized ===
+3 Aug 2025 18:21:30 | INFO | Log file: /Users/nickfox137/Documents/chatty-channel/logs/AIplayer.log
+3 Aug 2025 18:21:30 | INFO | ==================================================================
+3 Aug 2025 18:21:30 | INFO | AIplayer PLUGIN WITH REFACTORED ARCHITECTURE STARTING!
+3 Aug 2025 18:21:30 | INFO | Plugin Instance tempInstanceID: c115e8d09a254d3790968bc72b1ab85a
+3 Aug 2025 18:21:30 | INFO | ==================================================================
+3 Aug 2025 18:21:30 | INFO | FrequencyAnalyzer initialized with FFT order 10 (size: 1024)
+3 Aug 2025 18:21:30 | INFO | Starting frequency analysis at 10 Hz
+3 Aug 2025 18:21:30 | INFO | OSCManager initialized
+3 Aug 2025 18:21:30 | INFO | PortManager initialized
+3 Aug 2025 18:21:30 | INFO | TelemetryService initialized
+3 Aug 2025 18:21:30 | INFO | Gain parameter pointer acquired.
+3 Aug 2025 18:21:30 | INFO | OSC Sender connected to 127.0.0.1:8999 on attempt 1
+3 Aug 2025 18:21:30 | INFO | Successfully connected to ChattyChannels
+3 Aug 2025 18:21:30 | INFO | OSC Receiver bound to port 50000
+3 Aug 2025 18:21:30 | INFO | Bound to ephemeral port 50000
+3 Aug 2025 18:21:30 | INFO | Requesting port assignment from ChattyChannels (attempt 1/5)
+3 Aug 2025 18:21:30 | INFO | Sent port request: tempID=c115e8d09a254d3790968bc72b1ab85a, preferred=-1, responsePort=50000
+3 Aug 2025 18:21:30 | INFO | prepareToPlay called. Sample Rate: 44100, Samples Per Block: 1024
+3 Aug 2025 18:21:30 | INFO | Audio components prepared for playback
+3 Aug 2025 18:21:30 | INFO | Plugin state restored.
+3 Aug 2025 18:21:41 | INFO | releaseResources called.
+3 Aug 2025 18:21:41 | INFO | --- AIplayer Plugin Shutting Down ---
+3 Aug 2025 18:21:41 | INFO | TelemetryService shutdown
+3 Aug 2025 18:21:42 | INFO | OSC Receiver disconnected
+3 Aug 2025 18:21:42 | INFO | OSCManager shutdown
+3 Aug 2025 18:21:42 | INFO | Frequency analysis stopped
+3 Aug 2025 18:21:42 | INFO | FrequencyAnalyzer shutdown
+3 Aug 2025 18:21:42 | INFO | === Logger shutting down ===
+===================
+3 Aug 2025 18:21:30 | INFO | FrequencyAnalyzer initialized with FFT order 10 (size: 1024)
+3 Aug 2025 18:21:30 | INFO | Starting frequency analysis at 10 Hz
+3 Aug 2025 18:21:30 | INFO | OSCManager initialized
+3 Aug 2025 18:21:30 | INFO | PortManager initialized
+3 Aug 2025 18:21:30 | INFO | TelemetryService initialized
+3 Aug 2025 18:21:30 | INFO | Gain parameter pointer acquired.
+3 Aug 2025 18:21:30 | INFO | OSC Sender connected to 127.0.0.1:8999 on attempt 1
+3 Aug 2025 18:21:30 | INFO | Successfully connected to ChattyChannels
+3 Aug 2025 18:21:30 | ERROR | Failed to bind OSC receiver to port 50000
+3 Aug 2025 18:21:30 | INFO | OSC Receiver bound to port 50100
+3 Aug 2025 18:21:30 | INFO | Bound to ephemeral port 50100
+3 Aug 2025 18:21:30 | INFO | Requesting port assignment from ChattyChannels (attempt 1/5)
+3 Aug 2025 18:21:30 | INFO | Sent port request: tempID=a0c2a3724cae45f8b4da65ce42f234f5, preferred=-1, responsePort=50100
+3 Aug 2025 18:21:30 | INFO | prepareToPlay called. Sample Rate: 44100, Samples Per Block: 1024
+3 Aug 2025 18:21:30 | INFO | Audio components prepared for playback
+3 Aug 2025 18:21:30 | INFO | Plugin state restored.
+3 Aug 2025 18:21:41 | INFO | releaseResources called.
+3 Aug 2025 18:21:42 | INFO | --- AIplayer Plugin Shutting Down ---
+3 Aug 2025 18:21:42 | INFO | TelemetryService shutdown
+3 Aug 2025 18:21:42 | INFO | OSC Receiver disconnected
+3 Aug 2025 18:21:42 | INFO | OSCManager shutdown
+3 Aug 2025 18:21:42 | INFO | Frequency analysis stopped
+3 Aug 2025 18:21:42 | INFO | FrequencyAnalyzer shutdown
+3 Aug 2025 18:21:42 | INFO | === Logger shutting down ===
+===================
+3 Aug 2025 18:21:30 | INFO | FrequencyAnalyzer initialized with FFT order 10 (size: 1024)
+3 Aug 2025 18:21:30 | INFO | Starting frequency analysis at 10 Hz
+3 Aug 2025 18:21:30 | INFO | OSCManager initialized
+3 Aug 2025 18:21:30 | INFO | PortManager initialized
+3 Aug 2025 18:21:30 | INFO | TelemetryService initialized
+3 Aug 2025 18:21:30 | INFO | Gain parameter pointer acquired.
+3 Aug 2025 18:21:30 | INFO | OSC Sender connected to 127.0.0.1:8999 on attempt 1
+3 Aug 2025 18:21:30 | INFO | Successfully connected to ChattyChannels
+3 Aug 2025 18:21:30 | ERROR | Failed to bind OSC receiver to port 50000
+3 Aug 2025 18:21:30 | ERROR | Failed to bind OSC receiver to port 50100
+3 Aug 2025 18:21:30 | INFO | OSC Receiver bound to port 50200
+3 Aug 2025 18:21:30 | INFO | Bound to ephemeral port 50200
+3 Aug 2025 18:21:30 | INFO | Requesting port assignment from ChattyChannels (attempt 1/5)
+3 Aug 2025 18:21:30 | INFO | Sent port request: tempID=847a02c4f49746caa66d5dbd516d76e0, preferred=-1, responsePort=50200
+3 Aug 2025 18:21:30 | INFO | prepareToPlay called. Sample Rate: 44100, Samples Per Block: 1024
+3 Aug 2025 18:21:30 | INFO | Audio components prepared for playback
+3 Aug 2025 18:21:30 | INFO | Plugin state restored.
+3 Aug 2025 18:21:41 | INFO | releaseResources called.
+3 Aug 2025 18:21:42 | INFO | --- AIplayer Plugin Shutting Down ---
+3 Aug 2025 18:21:42 | INFO | TelemetryService shutdown
+3 Aug 2025 18:21:42 | INFO | OSC Receiver disconnected
+3 Aug 2025 18:21:42 | INFO | OSCManager shutdown
+3 Aug 2025 18:21:42 | INFO | Frequency analysis stopped
+3 Aug 2025 18:21:42 | INFO | FrequencyAnalyzer shutdown
+3 Aug 2025 18:21:42 | INFO | === Logger shutting down ===
+10 Sep 2025 16:21:07 | INFO | === Logger initialized ===
+10 Sep 2025 16:21:07 | INFO | Log file: /Users/nickfox137/Documents/chatty-channel/logs/AIplayer.log
+10 Sep 2025 16:21:07 | INFO | ==================================================================
+10 Sep 2025 16:21:07 | INFO | AIplayer PLUGIN WITH REFACTORED ARCHITECTURE STARTING!
+10 Sep 2025 16:21:07 | INFO | Plugin Instance tempInstanceID: eb5a32c6ebcf46c1b9a0ea169fb46fff
+10 Sep 2025 16:21:07 | INFO | ==================================================================
+10 Sep 2025 16:21:07 | INFO | FrequencyAnalyzer initialized with FFT order 10 (size: 1024)
+10 Sep 2025 16:21:07 | INFO | Starting frequency analysis at 10 Hz
+10 Sep 2025 16:21:07 | INFO | OSCManager initialized
+10 Sep 2025 16:21:07 | INFO | PortManager initialized
+10 Sep 2025 16:21:07 | INFO | TelemetryService initialized
+10 Sep 2025 16:21:07 | INFO | Gain parameter pointer acquired.
+10 Sep 2025 16:21:07 | INFO | OSC Sender connected to 127.0.0.1:8999 on attempt 1
+10 Sep 2025 16:21:07 | INFO | Successfully connected to ChattyChannels
+10 Sep 2025 16:21:07 | INFO | OSC Receiver bound to port 50000
+10 Sep 2025 16:21:07 | INFO | Bound to ephemeral port 50000
+10 Sep 2025 16:21:07 | INFO | Requesting port assignment from ChattyChannels (attempt 1/5)
+10 Sep 2025 16:21:07 | INFO | Sent port request: tempID=eb5a32c6ebcf46c1b9a0ea169fb46fff, preferred=-1, responsePort=50000
+10 Sep 2025 16:21:07 | INFO | --- AIplayer Plugin Shutting Down ---
+10 Sep 2025 16:21:07 | INFO | TelemetryService shutdown
+10 Sep 2025 16:21:07 | INFO | OSC Receiver disconnected
+10 Sep 2025 16:21:07 | INFO | OSCManager shutdown
+10 Sep 2025 16:21:07 | INFO | Frequency analysis stopped
+10 Sep 2025 16:21:07 | INFO | FrequencyAnalyzer shutdown
+10 Sep 2025 16:21:07 | INFO | === Logger shutting down ===
+11 Sep 2025 22:22:38 | INFO | === Logger initialized ===
+11 Sep 2025 22:22:38 | INFO | Log file: /Users/nickfox137/Documents/chatty-channel/logs/AIplayer.log
+11 Sep 2025 22:22:38 | INFO | ==================================================================
+11 Sep 2025 22:22:38 | INFO | AIplayer PLUGIN WITH REFACTORED ARCHITECTURE STARTING!
+11 Sep 2025 22:22:38 | INFO | Plugin Instance tempInstanceID: 478afc7443474d42be4559536733582c
+11 Sep 2025 22:22:38 | INFO | ==================================================================
+11 Sep 2025 22:22:38 | INFO | FrequencyAnalyzer initialized with FFT order 10 (size: 1024)
+11 Sep 2025 22:22:38 | INFO | Starting frequency analysis at 10 Hz
+11 Sep 2025 22:22:38 | INFO | OSCManager initialized
+11 Sep 2025 22:22:38 | INFO | PortManager initialized
+11 Sep 2025 22:22:38 | INFO | TelemetryService initialized
+11 Sep 2025 22:22:38 | INFO | Gain parameter pointer acquired.
+11 Sep 2025 22:22:38 | INFO | OSC Sender connected to 127.0.0.1:8999 on attempt 1
+11 Sep 2025 22:22:38 | INFO | Successfully connected to ChattyChannels
+11 Sep 2025 22:22:38 | INFO | OSC Receiver bound to port 50000
+11 Sep 2025 22:22:38 | INFO | Bound to ephemeral port 50000
+11 Sep 2025 22:22:38 | INFO | Requesting port assignment from ChattyChannels (attempt 1/5)
+11 Sep 2025 22:22:38 | INFO | Sent port request: tempID=478afc7443474d42be4559536733582c, preferred=-1, responsePort=50000
+11 Sep 2025 22:22:38 | INFO | --- AIplayer Plugin Shutting Down ---
+11 Sep 2025 22:22:38 | INFO | TelemetryService shutdown
+11 Sep 2025 22:22:38 | INFO | OSC Receiver disconnected
+11 Sep 2025 22:22:38 | INFO | OSCManager shutdown
+11 Sep 2025 22:22:38 | INFO | Frequency analysis stopped
+11 Sep 2025 22:22:38 | INFO | FrequencyAnalyzer shutdown
+11 Sep 2025 22:22:38 | INFO | === Logger shutting down ===
