@@ -1,7 +1,7 @@
 # Multi-Agent Orchestrator Architecture - Implementation Plan
 
-**Version**: 1.1
-**Date**: 2025-11-12
+**Version**: 1.2
+**Date**: 2025-11-13
 **Status**: Planning Phase
 
 ---
@@ -10,21 +10,25 @@
 
 This document outlines the implementation plan for transforming Chatty Channels from a single-LLM architecture to a sophisticated multi-agent system where an orchestrator LLM coordinates four specialized sub-agent LLMs. Each agent has domain-specific responsibilities and can communicate peer-to-peer for efficiency while maintaining orchestrator oversight for high-level coordination.
 
+The system uses PostgreSQL with pg_vector for conversation persistence, semantic search, and session management. Embeddings are generated via Ollama (nomic-embed-text) running locally on Mac Mini. Context retrieval uses a hybrid approach combining semantic similarity, recency, and always including the last 10 messages.
+
 ---
 
 ## Table of Contents
 
 1. [Architecture Overview](#architecture-overview)
-2. [Agent Specifications](#agent-specifications)
-3. [Communication Patterns](#communication-patterns)
-4. [Data Flow Examples](#data-flow-examples)
-5. [Debug Mode: Mission Control View](#debug-mode-mission-control-view)
-6. [Implementation Phases](#implementation-phases)
-7. [Technical Design](#technical-design)
-8. [State Management](#state-management)
-9. [Cost Analysis](#cost-analysis)
-10. [Testing Strategy](#testing-strategy)
-11. [Risk Mitigation](#risk-mitigation)
+2. [Data Architecture & Persistence](#data-architecture--persistence)
+3. [Session Resumption Flow](#session-resumption-flow)
+4. [Agent Specifications](#agent-specifications)
+5. [Communication Patterns](#communication-patterns)
+6. [Data Flow Examples](#data-flow-examples)
+7. [Debug Mode: Mission Control View](#debug-mode-mission-control-view)
+8. [Implementation Phases](#implementation-phases)
+9. [Technical Design](#technical-design)
+10. [State Management](#state-management)
+11. [Cost Analysis](#cost-analysis)
+12. [Testing Strategy](#testing-strategy)
+13. [Risk Mitigation](#risk-mitigation)
 
 ---
 
@@ -76,9 +80,334 @@ Legend:
 
 ---
 
-## 2. Agent Specifications
+## 2. Data Architecture & Persistence
 
-### 2.1 Orchestrator Agent
+### 2.1 Database Overview
+
+**Database**: PostgreSQL with pg_vector extension
+**Embeddings**: Ollama (nomic-embed-text) running on Mac Mini (768-dimensional vectors)
+**Connection**: Local PostgreSQL instance
+
+### 2.2 What Goes in the Database
+
+✅ **Stored in Database**:
+1. **User messages & LLM responses** - Full conversation history with embeddings
+2. **Project metadata** - Name, creation date, last opened, track count
+3. **Mission Control conversations** - User-facing producer ↔ user dialogue
+4. **Mission Control debug logs** - Agent ↔ orchestrator communications for debug mode
+5. **Track assignments** - Current track-to-plugin mappings (snapshot only)
+6. **Key decisions** - Important mixing decisions flagged for retrieval (e.g., "reduced bass by 3dB")
+
+❌ **NOT Stored in Database**:
+1. **OSC telemetry data** - Too massive (24Hz × multiple tracks × sessions). Use in-memory ring buffer only.
+2. **AppleScript query results** - Transient data, re-query as needed
+3. **Calculations Agent analysis results** - Transient analysis, not persisted
+4. **Tool call history** - Captured in Mission Control debug logs instead
+
+### 2.3 Database Schema Summary
+
+#### Core Tables
+
+**`projects`**
+- Stores Logic Pro project metadata
+- Links to all messages and sessions
+- Tracks last opened time for session resumption
+
+**`sessions`**
+- Represents distinct working sessions within a project
+- Has start/end timestamps
+- Tracks message count
+
+**`messages`**
+- User and assistant conversation messages
+- Contains 768-dim vector embeddings for semantic search
+- Flags key decisions (e.g., "reduced bass by 3dB")
+- Links to projects and sessions
+
+**`mission_control_conversations`**
+- User-facing conversation log (producer ↔ user)
+- What the user sees in Mission Control normal mode
+- Cleaner, higher-level view
+
+**`mission_control_debug`**
+- Agent-to-agent and orchestrator communications
+- Developer debug view
+- Shows internal system operations
+- JSONB payload for structured data
+
+**`track_assignments`**
+- Current track-to-plugin mappings
+- Verified via OSC ping
+- Timestamped snapshots
+- Only "current" assignment kept per session
+
+#### Indexes & Performance
+
+- **HNSW vector index** on `messages.embedding` for fast semantic search (cosine similarity)
+- **Composite indexes** on (project_id, session_id, created_at) for efficient retrieval
+- **GIN index** on `mission_control_debug.payload` for JSONB queries
+- **Unique index** on current track assignments to prevent duplicates
+
+### 2.4 Embeddings Strategy
+
+**Model**: `nomic-embed-text` via Ollama
+**Why Ollama**: Runs locally on Mac Mini, no API costs, fast inference
+**Dimensions**: 768
+**When to Generate**:
+- Every user message
+- Every LLM response
+- Key decisions (separately flagged)
+
+**Embedding Code Example**:
+```swift
+class EmbeddingService {
+    private let ollamaEndpoint = "http://localhost:11434/api/embeddings"
+
+    func generateEmbedding(text: String) async throws -> [Float] {
+        let payload = ["model": "nomic-embed-text", "prompt": text]
+        // Call Ollama API
+        let response = try await URLSession.shared.data(for: request)
+        // Parse and return 768-dim vector
+    }
+}
+```
+
+### 2.5 Context Retrieval Strategy
+
+**Hybrid Approach**: Semantic similarity + Recency + Last 10 messages
+
+When user sends a message:
+
+1. **Always include last 10 messages** (most recent context)
+2. **Semantic search**: Query embedding vector index for top 10 similar messages
+3. **Key decisions**: Include flagged decisions from last 7 days (up to 5)
+4. **Deduplicate** and sort by timestamp
+5. **Total context**: ~20-25 messages maximum to control token usage
+
+**SQL Function** (see schema):
+```sql
+SELECT * FROM get_conversation_context(
+    p_project_id := '...',
+    p_query_embedding := ...,
+    p_limit := 20
+);
+```
+
+This function combines:
+- CTE for semantic matches
+- CTE for recent messages
+- CTE for key decisions
+- UNION and DISTINCT to merge
+
+### 2.6 Session Resumption
+
+**Trigger**: User opens Chatty Channels app and opens a project file
+
+**Flow**:
+1. Get or create project by name (matches Logic Pro project name)
+2. Query last session's messages (last 10)
+3. Producer greets user: "Welcome back! Last time we were working on..."
+4. Display last 10 messages in chat window
+5. **Background**: AppleScript Agent queries Logic Pro for current track list
+6. **Background**: Compare with stored track assignments, update if changed
+7. **Background**: OSC Agent pings each plugin to verify connection
+8. System ready for user input
+
+**Implementation**:
+```swift
+func resumeSession(projectName: String) async {
+    // 1. Get or create project
+    let projectID = await db.getOrCreateProject(name: projectName)
+
+    // 2. Start new session
+    let sessionID = await db.startSession(projectID: projectID)
+
+    // 3. Get last 10 messages
+    let recentMessages = await db.getRecentMessages(projectID: projectID, limit: 10)
+
+    // 4. Producer greeting
+    let greeting = await chatAgent.generateGreeting(context: recentMessages)
+
+    // 5. Background track verification
+    Task {
+        await verifyTrackAssignments(projectID: projectID, sessionID: sessionID)
+    }
+
+    // 6. Background OSC ping
+    Task {
+        await verifyOSCConnections(sessionID: sessionID)
+    }
+}
+```
+
+### 2.7 OSC Telemetry Storage
+
+**NOT stored in database** - too high frequency (24 Hz per track)
+
+**In-Memory Ring Buffer**:
+```swift
+class OSCTelemetryBuffer {
+    // Keep last 1000 samples per plugin (~42 seconds at 24Hz)
+    private var buffers: [String: CircularBuffer<TelemetryData>] = [:]
+
+    func append(pluginID: String, data: TelemetryData) {
+        buffers[pluginID, default: CircularBuffer(capacity: 1000)].append(data)
+    }
+
+    func getRecent(pluginID: String, count: Int = 100) -> [TelemetryData] {
+        return buffers[pluginID]?.last(count) ?? []
+    }
+}
+```
+
+**Persistence Exception**: Snapshot to DB only when:
+- User explicitly references telemetry in conversation ("what was the level 10 seconds ago?")
+- Anomaly detected and logged to Mission Control debug
+- Context snapshot created
+
+### 2.8 Database Migration Strategy
+
+**Initial Schema**: Provided in `/database/schema.sql`
+
+**Migration Tool**: Use PostgreSQL native tools or Swift migration library
+
+**Sequence**:
+1. Create database: `createdb chatty_channels`
+2. Enable extensions: `CREATE EXTENSION vector;`
+3. Run schema: `psql chatty_channels < database/schema.sql`
+4. Verify: Check tables, indexes, functions created
+
+**Future Migrations**: Store in `/database/migrations/` with version numbers
+
+---
+
+## 3. Session Resumption Flow
+
+### 3.1 User Opens Project
+
+**Scenario**: User opens Logic Pro project "MySong.logicx", then opens Chatty Channels app and selects/opens same project.
+
+**Step-by-Step Flow**:
+
+```
+1. User clicks "Open Project" in Chatty Channels
+   ↓
+2. System queries database: get_or_create_project('MySong')
+   - If exists: Load project metadata
+   - If new: Create new project record
+   ↓
+3. System starts new session: start_session(project_id)
+   - Closes any active session for this project
+   - Creates new session record
+   ↓
+4. System queries last 10 messages for this project
+   SELECT * FROM recent_messages WHERE project_id = ... LIMIT 10
+   ↓
+5. Producer (Chat Agent) analyzes last 10 messages and generates greeting
+   Input: Recent messages
+   Output: "Welcome back! Last time we worked on brightening the vocals
+           and adding more punch to the kick. Ready to keep going?"
+   ↓
+6. UI displays greeting + last 10 messages in chat window
+   User sees conversation context immediately
+   ↓
+7. BACKGROUND TASK: Track Verification
+   Orchestrator → AppleScript Agent:
+   "Get current track list from Logic Pro"
+   ↓
+   AppleScript Agent returns: [Track 1: Kick, Track 2: Snare, ...]
+   ↓
+   System compares with stored track_assignments
+   - If tracks match: All good
+   - If tracks changed: Update track_assignments, mark old as not current
+   - If new tracks: Create new assignments
+   ↓
+   Mission Control Debug Log:
+   "📜 APPLESCRIPT: Retrieved 12 tracks from Logic Pro"
+   "🎯 ORCHESTRATOR: Track assignments verified, 2 new tracks detected"
+   ↓
+8. BACKGROUND TASK: OSC Connection Verification
+   Orchestrator → OSC Agent:
+   "Ping all plugins and verify connections"
+   ↓
+   OSC Agent sends test messages to each plugin
+   ↓
+   For each response received:
+   - Update track_assignments.verified_at timestamp
+   - Update connection state
+   ↓
+   Mission Control Debug Log:
+   "📡 OSC: Pinging 12 plugins..."
+   "✅ OSC: 12/12 plugins responding"
+   ↓
+9. System ready, waiting for user input
+   UI shows: "System Ready" indicator
+   Producer ready to receive user messages
+```
+
+### 3.2 Producer Greeting Examples
+
+Based on last conversation context:
+
+**Example 1 - Returning to Active Work**:
+> "Hey! Last time you were tweaking the vocal EQ and mentioned the high-mids felt harsh. I see we made a 3dB cut at 3.5kHz. Want to continue refining that, or move on to something else?"
+
+**Example 2 - No Recent Activity**:
+> "Welcome back! It's been a few days since we worked on this project. Last session we were focusing on the drum mix. What would you like to work on today?"
+
+**Example 3 - First Time Opening Project**:
+> "Hey! Looks like this is a fresh start on this project. I see you have 12 tracks loaded. Want to give me a quick overview of what you're going for with this mix?"
+
+**Example 4 - Track Changes Detected**:
+> "Welcome back! I notice you've added 3 new tracks since last time. The arrangement is looking fuller! What would you like to focus on today?"
+
+### 3.3 Background Verification Details
+
+**Track Verification** (AppleScript Agent):
+```applescript
+tell application "Logic Pro"
+    set trackList to {}
+    repeat with t from 1 to count of tracks
+        set trackName to name of track t
+        copy {t, trackName} to end of trackList
+    end repeat
+    return trackList
+end tell
+```
+
+**OSC Ping** (OSC Agent):
+```swift
+func verifyConnections() async {
+    for assignment in currentTrackAssignments {
+        let pingMessage = OSCMessage(
+            address: "/aiplayer/ping",
+            arguments: [assignment.pluginID]
+        )
+
+        do {
+            try await oscService.send(pingMessage, timeout: 2.0)
+            // Success - update verified_at
+            await db.updateTrackAssignment(
+                id: assignment.id,
+                verifiedAt: Date()
+            )
+        } catch {
+            // Failed - log to Mission Control
+            missionControl.log(
+                agent: .osc,
+                status: .warning,
+                message: "Plugin \(assignment.pluginID) not responding"
+            )
+        }
+    }
+}
+```
+
+---
+
+## 4. Agent Specifications
+
+### 4.1 Orchestrator Agent
 
 **Model**: Claude Sonnet 4.5
 **Role**: System coordinator and strategic planner
@@ -121,7 +450,7 @@ Legend:
 
 ---
 
-### 2.2 Chat Agent
+### 4.2 Chat Agent
 
 **Model**: Claude Sonnet 4.5
 **Role**: User-facing communication specialist
@@ -156,7 +485,7 @@ Legend:
 
 ---
 
-### 2.3 OSC Agent
+### 4.3 OSC Agent
 
 **Model**: Grok 4 Fast Non-Reasoning
 **Role**: Real-time telemetry handler and protocol manager
@@ -211,7 +540,7 @@ if bandEnergy[highFreqs] > threshold {
 
 ---
 
-### 2.4 AppleScript Agent
+### 4.4 AppleScript Agent
 
 **Model**: Grok 4 Fast Non-Reasoning
 **Role**: Logic Pro automation specialist
@@ -247,7 +576,7 @@ if bandEnergy[highFreqs] > threshold {
 
 ---
 
-### 2.5 Calculations Agent
+### 4.5 Calculations Agent
 
 **Model**: Grok 4 Fast Reasoning
 **Role**: Signal processing and audio analysis expert
@@ -294,9 +623,9 @@ This agent uses the reasoning model to:
 
 ---
 
-## 3. Communication Patterns
+## 5. Communication Patterns
 
-### 3.1 Hub-and-Spoke (Orchestrator-Centric)
+### 5.1 Hub-and-Spoke (Orchestrator-Centric)
 
 **When to use**:
 - User-initiated requests
@@ -318,7 +647,7 @@ Orchestrator → Chat Agent
 Chat Agent → User
 ```
 
-### 3.2 Peer-to-Peer (Direct Agent Communication)
+### 5.2 Peer-to-Peer (Direct Agent Communication)
 
 **When to use**:
 - Routine data processing (OSC → Calculations)
@@ -347,7 +676,7 @@ OSC Agent → Orchestrator (report)
 - Chat Agent cannot directly invoke other agents (must go through orchestrator)
 - AppleScript Agent cannot directly invoke Calculations Agent (orchestrator decides)
 
-### 3.3 Communication Protocol
+### 5.3 Communication Protocol
 
 **Message Format**:
 ```swift
@@ -379,9 +708,9 @@ enum Priority {
 
 ---
 
-## 4. Data Flow Examples
+## 6. Data Flow Examples
 
-### 4.1 Example: Simple User Request
+### 6.1 Example: Simple User Request
 
 **User**: "What's the current level of the kick drum?"
 
@@ -427,7 +756,7 @@ User query → Needs track identification → AppleScript Agent
 
 ---
 
-### 4.2 Example: Complex Multi-Agent Task
+### 6.2 Example: Complex Multi-Agent Task
 
 **User**: "The vocals sound harsh. Can you help?"
 
@@ -499,7 +828,7 @@ User query → Needs track identification → AppleScript Agent
 
 ---
 
-### 4.3 Example: Peer-to-Peer Optimization
+### 6.3 Example: Peer-to-Peer Optimization
 
 **Scenario**: OSC Agent receives telemetry showing unusual frequency spike
 
@@ -549,9 +878,9 @@ User query → Needs track identification → AppleScript Agent
 
 ---
 
-## 5. Debug Mode: Mission Control View
+## 7. Debug Mode: Mission Control View
 
-### 5.1 Visual Design
+### 7.1 Visual Design
 
 **Layout**:
 ```
@@ -576,7 +905,7 @@ User query → Needs track identification → AppleScript Agent
 └──────────────────────────────────────────────────────────┘
 ```
 
-### 5.2 Icon Legend
+### 7.2 Icon Legend
 
 | Icon | Agent | Meaning |
 |------|-------|---------|
@@ -592,7 +921,7 @@ User query → Needs track identification → AppleScript Agent
 | 🔄 | Any | Retry attempt |
 | 🔗 | Any | Peer-to-peer communication |
 
-### 5.3 Message Format
+### 7.3 Message Format
 
 **Standard format**:
 ```
@@ -609,7 +938,7 @@ User query → Needs track identification → AppleScript Agent
 ⏳ APPLESCRIPT: Waiting for Logic Pro response...
 ```
 
-### 5.4 Implementation Details
+### 7.4 Implementation Details
 
 ```swift
 /// Mission Control message logger
@@ -673,7 +1002,7 @@ enum Status {
 }
 ```
 
-### 5.5 SwiftUI View
+### 7.5 SwiftUI View
 
 ```swift
 struct MissionControlView: View {
@@ -766,7 +1095,7 @@ extension AgentType {
 }
 ```
 
-### 5.6 Usage Example
+### 7.6 Usage Example
 
 ```swift
 // In any agent operation
@@ -807,7 +1136,36 @@ missionControl.log(
 
 ---
 
-## 6. Implementation Phases
+## 8. Implementation Phases
+
+### Phase 0: Database Setup (Days 1-2)
+**Goal**: Set up PostgreSQL database with pg_vector and initial schema
+
+**Tasks**:
+1. Install PostgreSQL and pg_vector extension on Mac Mini
+2. Create `chatty_channels` database
+3. Run schema SQL file to create tables, indexes, functions
+4. Set up Ollama with nomic-embed-text model
+5. Create Swift database access layer (using PostgresNIO or similar)
+6. Implement EmbeddingService for generating vectors via Ollama
+
+**Deliverables**:
+- PostgreSQL database running with schema
+- `DatabaseService.swift` - Connection management
+- `EmbeddingService.swift` - Ollama integration
+- `ProjectRepository.swift` - CRUD operations for projects
+- `MessageRepository.swift` - CRUD operations for messages
+- `MissionControlRepository.swift` - Mission Control logging to DB
+- Unit tests for database operations
+
+**Success Criteria**:
+- Database accessible from Swift app
+- Embeddings generated successfully via Ollama
+- Messages stored with vectors
+- Context retrieval function works
+- Session resumption data available
+
+---
 
 ### Phase 1: Foundation (Week 1)
 **Goal**: Build core infrastructure without LLMs
@@ -818,12 +1176,13 @@ missionControl.log(
 3. Build Mission Control UI and logger
 4. Create agent registry and lifecycle management
 5. Implement configuration system for model assignments
+6. Integrate database layer with agent system
 
 **Deliverables**:
 - `Agent` protocol
 - `AgentMessage` struct
 - `AgentCoordinator` class
-- `MissionControlLogger` class
+- `MissionControlLogger` class (with DB persistence)
 - `MissionControlView` SwiftUI view
 - Unit tests for message passing
 
@@ -831,6 +1190,7 @@ missionControl.log(
 - Agents can send messages to each other
 - Mission Control displays agent activity
 - Debug mode toggle works
+- Mission Control logs persisted to database
 
 ---
 
@@ -954,9 +1314,9 @@ missionControl.log(
 
 ---
 
-## 7. Technical Design
+## 9. Technical Design
 
-### 7.1 Core Protocols
+### 9.1 Core Protocols
 
 ```swift
 /// Base protocol for all agents
@@ -1005,7 +1365,7 @@ struct AgentState {
 }
 ```
 
-### 7.2 LLM Integration Layer
+### 9.2 LLM Integration Layer
 
 ```swift
 /// Protocol for LLM providers
@@ -1036,7 +1396,7 @@ struct Tool {
 }
 ```
 
-### 7.3 Grok Integration
+### 9.3 Grok Integration
 
 ```swift
 /// Grok 4 provider implementation
@@ -1063,7 +1423,7 @@ final class GrokProvider: LLMProvider {
 }
 ```
 
-### 7.4 Agent Coordinator
+### 9.4 Agent Coordinator
 
 ```swift
 /// Central coordinator for agent lifecycle and communication
@@ -1172,7 +1532,7 @@ class AgentCoordinator: ObservableObject {
 }
 ```
 
-### 7.5 OSC Agent Implementation Example
+### 9.5 OSC Agent Implementation Example
 
 ```swift
 final class OSCAgent: Agent {
@@ -1320,9 +1680,9 @@ final class OSCAgent: Agent {
 
 ---
 
-## 8. State Management
+## 10. State Management
 
-### 8.1 Agent State
+### 10.1 Agent State
 
 Each agent maintains its own internal state:
 
@@ -1352,7 +1712,7 @@ Each agent maintains its own internal state:
 - Reference spectrums
 - Learned patterns
 
-### 8.2 Shared State
+### 10.2 Shared State
 
 Managed by `AgentCoordinator`:
 
@@ -1374,7 +1734,7 @@ class SharedState: ObservableObject {
 }
 ```
 
-### 8.3 State Persistence
+### 10.3 State Persistence
 
 ```swift
 /// Persist agent state between sessions
@@ -1397,9 +1757,9 @@ class AgentStateManager {
 
 ---
 
-## 9. Cost Analysis
+## 11. Cost Analysis
 
-### 9.1 Model Pricing (Estimated)
+### 11.1 Model Pricing (Estimated)
 
 | Model | Input (per 1M tokens) | Output (per 1M tokens) |
 |-------|----------------------|------------------------|
@@ -1407,7 +1767,7 @@ class AgentStateManager {
 | Grok 4 Fast Reasoning | $0.50 | $2.00 |
 | Grok 4 Fast Non-Reasoning | $0.30 | $1.00 |
 
-### 9.2 Token Usage Estimates
+### 11.2 Token Usage Estimates
 
 **Per User Request**:
 
@@ -1441,7 +1801,7 @@ class AgentStateManager {
 - 20 complex requests = $0.22
 - **Total: ~$0.47/day or ~$14/month per active user**
 
-### 9.3 Cost Control Mechanisms
+### 11.3 Cost Control Mechanisms
 
 ```swift
 class CostController {
@@ -1466,9 +1826,9 @@ class CostController {
 
 ---
 
-## 10. Testing Strategy
+## 12. Testing Strategy
 
-### 10.1 Unit Tests
+### 12.1 Unit Tests
 
 **Agent Tests**:
 ```swift
@@ -1484,7 +1844,7 @@ class OrchestratorAgentTests: XCTestCase {
 }
 ```
 
-### 10.2 Integration Tests
+### 12.2 Integration Tests
 
 **Multi-Agent Workflow**:
 ```swift
@@ -1503,7 +1863,7 @@ class AgentIntegrationTests: XCTestCase {
 }
 ```
 
-### 10.3 Performance Tests
+### 12.3 Performance Tests
 
 ```swift
 func testResponseTime() async throws {
@@ -1515,7 +1875,7 @@ func testResponseTime() async throws {
 }
 ```
 
-### 10.4 Cost Tests
+### 12.4 Cost Tests
 
 ```swift
 func testCostTracking() async throws {
@@ -1532,9 +1892,9 @@ func testCostTracking() async throws {
 
 ---
 
-## 11. Risk Mitigation
+## 13. Risk Mitigation
 
-### 11.1 LLM Availability
+### 13.1 LLM Availability
 
 **Risk**: Claude or Grok API downtime
 **Mitigation**:
@@ -1569,7 +1929,7 @@ class CircuitBreaker {
 }
 ```
 
-### 11.2 Cost Overrun
+### 13.2 Cost Overrun
 
 **Risk**: Unexpected high LLM usage
 **Mitigation**:
@@ -1578,7 +1938,7 @@ class CircuitBreaker {
 - Cost estimation before execution
 - Alerts at 80% of budget
 
-### 11.3 Incorrect Agent Actions
+### 13.3 Incorrect Agent Actions
 
 **Risk**: Agent makes wrong decision (e.g., mutes wrong track)
 **Mitigation**:
@@ -1587,7 +1947,7 @@ class CircuitBreaker {
 - Comprehensive logging
 - User override capability
 
-### 11.4 Performance Degradation
+### 13.4 Performance Degradation
 
 **Risk**: Multiple LLM calls slow down system
 **Mitigation**:
@@ -1598,9 +1958,9 @@ class CircuitBreaker {
 
 ---
 
-## 12. Open Questions
+## 14. Open Questions
 
-### 12.1 System Prompt Management
+### 14.1 System Prompt Management
 
 **Question**: Should system prompts be:
 - A) Stored in separate `.txt` files per agent?
@@ -1612,7 +1972,7 @@ class CircuitBreaker {
 - Version control friendly
 - Can be updated without code changes
 
-### 12.2 Conversation Context Window
+### 14.2 Conversation Context Window
 
 **Question**: How many messages should orchestrator remember?
 - Last 10 messages? Last 20? Entire session?
@@ -1623,7 +1983,7 @@ class CircuitBreaker {
 - Summarize older messages beyond 20
 - Reset conversation context with explicit user command
 
-### 12.3 Agent Tool Expansion
+### 14.3 Agent Tool Expansion
 
 **Question**: Should agents be able to:
 - Invoke external APIs (Spotify, Apple Music for reference tracks)?
@@ -1632,7 +1992,7 @@ class CircuitBreaker {
 
 **Recommendation**: Start conservative, expand based on user needs
 
-### 12.4 Multi-User Support
+### 14.4 Multi-User Support
 
 **Question**: Will multiple users share one Chatty Channels instance?
 **Impact**: Affects state management, cost tracking, conversation history
@@ -1641,9 +2001,9 @@ class CircuitBreaker {
 
 ---
 
-## 13. Success Criteria
+## 15. Success Criteria
 
-### 13.1 Functional Requirements
+### 15.1 Functional Requirements
 
 - ✅ User can ask natural language questions about their mix
 - ✅ System correctly identifies tracks and plugins
@@ -1652,20 +2012,20 @@ class CircuitBreaker {
 - ✅ Mission Control provides visibility into agent operations
 - ✅ All agents log activity in human-readable format
 
-### 13.2 Performance Requirements
+### 15.2 Performance Requirements
 
 - ✅ Simple requests respond in < 3 seconds
 - ✅ Complex requests respond in < 10 seconds
 - ✅ System handles 50 requests/hour without degradation
 - ✅ OSC telemetry processed at 24 Hz without drops
 
-### 13.3 Cost Requirements
+### 15.3 Cost Requirements
 
 - ✅ Average cost per request < $0.01
 - ✅ Daily cost for active user < $1.00
 - ✅ Monthly cost per user < $30
 
-### 13.4 Quality Requirements
+### 15.4 Quality Requirements
 
 - ✅ Orchestrator correctly interprets intent >90% of time
 - ✅ Agent tool calls succeed >95% of time
@@ -1674,13 +2034,15 @@ class CircuitBreaker {
 
 ---
 
-## 14. Next Steps
+## 16. Next Steps
 
 1. **Review this document** with stakeholders
-2. **Refine agent responsibilities** based on feedback
-3. **Create detailed system prompts** for each agent
-4. **Set up development environment** (API keys, test Logic session)
-5. **Begin Phase 1 implementation** (Foundation)
+2. **Set up database** (PostgreSQL + pg_vector + Ollama)
+3. **Refine agent responsibilities** based on feedback
+4. **Create detailed system prompts** for each agent
+5. **Set up development environment** (API keys, test Logic session)
+6. **Begin Phase 0 implementation** (Database Setup)
+7. **Begin Phase 1 implementation** (Foundation)
 
 ---
 
@@ -1946,12 +2308,35 @@ Be technical but explain WHY, not just WHAT.
 
 ---
 
+## Appendix C: Database Schema Reference
+
+The complete PostgreSQL database schema with all tables, indexes, views, and functions is available in:
+
+**`/database/schema.sql`**
+
+This file includes:
+- Complete table definitions (projects, sessions, messages, mission_control_conversations, mission_control_debug, track_assignments, context_snapshots)
+- All indexes including HNSW vector index for semantic search
+- Helper functions (get_conversation_context, get_or_create_project, start_session)
+- Triggers for automatic timestamp updates
+- Views for common queries
+- Comments and documentation
+
+To initialize the database:
+```bash
+createdb chatty_channels
+psql chatty_channels < database/schema.sql
+```
+
+---
+
 ## Document History
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2025-11-12 | AI Assistant | Initial planning document |
 | 1.1 | 2025-11-12 | AI Assistant | Corrected architecture: Calculations Agent is now a direct sub-agent of Orchestrator (peer to Chat, AppleScript, OSC) with peer-to-peer capability with OSC Agent |
+| 1.2 | 2025-11-13 | AI Assistant | Added comprehensive data architecture: PostgreSQL with pg_vector, Ollama embeddings (nomic-embed-text), session resumption flow, database schema summary, context retrieval strategy, Mission Control persistence, Phase 0 database setup |
 
 ---
 
