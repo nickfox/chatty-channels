@@ -464,7 +464,7 @@ CREATE INDEX idx_messages_active_sessions ON messages(session_id, created_at DES
     WHERE session_id IN (SELECT id FROM sessions WHERE is_active = TRUE);
 
 -- ============================================================================
--- COMMENTS
+-- COMMENTS ok
 -- Documentation for schema elements
 -- ============================================================================
 
