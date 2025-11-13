@@ -144,7 +144,24 @@ struct ChattyChannelsApp: App {
                 .environmentObject(oscListener)
                 .task { // Use .task for async setup tied to the Scene lifecycle
                     setupServiceSubscription()
-                    
+
+                    // Initialize PostgreSQL database
+                    do {
+                        logger.info("Initializing PostgreSQL database...")
+                        try await DatabaseConfiguration.shared.initialize()
+
+                        // Setup default project (you can change this to the actual Logic project name)
+                        try await DatabaseConfiguration.shared.setupProject(
+                            name: "Default Project",
+                            logicProjectPath: nil
+                        )
+
+                        logger.info("PostgreSQL database initialized successfully")
+                    } catch {
+                        logger.error("Failed to initialize PostgreSQL database: \(error.localizedDescription)")
+                        logger.warning("Continuing without database - some features may not work")
+                    }
+
                     // Start OSC Listener to receive RMS data from AIPlayer plugins
                     do {
                         try await oscListener.startListening()
@@ -152,7 +169,7 @@ struct ChattyChannelsApp: App {
                     } catch {
                         logger.error("Failed to start OSC Listener: \(error.localizedDescription)")
                     }
-                    
+
                     // Auto-start simulation for testing - DISABLED for v0.7 OSC integration
                     // Real RMS data should come from AIPlayer plugin via OSC
                     #if DEBUG && false  // Disabled for v0.7

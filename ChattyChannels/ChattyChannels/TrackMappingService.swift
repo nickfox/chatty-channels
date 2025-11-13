@@ -4,13 +4,13 @@ import OSLog
 import Combine // Added for ObservableObject
 
 /// Service that provides a cached mapping from Logic Pro track names to their simple IDs (TR1, TR2, etc).
-/// The mapping is persisted to SQLite database for reliability and concurrent access.
+/// The mapping is persisted to PostgreSQL database for reliability and concurrent access.
 /// Uses accessibility APIs to discover tracks instead of AppleScript for better Logic Pro 11.2 compatibility.
 public class TrackMappingService: ObservableObject { // Changed to class and added ObservableObject
 
     // MARK: - Dependencies
     private let runner: ProcessRunner
-    private let database: SQLiteDatabase
+    private let dbConfig: DatabaseConfiguration
     private let accessibilityService: AccessibilityTrackDiscoveryService
     private let logger = Logger(subsystem: "com.websmithing.ChattyChannels", category: "TrackMappingService")
 
@@ -18,13 +18,13 @@ public class TrackMappingService: ObservableObject { // Changed to class and add
 
     /// - Parameters:
     ///   - runner: Injectable `ProcessRunner` (kept for compatibility, may be used for fallback).
-    ///   - database: SQLite database for persisting mappings.
+    ///   - dbConfig: Database configuration with PostgreSQL connection.
     ///   - accessibilityService: Service for discovering tracks via accessibility APIs.
     public init(runner: ProcessRunner = PlaybackSafeProcessRunner(),
-                database: SQLiteDatabase? = nil,
+                dbConfig: DatabaseConfiguration? = nil,
                 accessibilityService: AccessibilityTrackDiscoveryService? = nil) {
         self.runner = runner
-        self.database = database ?? SQLiteDatabase()
+        self.dbConfig = dbConfig ?? DatabaseConfiguration.shared
         self.accessibilityService = accessibilityService ?? AccessibilityTrackDiscoveryService()
     }
 
@@ -33,16 +33,26 @@ public class TrackMappingService: ObservableObject { // Changed to class and add
     /// Loads the mapping of `TrackName -> SimpleID`.
     /// If mappings exist in the database they are returned immediately,
     /// otherwise accessibility APIs are used to discover tracks and the results are stored.
-    public func loadMapping() throws -> [String: String] {
+    public func loadMapping() async throws -> [String: String] {
         logger.info("Attempting to load track mapping.")
-        
+
+        // Ensure we have a current project context
+        guard let context = dbConfig.getCurrentContext(),
+              let database = dbConfig.database else {
+            logger.error("Database not configured or no project context available")
+            throw TrackMappingError.notConfigured
+        }
+
+        let projectID = context.projectID
+        let sessionID = context.sessionID
+
         // Try to load from database first
-        let cachedMappings = database.getAllTrackMappings()
+        let cachedMappings = try await database.getAllTrackAssignments(projectID: projectID, sessionID: sessionID)
         if !cachedMappings.isEmpty {
             logger.info("Successfully loaded \(cachedMappings.count) mappings from database.")
             return cachedMappings
         }
-        
+
         logger.info("No mappings found in database. Proceeding with accessibility-based track discovery.")
 
         // Use accessibility service to discover tracks
@@ -54,7 +64,7 @@ public class TrackMappingService: ObservableObject { // Changed to class and add
         } catch {
             logger.error("Accessibility-based track discovery failed: \(error.localizedDescription, privacy: .public)")
             logger.info("Attempting fallback to AppleScript method.")
-            
+
             // Fallback to AppleScript if accessibility fails
             do {
                 let rawOutput = try runner.run("/usr/bin/osascript", arguments: ["-e", Self.handshakeAppleScript])
@@ -71,32 +81,57 @@ public class TrackMappingService: ObservableObject { // Changed to class and add
         for (cleanedTrackName, simpleID) in mappings {
             // Extract track number from ID like "TR1" -> 1
             let trackNumber = Int(simpleID.dropFirst(2)) ?? 0
-            
-            if database.saveTrackMapping(tempID: simpleID, logicUUID: simpleID, trackName: cleanedTrackName, trackNumber: trackNumber) {
+
+            do {
+                try await database.saveTrackAssignment(
+                    projectID: projectID,
+                    sessionID: sessionID,
+                    trackNumber: trackNumber,
+                    trackName: cleanedTrackName,
+                    pluginID: simpleID
+                )
                 savedCount += 1
-            } else {
-                logger.warning("Failed to save mapping for track: \(cleanedTrackName) -> \(simpleID)")
+            } catch {
+                logger.warning("Failed to save mapping for track: \(cleanedTrackName) -> \(simpleID): \(error.localizedDescription)")
             }
         }
-        
+
         logger.info("Successfully persisted \(savedCount) of \(mappings.count) mappings to database.")
         return mappings
     }
     
     /// Get a specific track mapping by its simple ID (e.g., "TR1")
-    public func getTrackByID(_ simpleID: String) -> (name: String, uuid: String)? {
-        if let mapping = database.getMappingByTempID(simpleID) {
-            return (name: mapping.trackName, uuid: mapping.logicUUID)
+    public func getTrackByID(_ simpleID: String) async throws -> (name: String, uuid: String)? {
+        guard let context = dbConfig.getCurrentContext(),
+              let database = dbConfig.database else {
+            logger.error("Database not configured or no project context available")
+            throw TrackMappingError.notConfigured
+        }
+
+        if let mapping = try await database.getTrackAssignmentByPluginID(
+            projectID: context.projectID,
+            sessionID: context.sessionID,
+            pluginID: simpleID
+        ) {
+            return (name: mapping.trackName, uuid: simpleID)
         }
         return nil
     }
-    
+
     /// Clear all track mappings and force a refresh on next load
-    public func clearMappings() {
-        if database.clearAllMappings() {
+    public func clearMappings() async throws {
+        guard let context = dbConfig.getCurrentContext(),
+              let database = dbConfig.database else {
+            logger.error("Database not configured or no project context available")
+            throw TrackMappingError.notConfigured
+        }
+
+        do {
+            try await database.clearTrackAssignments(projectID: context.projectID, sessionID: context.sessionID)
             logger.info("All track mappings cleared from database.")
-        } else {
-            logger.error("Failed to clear track mappings from database.")
+        } catch {
+            logger.error("Failed to clear track mappings from database: \(error.localizedDescription)")
+            throw error
         }
     }
 
@@ -195,6 +230,22 @@ public class TrackMappingService: ObservableObject { // Changed to class and add
     """
 
     // MARK: - Defaults
-    
-    // Removed defaultCacheURL as we're now using SQLite database
+
+    // Removed defaultCacheURL as we're now using PostgreSQL database
+}
+
+// MARK: - Error Types
+
+public enum TrackMappingError: Error, LocalizedError {
+    case notConfigured
+    case discoveryFailed(String)
+
+    public var errorDescription: String? {
+        switch self {
+        case .notConfigured:
+            return "Database not configured or no project context available"
+        case .discoveryFailed(let message):
+            return "Track discovery failed: \(message)"
+        }
+    }
 }
